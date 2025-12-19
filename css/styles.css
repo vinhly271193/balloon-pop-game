@@ -698,6 +698,51 @@ html, body {
     box-shadow: 0 0 10px var(--accent-primary);
 }
 
+/* Button with ring progress (360° outline) */
+.button-with-ring {
+    position: relative;
+    display: inline-block;
+    margin: var(--spacing-small);
+}
+
+.button-with-ring .big-button {
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.button-progress-ring {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    width: calc(100% + 12px);
+    height: calc(100% + 12px);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 4;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: var(--accent-primary);
+    stroke-width: 4;
+    stroke-dasharray: 392;
+    stroke-dashoffset: 392;
+    transition: stroke-dashoffset 0.1s linear;
+    filter: drop-shadow(0 0 6px var(--accent-primary));
+}
+
+.button-with-ring:has(.hand-hovering) .progress-ring-fill {
+    filter: drop-shadow(0 0 10px var(--accent-primary));
+}
+
 /* Circular progress for settings button */
 .hover-progress-ring {
     position: absolute;

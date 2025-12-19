@@ -279,7 +279,7 @@ class UIManager {
      * Update hover progress visual
      */
     updateHoverProgress(element, progress) {
-        // Update progress bar
+        // Update progress bar (legacy)
         const progressBar = element.querySelector('.hover-progress-bar');
         if (progressBar) {
             progressBar.style.width = `${progress * 100}%`;
@@ -292,6 +292,14 @@ class UIManager {
             const offset = circumference * (1 - progress);
             progressFill.style.strokeDashoffset = offset;
         }
+
+        // Update rectangular ring progress (for big buttons)
+        const buttonRing = element.parentElement?.querySelector('.progress-ring-fill');
+        if (buttonRing) {
+            const perimeter = 392; // Approximate perimeter of rounded rect
+            const offset = perimeter * (1 - progress);
+            buttonRing.style.strokeDashoffset = offset;
+        }
     }
 
     /**
@@ -301,6 +309,12 @@ class UIManager {
         if (this.hoverState.currentElement) {
             this.hoverState.currentElement.classList.remove('hand-hovering');
             this.updateHoverProgress(this.hoverState.currentElement, 0);
+
+            // Also reset button ring if present
+            const buttonRing = this.hoverState.currentElement.parentElement?.querySelector('.progress-ring-fill');
+            if (buttonRing) {
+                buttonRing.style.strokeDashoffset = 392;
+            }
         }
         this.hoverState.currentElement = null;
         this.hoverState.isHovering = false;

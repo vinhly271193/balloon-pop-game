@@ -200,21 +200,8 @@ class HandTracker {
 
         if (!results.multiHandLandmarks) return;
 
-        // Hand landmark connections for drawing skeleton
-        const fingerConnections = [
-            // Thumb
-            [0, 1], [1, 2], [2, 3], [3, 4],
-            // Index finger
-            [0, 5], [5, 6], [6, 7], [7, 8],
-            // Middle finger
-            [0, 9], [9, 10], [10, 11], [11, 12],
-            // Ring finger
-            [0, 13], [13, 14], [14, 15], [15, 16],
-            // Pinky
-            [0, 17], [17, 18], [18, 19], [19, 20],
-            // Palm connections
-            [5, 9], [9, 13], [13, 17]
-        ];
+        // Scale factor - 20% smaller
+        const scale = 0.8;
 
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
@@ -226,68 +213,129 @@ class HandTracker {
                 y: lm.y * this.canvas.height
             }));
 
-            // Draw glow/shadow layer first
+            // Calculate center for scaling
+            const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+            const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+
+            // Scale points around center
+            const scaledPoints = points.map(p => ({
+                x: centerX + (p.x - centerX) * scale,
+                y: centerY + (p.y - centerY) * scale
+            }));
+
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Outer glow
-            ctx.strokeStyle = `${colors.primary}40`;
-            ctx.lineWidth = 20;
-            this.drawHandSkeleton(ctx, points, fingerConnections);
+            // Draw filled palm area (softer look)
+            this.drawFilledPalm(ctx, scaledPoints, colors);
 
-            // Main hand outline
-            ctx.strokeStyle = colors.primary;
-            ctx.lineWidth = 8;
-            this.drawHandSkeleton(ctx, points, fingerConnections);
+            // Draw filled fingers (softer, rounder look)
+            this.drawFilledFingers(ctx, scaledPoints, colors);
 
-            // Inner highlight
-            ctx.strokeStyle = colors.secondary;
-            ctx.lineWidth = 4;
-            this.drawHandSkeleton(ctx, points, fingerConnections);
+            // Draw soft fingertip circles
+            const fingertips = [4, 8, 12, 16, 20];
+            fingertips.forEach(idx => {
+                const point = scaledPoints[idx];
 
-            // Draw joints
-            const jointIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-            jointIndices.forEach(idx => {
-                const point = points[idx];
-
-                // Larger circles for fingertips and wrist
-                const isFingertip = [4, 8, 12, 16, 20].includes(idx);
-                const isWrist = idx === 0;
-                const radius = isFingertip ? 12 : (isWrist ? 14 : 6);
-
-                // Glow
+                // Outer glow
                 ctx.beginPath();
-                ctx.arc(point.x, point.y, radius + 4, 0, Math.PI * 2);
-                ctx.fillStyle = `${colors.primary}40`;
+                ctx.arc(point.x, point.y, 12, 0, Math.PI * 2);
+                ctx.fillStyle = `${colors.primary}50`;
                 ctx.fill();
 
-                // Main joint
+                // Main circle
                 ctx.beginPath();
-                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-                ctx.fillStyle = isFingertip ? colors.secondary : colors.primary;
+                ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = colors.secondary;
                 ctx.fill();
 
-                // Highlight on fingertips
-                if (isFingertip) {
-                    ctx.beginPath();
-                    ctx.arc(point.x - 3, point.y - 3, radius * 0.4, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.fill();
-                }
+                // Highlight
+                ctx.beginPath();
+                ctx.arc(point.x - 2, point.y - 2, 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.fill();
             });
         }
     }
 
     /**
-     * Draw hand skeleton lines
+     * Draw filled palm shape
      */
-    drawHandSkeleton(ctx, points, connections) {
+    drawFilledPalm(ctx, points, colors) {
+        // Palm outline using base of fingers and wrist
+        const palmPoints = [points[0], points[5], points[9], points[13], points[17]];
+
+        // Outer glow
         ctx.beginPath();
-        connections.forEach(([start, end]) => {
-            ctx.moveTo(points[start].x, points[start].y);
-            ctx.lineTo(points[end].x, points[end].y);
-        });
+        ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
+        for (let i = 1; i < palmPoints.length; i++) {
+            ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = `${colors.primary}30`;
+        ctx.fill();
+        ctx.strokeStyle = `${colors.primary}60`;
+        ctx.lineWidth = 12;
         ctx.stroke();
+
+        // Main palm
+        ctx.beginPath();
+        ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
+        for (let i = 1; i < palmPoints.length; i++) {
+            ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = `${colors.primary}40`;
+        ctx.fill();
+        ctx.strokeStyle = colors.primary;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    /**
+     * Draw filled finger shapes
+     */
+    drawFilledFingers(ctx, points, colors) {
+        // Finger segments: [base, mid1, mid2, tip]
+        const fingers = [
+            [1, 2, 3, 4],     // Thumb
+            [5, 6, 7, 8],     // Index
+            [9, 10, 11, 12],  // Middle
+            [13, 14, 15, 16], // Ring
+            [17, 18, 19, 20]  // Pinky
+        ];
+
+        fingers.forEach(finger => {
+            // Draw thick rounded line for each finger segment
+            for (let j = 0; j < finger.length - 1; j++) {
+                const start = points[finger[j]];
+                const end = points[finger[j + 1]];
+
+                // Glow
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.strokeStyle = `${colors.primary}40`;
+                ctx.lineWidth = 16;
+                ctx.stroke();
+
+                // Main finger
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.strokeStyle = colors.primary;
+                ctx.lineWidth = 10;
+                ctx.stroke();
+
+                // Highlight
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.strokeStyle = colors.secondary;
+                ctx.lineWidth = 5;
+                ctx.stroke();
+            }
+        });
     }
 
     /**
