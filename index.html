@@ -143,6 +143,11 @@
         <!-- Settings Overlay -->
         <div id="settingsOverlay" class="settings-overlay hidden">
             <div class="settings-panel">
+                <button id="closeSettingsX" class="close-x-btn hoverable" data-hover-action="closeSettings">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
                 <h2 class="settings-title">Settings</h2>
 
                 <div class="settings-section">
@@ -159,8 +164,9 @@
                         <label class="setting-label">Volume</label>
                         <div class="volume-control">
                             <button id="volumeDown" class="volume-btn hoverable" data-hover-action="volumeDown">-</button>
-                            <div class="volume-bar">
+                            <div id="volumeSlider" class="volume-bar volume-slider">
                                 <div id="volumeFill" class="volume-fill" style="width: 70%"></div>
+                                <div id="volumeHandle" class="volume-handle"></div>
                             </div>
                             <button id="volumeUp" class="volume-btn hoverable" data-hover-action="volumeUp">+</button>
                         </div>
@@ -185,29 +191,34 @@
                         </div>
                     </div>
 
-                    <div class="setting-row">
+                    <div class="setting-row setting-row-vertical">
                         <label class="setting-label">Background</label>
                         <div class="background-options">
-                            <button id="bgNone" class="bg-btn hoverable active" data-hover-action="bgNone">
-                                None
+                            <button id="bgNone" class="bg-btn bg-preview hoverable active" data-hover-action="bgNone">
+                                <div class="bg-preview-box bg-preview-none"></div>
+                                <span>None</span>
                             </button>
-                            <button id="bgGarden" class="bg-btn hoverable" data-hover-action="bgGarden">
-                                Garden
+                            <button id="bgGarden" class="bg-btn bg-preview hoverable" data-hover-action="bgGarden">
+                                <div class="bg-preview-box bg-preview-garden"></div>
+                                <span>Garden</span>
                             </button>
-                            <button id="bgBeach" class="bg-btn hoverable" data-hover-action="bgBeach">
-                                Beach
+                            <button id="bgBeach" class="bg-btn bg-preview hoverable" data-hover-action="bgBeach">
+                                <div class="bg-preview-box bg-preview-beach"></div>
+                                <span>Beach</span>
                             </button>
-                            <button id="bgForest" class="bg-btn hoverable" data-hover-action="bgForest">
-                                Forest
+                            <button id="bgForest" class="bg-btn bg-preview hoverable" data-hover-action="bgForest">
+                                <div class="bg-preview-box bg-preview-forest"></div>
+                                <span>Forest</span>
                             </button>
-                            <button id="bgSky" class="bg-btn hoverable" data-hover-action="bgSky">
-                                Sky
+                            <button id="bgSky" class="bg-btn bg-preview hoverable" data-hover-action="bgSky">
+                                <div class="bg-preview-box bg-preview-sky"></div>
+                                <span>Sky</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <button id="closeSettingsBtn" class="big-button hoverable" data-hover-action="closeSettings">
+                <button id="closeSettingsBtn" class="settings-close-btn hoverable" data-hover-action="closeSettings">
                     <span>Close</span>
                     <div class="hover-progress-bar"></div>
                 </button>

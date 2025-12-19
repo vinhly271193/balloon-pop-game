@@ -48,13 +48,19 @@ class UIManager {
         this.settingsBtn = document.getElementById('settingsBtn');
         this.settingsOverlay = document.getElementById('settingsOverlay');
         this.closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        this.closeSettingsX = document.getElementById('closeSettingsX');
         this.soundToggle = document.getElementById('soundToggle');
         this.volumeDown = document.getElementById('volumeDown');
         this.volumeUp = document.getElementById('volumeUp');
+        this.volumeSlider = document.getElementById('volumeSlider');
         this.volumeFill = document.getElementById('volumeFill');
+        this.volumeHandle = document.getElementById('volumeHandle');
         this.contrastNormal = document.getElementById('contrastNormal');
         this.contrastHigh = document.getElementById('contrastHigh');
         this.contrastMax = document.getElementById('contrastMax');
+
+        // Volume slider drag state
+        this.isDraggingVolume = false;
 
         // Background elements
         this.natureBackground = document.getElementById('natureBackground');
@@ -116,6 +122,7 @@ class UIManager {
         // Settings button click
         this.settingsBtn?.addEventListener('click', () => this.openSettings());
         this.closeSettingsBtn?.addEventListener('click', () => this.closeSettings());
+        this.closeSettingsX?.addEventListener('click', () => this.closeSettings());
 
         // Settings controls
         this.soundToggle?.addEventListener('click', () => this.toggleSound());
@@ -124,6 +131,9 @@ class UIManager {
         this.contrastNormal?.addEventListener('click', () => this.setContrast('normal'));
         this.contrastHigh?.addEventListener('click', () => this.setContrast('high'));
         this.contrastMax?.addEventListener('click', () => this.setContrast('max'));
+
+        // Volume slider drag functionality
+        this.initVolumeSlider();
 
         // Background controls
         this.bgNone?.addEventListener('click', () => this.setBackground('none'));
@@ -393,14 +403,92 @@ class UIManager {
         this.settings.volume = Math.max(0, Math.min(1, this.settings.volume + delta));
         audioManager.setVolume(this.settings.volume);
 
-        if (this.volumeFill) {
-            this.volumeFill.style.width = `${this.settings.volume * 100}%`;
-        }
+        this.updateVolumeUI();
 
         // Play a pop sound to demonstrate volume
         audioManager.play('pop');
 
         this.saveSettings();
+    }
+
+    /**
+     * Update volume UI (fill bar and handle position)
+     */
+    updateVolumeUI() {
+        const percent = this.settings.volume * 100;
+        if (this.volumeFill) {
+            this.volumeFill.style.width = `${percent}%`;
+        }
+        if (this.volumeHandle) {
+            this.volumeHandle.style.left = `${percent}%`;
+            this.volumeHandle.style.right = 'auto';
+        }
+    }
+
+    /**
+     * Initialize volume slider drag functionality
+     */
+    initVolumeSlider() {
+        if (!this.volumeSlider) return;
+
+        const setVolumeFromEvent = (e) => {
+            const rect = this.volumeSlider.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let x = clientX - rect.left;
+            let percent = x / rect.width;
+            percent = Math.max(0, Math.min(1, percent));
+
+            this.settings.volume = percent;
+            audioManager.setVolume(this.settings.volume);
+            this.updateVolumeUI();
+        };
+
+        // Mouse events
+        this.volumeSlider.addEventListener('mousedown', (e) => {
+            this.isDraggingVolume = true;
+            setVolumeFromEvent(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (this.isDraggingVolume) {
+                setVolumeFromEvent(e);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (this.isDraggingVolume) {
+                this.isDraggingVolume = false;
+                audioManager.play('pop');
+                this.saveSettings();
+            }
+        });
+
+        // Touch events for mobile
+        this.volumeSlider.addEventListener('touchstart', (e) => {
+            this.isDraggingVolume = true;
+            setVolumeFromEvent(e);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (this.isDraggingVolume) {
+                setVolumeFromEvent(e);
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (this.isDraggingVolume) {
+                this.isDraggingVolume = false;
+                audioManager.play('pop');
+                this.saveSettings();
+            }
+        });
+
+        // Click directly on the bar
+        this.volumeSlider.addEventListener('click', (e) => {
+            setVolumeFromEvent(e);
+            audioManager.play('pop');
+            this.saveSettings();
+        });
     }
 
     /**
@@ -496,9 +584,7 @@ class UIManager {
                     if (state) state.textContent = this.settings.soundEnabled ? 'ON' : 'OFF';
                     this.soundToggle.classList.toggle('off', !this.settings.soundEnabled);
                 }
-                if (this.volumeFill) {
-                    this.volumeFill.style.width = `${this.settings.volume * 100}%`;
-                }
+                this.updateVolumeUI();
             }
         } catch (e) {
             console.warn('Could not load settings:', e);

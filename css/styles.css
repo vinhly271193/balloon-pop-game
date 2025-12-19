@@ -782,24 +782,55 @@ html, body {
 
 .settings-panel {
     background: var(--bg-secondary);
-    border-radius: 30px;
-    padding: var(--spacing-large);
-    max-width: 600px;
+    border-radius: 24px;
+    padding: var(--spacing-medium);
+    max-width: 500px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    position: relative;
+}
+
+/* X Close Button at top right */
+.close-x-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    z-index: 10;
+}
+
+.close-x-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.close-x-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
 .settings-title {
-    font-size: var(--text-large);
+    font-size: var(--text-medium);
     text-align: center;
-    margin-bottom: var(--spacing-large);
+    margin-bottom: var(--spacing-medium);
     color: var(--text-primary);
 }
 
 .settings-section {
-    margin-bottom: var(--spacing-large);
-    padding-bottom: var(--spacing-medium);
+    margin-bottom: var(--spacing-medium);
+    padding-bottom: var(--spacing-small);
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -808,33 +839,40 @@ html, body {
 }
 
 .settings-section-title {
-    font-size: var(--text-medium);
+    font-size: var(--text-small);
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-medium);
+    margin-bottom: var(--spacing-small);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .setting-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-medium);
+    margin-bottom: var(--spacing-small);
     flex-wrap: wrap;
     gap: var(--spacing-small);
 }
 
+.setting-row-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .setting-label {
-    font-size: var(--text-normal);
+    font-size: var(--text-small);
     color: var(--text-primary);
 }
 
 /* Toggle Button */
 .toggle-button {
-    min-width: 100px;
-    padding: var(--spacing-small) var(--spacing-medium);
-    font-size: var(--text-normal);
+    min-width: 70px;
+    padding: 8px 16px;
+    font-size: 14px;
     font-weight: 700;
-    border: 3px solid var(--accent-primary);
-    border-radius: 12px;
+    border: 2px solid var(--accent-primary);
+    border-radius: 8px;
     background: transparent;
     color: var(--accent-primary);
     cursor: pointer;
@@ -854,17 +892,17 @@ html, body {
 .volume-control {
     display: flex;
     align-items: center;
-    gap: var(--spacing-small);
+    gap: 8px;
 }
 
 .volume-btn {
-    width: 50px;
-    height: 50px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 3px solid var(--text-secondary);
+    border: 2px solid var(--text-secondary);
     background: transparent;
     color: var(--text-primary);
-    font-size: var(--text-medium);
+    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -877,33 +915,65 @@ html, body {
 }
 
 .volume-bar {
-    width: 150px;
-    height: 20px;
+    width: 120px;
+    height: 16px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
+    border-radius: 8px;
+    overflow: visible;
+    position: relative;
 }
 
 .volume-fill {
     height: 100%;
     background: var(--accent-primary);
-    border-radius: 10px;
-    transition: width var(--transition-fast);
+    border-radius: 8px;
+    transition: width 0.1s ease;
+    pointer-events: none;
+}
+
+/* Draggable Volume Slider */
+.volume-slider {
+    cursor: pointer;
+    touch-action: none;
+}
+
+.volume-handle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-primary);
+    border: 3px solid white;
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    cursor: grab;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease;
+}
+
+.volume-handle:hover {
+    transform: translate(50%, -50%) scale(1.15);
+}
+
+.volume-slider:active .volume-handle {
+    cursor: grabbing;
+    transform: translate(50%, -50%) scale(1.2);
 }
 
 /* Contrast Options */
 .contrast-options {
     display: flex;
-    gap: var(--spacing-small);
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .contrast-btn {
-    padding: var(--spacing-small) var(--spacing-medium);
-    font-size: var(--text-small);
+    padding: 6px 12px;
+    font-size: 12px;
     font-weight: 700;
-    border: 3px solid var(--text-secondary);
-    border-radius: 12px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 8px;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
@@ -919,6 +989,35 @@ html, body {
     border-color: var(--accent-primary);
     background: var(--accent-primary);
     color: var(--bg-primary);
+}
+
+/* Settings Close Button (bottom) */
+.settings-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: var(--bg-primary);
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+    position: relative;
+    overflow: hidden;
+    margin-top: var(--spacing-small);
+}
+
+.settings-close-btn:hover {
+    transform: scale(1.02);
+}
+
+.settings-close-btn .hover-progress-bar {
+    border-radius: 0 0 12px 12px;
 }
 
 /* ===========================================
@@ -1084,21 +1183,23 @@ body.theme-max-contrast .hud-item {
 }
 
 /* ===========================================
-   Background Option Buttons
+   Background Option Buttons with Previews
    =========================================== */
 
 .background-options {
     display: flex;
-    gap: var(--spacing-small);
+    gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
+    margin-top: 8px;
 }
 
 .bg-btn {
-    padding: var(--spacing-small) var(--spacing-medium);
-    font-size: var(--text-small);
-    font-weight: 700;
-    border: 3px solid var(--text-secondary);
-    border-radius: 12px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 2px solid var(--text-secondary);
+    border-radius: 8px;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
@@ -1114,30 +1215,99 @@ body.theme-max-contrast .hud-item {
 
 .bg-btn.active {
     border-color: var(--accent-primary);
-    background: var(--accent-primary);
-    color: var(--bg-primary);
+    color: var(--accent-primary);
 }
 
-/* Color indicators for background buttons */
-.bg-btn#bgGarden {
-    border-left: 5px solid #90EE90;
+/* Background preview buttons with thumbnails */
+.bg-btn.bg-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px;
+    min-width: 60px;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.3);
 }
 
-.bg-btn#bgBeach {
-    border-left: 5px solid #87CEEB;
+.bg-btn.bg-preview span {
+    font-size: 10px;
 }
 
-.bg-btn#bgForest {
-    border-left: 5px solid #228B22;
+.bg-btn.bg-preview.active {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: var(--accent-primary);
 }
 
-.bg-btn#bgSky {
-    border-left: 5px solid #ADD8E6;
+/* Preview thumbnail box */
+.bg-preview-box {
+    width: 50px;
+    height: 35px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.bg-btn.active#bgGarden,
-.bg-btn.active#bgBeach,
-.bg-btn.active#bgForest,
-.bg-btn.active#bgSky {
-    border-left-color: var(--bg-primary);
+/* None preview - dark with X */
+.bg-preview-none {
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.bg-preview-none::after {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 2px;
+    background: var(--text-secondary);
+    transform: rotate(45deg);
+}
+
+.bg-preview-none::before {
+    content: '';
+    position: absolute;
+    width: 70%;
+    height: 2px;
+    background: var(--text-secondary);
+    transform: rotate(-45deg);
+}
+
+/* Garden preview */
+.bg-preview-garden {
+    background:
+        radial-gradient(ellipse at 20% 80%, rgba(144, 238, 144, 0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 182, 193, 0.4) 0%, transparent 40%),
+        linear-gradient(180deg, rgba(135, 206, 150, 0.9) 0%, rgba(80, 150, 80, 0.9) 100%);
+}
+
+/* Beach preview */
+.bg-preview-beach {
+    background:
+        linear-gradient(180deg,
+            rgba(135, 206, 235, 0.9) 0%,
+            rgba(100, 180, 220, 0.9) 40%,
+            rgba(194, 178, 128, 0.9) 70%,
+            rgba(210, 190, 140, 0.9) 100%);
+}
+
+/* Forest preview */
+.bg-preview-forest {
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(100, 140, 80, 0.6) 0%, transparent 40%),
+        linear-gradient(180deg,
+            rgba(34, 80, 50, 0.9) 0%,
+            rgba(55, 100, 60, 0.9) 60%,
+            rgba(40, 70, 45, 0.9) 100%);
+}
+
+/* Sky preview */
+.bg-preview-sky {
+    background:
+        radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.7) 0%, transparent 30%),
+        radial-gradient(ellipse at 70% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 25%),
+        linear-gradient(180deg,
+            rgba(135, 206, 250, 0.95) 0%,
+            rgba(175, 225, 255, 0.9) 50%,
+            rgba(200, 235, 255, 0.85) 100%);
 }
