@@ -176,7 +176,8 @@ class Game {
 
         // Update calibration screen indicators
         if (this.state === GameState.CALIBRATION) {
-            uiManager.updateHandIndicators(data.leftDetected, data.rightDetected);
+            // Swap left/right because video is mirrored - user's right hand appears on left side
+            uiManager.updateHandIndicators(data.rightDetected, data.leftDetected);
 
             // Check for wave gesture to proceed
             if (!this.calibrationWaveDetected && data.leftDetected && data.rightDetected) {
