@@ -30,10 +30,8 @@ class HandTracker {
         // Visual feedback settings
         this.showHandIndicators = true;
         this.handIndicatorSize = 40;
-        this.handColors = {
-            left: { primary: '#FF6B6B', secondary: '#FF8E8E' },
-            right: { primary: '#4ECDC4', secondary: '#7EDED7' }
-        };
+        // Same color for all hands - easier when playing with others
+        this.handColor = { primary: '#4ECDC4', secondary: '#7EDED7' };
     }
 
     /**
@@ -145,11 +143,12 @@ class HandTracker {
                 const landmarks = results.multiHandLandmarks[i];
                 const handedness = results.multiHandedness[i];
 
-                // Note: handedness is mirrored (Left in results = Right hand in reality)
-                // Since we mirror the video, we keep the labels as-is for display
-                const isLeft = handedness.label === 'Left';
+                // Swap handedness because video is mirrored
+                // MediaPipe's "Left" = User's RIGHT hand (from their perspective)
+                // MediaPipe's "Right" = User's LEFT hand (from their perspective)
+                const isUserLeftHand = handedness.label === 'Right';
 
-                if (isLeft) {
+                if (isUserLeftHand) {
                     this.leftHandDetected = true;
                 } else {
                     this.rightHandDetected = true;
@@ -168,14 +167,13 @@ class HandTracker {
 
                 collisionPoints.forEach(point => {
                     // Convert normalized coordinates to canvas coordinates
-                    // Note: We mirror X because video is mirrored
                     const x = point.x * this.canvas.width;
                     const y = point.y * this.canvas.height;
 
                     this.handPositions.push({
                         x,
                         y,
-                        isLeft,
+                        isLeft: isUserLeftHand,
                         landmark: point
                     });
                 });
@@ -220,9 +218,7 @@ class HandTracker {
 
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
-            const handedness = results.multiHandedness[i];
-            const isLeft = handedness.label === 'Left';
-            const colors = isLeft ? this.handColors.left : this.handColors.right;
+            const colors = this.handColor;
 
             // Convert landmarks to canvas coordinates
             const points = landmarks.map(lm => ({
