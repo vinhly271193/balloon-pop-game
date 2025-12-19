@@ -293,11 +293,11 @@ class UIManager {
             progressFill.style.strokeDashoffset = offset;
         }
 
-        // Update rectangular ring progress (for big buttons)
-        const buttonRing = element.parentElement?.querySelector('.progress-ring-fill');
+        // Update circular ring progress (for big buttons)
+        const buttonRing = element.parentElement?.querySelector('.ring-fill');
         if (buttonRing) {
-            const perimeter = 392; // Approximate perimeter of rounded rect
-            const offset = perimeter * (1 - progress);
+            const circumference = 289; // 2 * PI * 46
+            const offset = circumference * (1 - progress);
             buttonRing.style.strokeDashoffset = offset;
         }
     }
@@ -311,9 +311,9 @@ class UIManager {
             this.updateHoverProgress(this.hoverState.currentElement, 0);
 
             // Also reset button ring if present
-            const buttonRing = this.hoverState.currentElement.parentElement?.querySelector('.progress-ring-fill');
+            const buttonRing = this.hoverState.currentElement.parentElement?.querySelector('.ring-fill');
             if (buttonRing) {
-                buttonRing.style.strokeDashoffset = 392;
+                buttonRing.style.strokeDashoffset = 289;
             }
         }
         this.hoverState.currentElement = null;

@@ -30,8 +30,13 @@ class HandTracker {
         // Visual feedback settings
         this.showHandIndicators = true;
         this.handIndicatorSize = 40;
-        // Same color for all hands - easier when playing with others
-        this.handColor = { primary: '#4ECDC4', secondary: '#7EDED7' };
+        // Cartoon glove colors - white with subtle shading
+        this.gloveColor = {
+            main: '#FFFFFF',
+            shadow: '#E8E8E8',
+            outline: '#4ECDC4',
+            highlight: '#FFFFFF'
+        };
     }
 
     /**
@@ -191,7 +196,7 @@ class HandTracker {
     }
 
     /**
-     * Draw hand indicators on canvas
+     * Draw cartoon glove hands on canvas
      */
     drawHands(ctx) {
         if (!this.showHandIndicators || !this.lastResults) return;
@@ -205,7 +210,7 @@ class HandTracker {
 
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
-            const colors = this.handColor;
+            const glove = this.gloveColor;
 
             // Convert landmarks to canvas coordinates
             const points = landmarks.map(lm => ({
@@ -226,77 +231,57 @@ class HandTracker {
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Draw filled palm area (softer look)
-            this.drawFilledPalm(ctx, scaledPoints, colors);
+            // Draw glove palm (puffy white shape)
+            this.drawGlovePalm(ctx, scaledPoints, glove);
 
-            // Draw filled fingers (softer, rounder look)
-            this.drawFilledFingers(ctx, scaledPoints, colors);
+            // Draw glove fingers (puffy cartoon style)
+            this.drawGloveFingers(ctx, scaledPoints, glove);
 
-            // Draw soft fingertip circles
-            const fingertips = [4, 8, 12, 16, 20];
-            fingertips.forEach(idx => {
-                const point = scaledPoints[idx];
-
-                // Outer glow
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, 12, 0, Math.PI * 2);
-                ctx.fillStyle = `${colors.primary}50`;
-                ctx.fill();
-
-                // Main circle
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-                ctx.fillStyle = colors.secondary;
-                ctx.fill();
-
-                // Highlight
-                ctx.beginPath();
-                ctx.arc(point.x - 2, point.y - 2, 3, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.fill();
-            });
+            // Draw fingertip circles (cartoon puff)
+            this.drawGloveFingertips(ctx, scaledPoints, glove);
         }
     }
 
     /**
-     * Draw filled palm shape
+     * Draw cartoon glove palm
      */
-    drawFilledPalm(ctx, points, colors) {
-        // Palm outline using base of fingers and wrist
+    drawGlovePalm(ctx, points, glove) {
+        // Palm points - create a puffy rounded shape
         const palmPoints = [points[0], points[5], points[9], points[13], points[17]];
 
-        // Outer glow
+        // Outer glow (teal)
         ctx.beginPath();
         ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
         for (let i = 1; i < palmPoints.length; i++) {
             ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
         }
         ctx.closePath();
-        ctx.fillStyle = `${colors.primary}30`;
+        ctx.shadowColor = glove.outline;
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = glove.main;
         ctx.fill();
-        ctx.strokeStyle = `${colors.primary}60`;
-        ctx.lineWidth = 12;
-        ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        // Main palm
+        // White fill
         ctx.beginPath();
         ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
         for (let i = 1; i < palmPoints.length; i++) {
             ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
         }
         ctx.closePath();
-        ctx.fillStyle = `${colors.primary}40`;
+        ctx.fillStyle = glove.main;
         ctx.fill();
-        ctx.strokeStyle = colors.primary;
-        ctx.lineWidth = 4;
+
+        // Teal outline
+        ctx.strokeStyle = glove.outline;
+        ctx.lineWidth = 3;
         ctx.stroke();
     }
 
     /**
-     * Draw filled finger shapes
+     * Draw cartoon glove fingers
      */
-    drawFilledFingers(ctx, points, colors) {
-        // Finger segments: [base, mid1, mid2, tip]
+    drawGloveFingers(ctx, points, glove) {
         const fingers = [
             [1, 2, 3, 4],     // Thumb
             [5, 6, 7, 8],     // Index
@@ -306,35 +291,76 @@ class HandTracker {
         ];
 
         fingers.forEach(finger => {
-            // Draw thick rounded line for each finger segment
             for (let j = 0; j < finger.length - 1; j++) {
                 const start = points[finger[j]];
                 const end = points[finger[j + 1]];
 
-                // Glow
+                // Outer glow
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
-                ctx.strokeStyle = `${colors.primary}40`;
-                ctx.lineWidth = 16;
+                ctx.strokeStyle = glove.outline;
+                ctx.lineWidth = 22;
+                ctx.globalAlpha = 0.3;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                // White glove finger (thick)
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.strokeStyle = glove.main;
+                ctx.lineWidth = 18;
                 ctx.stroke();
 
-                // Main finger
+                // Teal outline
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
-                ctx.strokeStyle = colors.primary;
-                ctx.lineWidth = 10;
+                ctx.strokeStyle = glove.outline;
+                ctx.lineWidth = 20;
+                ctx.globalAlpha = 0.15;
                 ctx.stroke();
-
-                // Highlight
-                ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.strokeStyle = colors.secondary;
-                ctx.lineWidth = 5;
-                ctx.stroke();
+                ctx.globalAlpha = 1;
             }
+        });
+    }
+
+    /**
+     * Draw cartoon glove fingertips
+     */
+    drawGloveFingertips(ctx, points, glove) {
+        const fingertips = [4, 8, 12, 16, 20];
+
+        fingertips.forEach(idx => {
+            const point = points[idx];
+
+            // Outer glow
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 14, 0, Math.PI * 2);
+            ctx.fillStyle = glove.outline;
+            ctx.globalAlpha = 0.4;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // White puffy circle
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+            ctx.fillStyle = glove.main;
+            ctx.fill();
+
+            // Teal outline
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+            ctx.strokeStyle = glove.outline;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Highlight shine
+            ctx.beginPath();
+            ctx.arc(point.x - 3, point.y - 3, 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fill();
         });
     }
 
