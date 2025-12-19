@@ -713,12 +713,12 @@ html, body {
 /* Track - subtle border outline (always visible) */
 .border-progress-track {
     position: absolute;
-    top: -6px;
-    left: -6px;
-    right: -6px;
-    bottom: -6px;
-    border: 6px solid rgba(255, 255, 255, 0.3);
-    border-radius: 28px;
+    top: -9px;
+    left: -9px;
+    right: -9px;
+    bottom: -9px;
+    border: 9px solid rgba(255, 255, 255, 0.3);
+    border-radius: 32px;
     pointer-events: none;
     z-index: 100;
 }
@@ -726,32 +726,22 @@ html, body {
 /* Fill - animated border using conic-gradient mask */
 .border-progress-fill {
     position: absolute;
-    top: -6px;
-    left: -6px;
-    right: -6px;
-    bottom: -6px;
-    border: 8px solid var(--accent-primary);
-    border-radius: 28px;
+    top: -9px;
+    left: -9px;
+    right: -9px;
+    bottom: -9px;
+    border: 12px solid #ffffff;
+    border-radius: 32px;
     pointer-events: none;
     z-index: 101;
-    box-shadow: 0 0 12px var(--accent-primary), 0 0 24px rgba(74, 222, 128, 0.5);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5);
     /* Use mask with conic-gradient for smooth progress */
     -webkit-mask: conic-gradient(from -90deg, #000 calc(var(--progress) * 360deg), transparent calc(var(--progress) * 360deg));
     mask: conic-gradient(from -90deg, #000 calc(var(--progress) * 360deg), transparent calc(var(--progress) * 360deg));
 }
 
 .big-button.hand-hovering .border-progress-fill {
-    box-shadow: 0 0 20px var(--accent-primary), 0 0 40px rgba(74, 222, 128, 0.6);
-}
-
-/* Secondary button (Play Again) - white outline */
-.big-button.secondary .border-progress-fill {
-    border-color: #ffffff;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.4);
-}
-
-.big-button.secondary.hand-hovering .border-progress-fill {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 50px rgba(255, 255, 255, 0.6);
 }
 
 /* Circular progress for settings button */
