@@ -293,12 +293,14 @@ class UIManager {
             progressFill.style.strokeDashoffset = offset;
         }
 
-        // Update circular ring progress (for big buttons)
-        const buttonRing = element.parentElement?.querySelector('.ring-fill');
-        if (buttonRing) {
-            const circumference = 289; // 2 * PI * 46
-            const offset = circumference * (1 - progress);
-            buttonRing.style.strokeDashoffset = offset;
+        // Update border stroke progress (for big buttons)
+        const borderFill = element.querySelector('.border-fill');
+        if (borderFill) {
+            // Calculate perimeter based on button size
+            const rect = element.getBoundingClientRect();
+            const perimeter = 2 * (rect.width + rect.height) + 8; // +8 for padding
+            borderFill.style.strokeDasharray = perimeter;
+            borderFill.style.strokeDashoffset = perimeter * (1 - progress);
         }
     }
 
@@ -310,10 +312,10 @@ class UIManager {
             this.hoverState.currentElement.classList.remove('hand-hovering');
             this.updateHoverProgress(this.hoverState.currentElement, 0);
 
-            // Also reset button ring if present
-            const buttonRing = this.hoverState.currentElement.parentElement?.querySelector('.ring-fill');
-            if (buttonRing) {
-                buttonRing.style.strokeDashoffset = 289;
+            // Also reset border progress if present
+            const borderFill = this.hoverState.currentElement.querySelector('.border-fill');
+            if (borderFill) {
+                borderFill.style.strokeDashoffset = 1000;
             }
         }
         this.hoverState.currentElement = null;

@@ -698,49 +698,46 @@ html, body {
     box-shadow: 0 0 10px var(--accent-primary);
 }
 
-/* Button with circular ring progress (360°) */
-.button-with-ring {
+/* Button with border stroke progress (360° around button) */
+.big-button.has-border-progress {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin: var(--spacing-small);
+    overflow: visible;
 }
 
-.button-with-ring .big-button {
-    margin: 0;
-    position: relative;
-    z-index: 2;
-}
-
-.button-ring-svg {
+.border-progress-svg {
     position: absolute;
-    width: 120%;
-    height: 200%;
-    z-index: 1;
+    top: -4px;
+    left: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
     pointer-events: none;
-    transform: rotate(-90deg);
+    z-index: 10;
 }
 
-.ring-bg {
+.border-progress-svg rect {
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+}
+
+.border-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.15);
+    stroke: rgba(255, 255, 255, 0.2);
     stroke-width: 3;
 }
 
-.ring-fill {
+.border-fill {
     fill: none;
     stroke: var(--accent-primary);
     stroke-width: 4;
     stroke-linecap: round;
-    stroke-dasharray: 289;
-    stroke-dashoffset: 289;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
     transition: stroke-dashoffset 0.1s linear;
-    filter: drop-shadow(0 0 8px var(--accent-primary));
+    filter: drop-shadow(0 0 6px var(--accent-primary));
 }
 
-.button-with-ring:has(.hand-hovering) .ring-fill {
-    filter: drop-shadow(0 0 12px var(--accent-primary));
+.big-button.hand-hovering .border-fill {
+    filter: drop-shadow(0 0 10px var(--accent-primary));
 }
 
 /* Circular progress for settings button */

@@ -34,15 +34,13 @@
                     <div class="hand-demo">
                         <span class="hand-icon">&#128400;</span>
                     </div>
-                    <div class="button-with-ring">
-                        <button id="startBtn" class="big-button hoverable" data-hover-action="start">
-                            <span>Start Game</span>
-                        </button>
-                        <svg class="button-ring-svg" viewBox="0 0 100 100">
-                            <circle class="ring-bg" cx="50" cy="50" r="46"/>
-                            <circle class="ring-fill" cx="50" cy="50" r="46"/>
+                    <button id="startBtn" class="big-button hoverable has-border-progress" data-hover-action="start">
+                        <span>Start Game</span>
+                        <svg class="border-progress-svg" preserveAspectRatio="none">
+                            <rect class="border-bg" x="2" y="2" rx="18" ry="18"/>
+                            <rect class="border-fill" x="2" y="2" rx="18" ry="18"/>
                         </svg>
-                    </div>
+                    </button>
                     <p class="camera-hint">Camera access required</p>
                 </div>
             </div>
@@ -119,24 +117,20 @@
                         </div>
                     </div>
                     <div class="end-buttons">
-                        <div class="button-with-ring">
-                            <button id="nextLevelBtn" class="big-button primary hoverable" data-hover-action="nextLevel">
-                                <span>Next Level</span>
-                            </button>
-                            <svg class="button-ring-svg" viewBox="0 0 100 100">
-                                <circle class="ring-bg" cx="50" cy="50" r="46"/>
-                                <circle class="ring-fill" cx="50" cy="50" r="46"/>
+                        <button id="nextLevelBtn" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
+                            <span>Next Level</span>
+                            <svg class="border-progress-svg" preserveAspectRatio="none">
+                                <rect class="border-bg" x="2" y="2" rx="18" ry="18"/>
+                                <rect class="border-fill" x="2" y="2" rx="18" ry="18"/>
                             </svg>
-                        </div>
-                        <div class="button-with-ring">
-                            <button id="playAgainBtn" class="big-button secondary hoverable" data-hover-action="playAgain">
-                                <span>Play Again</span>
-                            </button>
-                            <svg class="button-ring-svg" viewBox="0 0 100 100">
-                                <circle class="ring-bg" cx="50" cy="50" r="46"/>
-                                <circle class="ring-fill" cx="50" cy="50" r="46"/>
+                        </button>
+                        <button id="playAgainBtn" class="big-button secondary hoverable has-border-progress" data-hover-action="playAgain">
+                            <span>Play Again</span>
+                            <svg class="border-progress-svg" preserveAspectRatio="none">
+                                <rect class="border-bg" x="2" y="2" rx="18" ry="18"/>
+                                <rect class="border-fill" x="2" y="2" rx="18" ry="18"/>
                             </svg>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
