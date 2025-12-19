@@ -202,54 +202,96 @@ class HandTracker {
 
         if (!results.multiHandLandmarks) return;
 
+        // Hand landmark connections for drawing skeleton
+        const fingerConnections = [
+            // Thumb
+            [0, 1], [1, 2], [2, 3], [3, 4],
+            // Index finger
+            [0, 5], [5, 6], [6, 7], [7, 8],
+            // Middle finger
+            [0, 9], [9, 10], [10, 11], [11, 12],
+            // Ring finger
+            [0, 13], [13, 14], [14, 15], [15, 16],
+            // Pinky
+            [0, 17], [17, 18], [18, 19], [19, 20],
+            // Palm connections
+            [5, 9], [9, 13], [13, 17]
+        ];
+
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
             const handedness = results.multiHandedness[i];
             const isLeft = handedness.label === 'Left';
             const colors = isLeft ? this.handColors.left : this.handColors.right;
 
-            // Draw indicator at palm center (landmark 9)
-            const palm = landmarks[9];
-            const palmX = palm.x * this.canvas.width;
-            const palmY = palm.y * this.canvas.height;
+            // Convert landmarks to canvas coordinates
+            const points = landmarks.map(lm => ({
+                x: lm.x * this.canvas.width,
+                y: lm.y * this.canvas.height
+            }));
+
+            // Draw glow/shadow layer first
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
 
             // Outer glow
-            ctx.beginPath();
-            ctx.arc(palmX, palmY, this.handIndicatorSize + 10, 0, Math.PI * 2);
-            ctx.fillStyle = `${colors.primary}33`;
-            ctx.fill();
+            ctx.strokeStyle = `${colors.primary}40`;
+            ctx.lineWidth = 20;
+            this.drawHandSkeleton(ctx, points, fingerConnections);
 
-            // Main circle
-            ctx.beginPath();
-            ctx.arc(palmX, palmY, this.handIndicatorSize, 0, Math.PI * 2);
-            const gradient = ctx.createRadialGradient(
-                palmX - 10, palmY - 10, 0,
-                palmX, palmY, this.handIndicatorSize
-            );
-            gradient.addColorStop(0, colors.secondary);
-            gradient.addColorStop(1, colors.primary);
-            ctx.fillStyle = gradient;
-            ctx.fill();
+            // Main hand outline
+            ctx.strokeStyle = colors.primary;
+            ctx.lineWidth = 8;
+            this.drawHandSkeleton(ctx, points, fingerConnections);
 
             // Inner highlight
-            ctx.beginPath();
-            ctx.arc(palmX - 10, palmY - 10, this.handIndicatorSize * 0.4, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fill();
+            ctx.strokeStyle = colors.secondary;
+            ctx.lineWidth = 4;
+            this.drawHandSkeleton(ctx, points, fingerConnections);
 
-            // Draw fingertip indicators (smaller)
-            const fingertips = [4, 8, 12, 16, 20];
-            fingertips.forEach(idx => {
-                const tip = landmarks[idx];
-                const tipX = tip.x * this.canvas.width;
-                const tipY = tip.y * this.canvas.height;
+            // Draw joints
+            const jointIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+            jointIndices.forEach(idx => {
+                const point = points[idx];
 
+                // Larger circles for fingertips and wrist
+                const isFingertip = [4, 8, 12, 16, 20].includes(idx);
+                const isWrist = idx === 0;
+                const radius = isFingertip ? 12 : (isWrist ? 14 : 6);
+
+                // Glow
                 ctx.beginPath();
-                ctx.arc(tipX, tipY, 15, 0, Math.PI * 2);
-                ctx.fillStyle = `${colors.primary}88`;
+                ctx.arc(point.x, point.y, radius + 4, 0, Math.PI * 2);
+                ctx.fillStyle = `${colors.primary}40`;
                 ctx.fill();
+
+                // Main joint
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = isFingertip ? colors.secondary : colors.primary;
+                ctx.fill();
+
+                // Highlight on fingertips
+                if (isFingertip) {
+                    ctx.beginPath();
+                    ctx.arc(point.x - 3, point.y - 3, radius * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.fill();
+                }
             });
         }
+    }
+
+    /**
+     * Draw hand skeleton lines
+     */
+    drawHandSkeleton(ctx, points, connections) {
+        ctx.beginPath();
+        connections.forEach(([start, end]) => {
+            ctx.moveTo(points[start].x, points[start].y);
+            ctx.lineTo(points[end].x, points[end].y);
+        });
+        ctx.stroke();
     }
 
     /**
