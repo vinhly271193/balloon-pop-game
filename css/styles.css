@@ -730,7 +730,8 @@ html, body {
     left: -9px;
     right: -9px;
     bottom: -9px;
-    border: 12px solid #ffffff;
+    border: 12px solid white !important;
+    border-color: white !important;
     border-radius: 32px;
     pointer-events: none;
     z-index: 101;
@@ -742,6 +743,12 @@ html, body {
 
 .big-button.hand-hovering .border-progress-fill {
     box-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 50px rgba(255, 255, 255, 0.6);
+}
+
+/* Ensure all buttons have white border progress */
+.big-button.primary .border-progress-fill,
+.big-button.secondary .border-progress-fill {
+    border-color: white !important;
 }
 
 /* Circular progress for settings button */
