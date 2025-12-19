@@ -56,6 +56,14 @@ class UIManager {
         this.contrastHigh = document.getElementById('contrastHigh');
         this.contrastMax = document.getElementById('contrastMax');
 
+        // Background elements
+        this.natureBackground = document.getElementById('natureBackground');
+        this.bgNone = document.getElementById('bgNone');
+        this.bgGarden = document.getElementById('bgGarden');
+        this.bgBeach = document.getElementById('bgBeach');
+        this.bgForest = document.getElementById('bgForest');
+        this.bgSky = document.getElementById('bgSky');
+
         // State
         this.currentScreen = 'welcome';
         this.countdownInterval = null;
@@ -64,7 +72,8 @@ class UIManager {
         this.settings = {
             soundEnabled: true,
             volume: 0.7,
-            contrastMode: 'normal'
+            contrastMode: 'normal',
+            background: 'none'
         };
 
         // Hand hover state
@@ -115,6 +124,13 @@ class UIManager {
         this.contrastNormal?.addEventListener('click', () => this.setContrast('normal'));
         this.contrastHigh?.addEventListener('click', () => this.setContrast('high'));
         this.contrastMax?.addEventListener('click', () => this.setContrast('max'));
+
+        // Background controls
+        this.bgNone?.addEventListener('click', () => this.setBackground('none'));
+        this.bgGarden?.addEventListener('click', () => this.setBackground('garden'));
+        this.bgBeach?.addEventListener('click', () => this.setBackground('beach'));
+        this.bgForest?.addEventListener('click', () => this.setBackground('forest'));
+        this.bgSky?.addEventListener('click', () => this.setBackground('sky'));
 
         // Collect all hoverable elements
         this.collectHoverableElements();
@@ -319,6 +335,21 @@ class UIManager {
             case 'contrastMax':
                 this.setContrast('max');
                 break;
+            case 'bgNone':
+                this.setBackground('none');
+                break;
+            case 'bgGarden':
+                this.setBackground('garden');
+                break;
+            case 'bgBeach':
+                this.setBackground('beach');
+                break;
+            case 'bgForest':
+                this.setBackground('forest');
+                break;
+            case 'bgSky':
+                this.setBackground('sky');
+                break;
         }
     }
 
@@ -401,6 +432,36 @@ class UIManager {
     }
 
     /**
+     * Set background theme
+     */
+    setBackground(bgName) {
+        this.settings.background = bgName;
+
+        // Remove all background classes
+        if (this.natureBackground) {
+            this.natureBackground.classList.remove('active', 'bg-garden', 'bg-beach', 'bg-forest', 'bg-sky');
+
+            // Add new background if not 'none'
+            if (bgName !== 'none') {
+                this.natureBackground.classList.add('active', `bg-${bgName}`);
+            }
+        }
+
+        // Update button states
+        [this.bgNone, this.bgGarden, this.bgBeach, this.bgForest, this.bgSky].forEach(btn => {
+            btn?.classList.remove('active');
+        });
+
+        if (bgName === 'none') this.bgNone?.classList.add('active');
+        if (bgName === 'garden') this.bgGarden?.classList.add('active');
+        if (bgName === 'beach') this.bgBeach?.classList.add('active');
+        if (bgName === 'forest') this.bgForest?.classList.add('active');
+        if (bgName === 'sky') this.bgSky?.classList.add('active');
+
+        this.saveSettings();
+    }
+
+    /**
      * Save settings to localStorage
      */
     saveSettings() {
@@ -425,6 +486,9 @@ class UIManager {
                 audioManager.setEnabled(this.settings.soundEnabled);
                 audioManager.setVolume(this.settings.volume);
                 this.setContrast(this.settings.contrastMode);
+                if (this.settings.background) {
+                    this.setBackground(this.settings.background);
+                }
 
                 // Update UI
                 if (this.soundToggle) {

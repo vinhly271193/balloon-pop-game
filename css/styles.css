@@ -1013,3 +1013,131 @@ body.theme-max-contrast .hud-item {
 .hoverable.hand-hovering .hover-hint {
     opacity: 1;
 }
+
+/* ===========================================
+   Nature Background Themes
+   =========================================== */
+
+.nature-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.nature-bg.active {
+    opacity: 1;
+}
+
+/* Garden Theme - Soft greens with floral hints */
+.nature-bg.bg-garden {
+    background:
+        radial-gradient(ellipse at 20% 80%, rgba(144, 238, 144, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 182, 193, 0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 60% 90%, rgba(255, 255, 150, 0.2) 0%, transparent 30%),
+        linear-gradient(180deg,
+            rgba(135, 206, 150, 0.7) 0%,
+            rgba(100, 180, 100, 0.6) 50%,
+            rgba(80, 150, 80, 0.7) 100%);
+}
+
+/* Beach Theme - Ocean blues to sandy beige */
+.nature-bg.bg-beach {
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+        linear-gradient(180deg,
+            rgba(135, 206, 235, 0.8) 0%,
+            rgba(100, 180, 220, 0.7) 30%,
+            rgba(70, 160, 200, 0.6) 50%,
+            rgba(194, 178, 128, 0.7) 80%,
+            rgba(210, 190, 140, 0.8) 100%);
+}
+
+/* Forest Theme - Deep peaceful greens */
+.nature-bg.bg-forest {
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(100, 140, 80, 0.5) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 60%, rgba(60, 100, 50, 0.4) 0%, transparent 50%),
+        linear-gradient(180deg,
+            rgba(34, 80, 50, 0.8) 0%,
+            rgba(45, 90, 55, 0.7) 30%,
+            rgba(55, 100, 60, 0.7) 60%,
+            rgba(40, 70, 45, 0.8) 100%);
+}
+
+/* Sky Theme - Light blue with soft clouds */
+.nature-bg.bg-sky {
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 30%),
+        radial-gradient(ellipse at 70% 20%, rgba(255, 255, 255, 0.5) 0%, transparent 25%),
+        radial-gradient(ellipse at 40% 50%, rgba(255, 255, 255, 0.4) 0%, transparent 35%),
+        radial-gradient(ellipse at 80% 60%, rgba(255, 255, 255, 0.3) 0%, transparent 20%),
+        linear-gradient(180deg,
+            rgba(135, 206, 250, 0.9) 0%,
+            rgba(175, 225, 255, 0.8) 50%,
+            rgba(200, 235, 255, 0.7) 100%);
+}
+
+/* ===========================================
+   Background Option Buttons
+   =========================================== */
+
+.background-options {
+    display: flex;
+    gap: var(--spacing-small);
+    flex-wrap: wrap;
+}
+
+.bg-btn {
+    padding: var(--spacing-small) var(--spacing-medium);
+    font-size: var(--text-small);
+    font-weight: 700;
+    border: 3px solid var(--text-secondary);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-btn:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.bg-btn.active {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+/* Color indicators for background buttons */
+.bg-btn#bgGarden {
+    border-left: 5px solid #90EE90;
+}
+
+.bg-btn#bgBeach {
+    border-left: 5px solid #87CEEB;
+}
+
+.bg-btn#bgForest {
+    border-left: 5px solid #228B22;
+}
+
+.bg-btn#bgSky {
+    border-left: 5px solid #ADD8E6;
+}
+
+.bg-btn.active#bgGarden,
+.bg-btn.active#bgBeach,
+.bg-btn.active#bgForest,
+.bg-btn.active#bgSky {
+    border-left-color: var(--bg-primary);
+}

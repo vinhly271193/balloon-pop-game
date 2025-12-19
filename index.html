@@ -14,6 +14,9 @@
 </head>
 <body>
     <div id="app">
+        <!-- Nature Background Layer -->
+        <div id="natureBackground" class="nature-bg"></div>
+
         <!-- Video feed from webcam (hidden, used for processing) -->
         <video id="webcam" autoplay playsinline></video>
 
@@ -178,6 +181,27 @@
                             </button>
                             <button id="contrastMax" class="contrast-btn hoverable" data-hover-action="contrastMax">
                                 Maximum
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <label class="setting-label">Background</label>
+                        <div class="background-options">
+                            <button id="bgNone" class="bg-btn hoverable active" data-hover-action="bgNone">
+                                None
+                            </button>
+                            <button id="bgGarden" class="bg-btn hoverable" data-hover-action="bgGarden">
+                                Garden
+                            </button>
+                            <button id="bgBeach" class="bg-btn hoverable" data-hover-action="bgBeach">
+                                Beach
+                            </button>
+                            <button id="bgForest" class="bg-btn hoverable" data-hover-action="bgForest">
+                                Forest
+                            </button>
+                            <button id="bgSky" class="bg-btn hoverable" data-hover-action="bgSky">
+                                Sky
                             </button>
                         </div>
                     </div>
