@@ -285,22 +285,18 @@ class UIManager {
             progressBar.style.width = `${progress * 100}%`;
         }
 
-        // Update circular progress (for settings button)
-        const progressFill = element.querySelector('.hover-progress-fill');
-        if (progressFill) {
+        // Update circular progress (for settings button) - SVG circle
+        const circleProgressFill = element.querySelector('.hover-progress-ring .hover-progress-fill');
+        if (circleProgressFill) {
             const circumference = 283; // 2 * PI * 45
             const offset = circumference * (1 - progress);
-            progressFill.style.strokeDashoffset = offset;
+            circleProgressFill.style.strokeDashoffset = offset;
         }
 
-        // Update border stroke progress (for big buttons)
-        const borderFill = element.querySelector('.border-fill');
-        if (borderFill) {
-            // Calculate perimeter based on button size
-            const rect = element.getBoundingClientRect();
-            const perimeter = 2 * (rect.width + rect.height) + 8; // +8 for padding
-            borderFill.style.strokeDasharray = perimeter;
-            borderFill.style.strokeDashoffset = perimeter * (1 - progress);
+        // Update border progress (for big buttons) - CSS conic-gradient mask
+        const borderProgressFill = element.querySelector('.border-progress-fill');
+        if (borderProgressFill) {
+            element.style.setProperty('--progress', progress);
         }
     }
 
@@ -312,11 +308,8 @@ class UIManager {
             this.hoverState.currentElement.classList.remove('hand-hovering');
             this.updateHoverProgress(this.hoverState.currentElement, 0);
 
-            // Also reset border progress if present
-            const borderFill = this.hoverState.currentElement.querySelector('.border-fill');
-            if (borderFill) {
-                borderFill.style.strokeDashoffset = 1000;
-            }
+            // Reset CSS custom property for border progress
+            this.hoverState.currentElement.style.setProperty('--progress', 0);
         }
         this.hoverState.currentElement = null;
         this.hoverState.isHovering = false;
@@ -441,8 +434,8 @@ class UIManager {
             this.volumeFill.style.width = `${percent}%`;
         }
         if (this.volumeHandle) {
+            // Position handle at the end of the fill (centered on the edge)
             this.volumeHandle.style.left = `${percent}%`;
-            this.volumeHandle.style.right = 'auto';
         }
     }
 

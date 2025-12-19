@@ -702,42 +702,44 @@ html, body {
 .big-button.has-border-progress {
     position: relative;
     overflow: visible;
+    --progress: 0;
 }
 
-.border-progress-svg {
+/* Track - subtle border outline */
+.border-progress-track {
     position: absolute;
     top: -4px;
     left: -4px;
-    width: calc(100% + 8px);
-    height: calc(100% + 8px);
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
     pointer-events: none;
     z-index: 10;
 }
 
-.border-progress-svg rect {
-    width: calc(100% - 4px);
-    height: calc(100% - 4px);
+/* Fill - animated border using conic-gradient mask */
+.border-progress-fill {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 4px solid var(--accent-primary);
+    border-radius: 24px;
+    pointer-events: none;
+    z-index: 11;
+    box-shadow: 0 0 8px var(--accent-primary), inset 0 0 8px rgba(74, 222, 128, 0.2);
+    /* Use mask with conic-gradient for smooth progress */
+    -webkit-mask: conic-gradient(from -90deg, #000 calc(var(--progress) * 360deg), transparent calc(var(--progress) * 360deg));
+    mask: conic-gradient(from -90deg, #000 calc(var(--progress) * 360deg), transparent calc(var(--progress) * 360deg));
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
-.border-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.2);
-    stroke-width: 3;
-}
-
-.border-fill {
-    fill: none;
-    stroke: var(--accent-primary);
-    stroke-width: 4;
-    stroke-linecap: round;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    transition: stroke-dashoffset 0.1s linear;
-    filter: drop-shadow(0 0 6px var(--accent-primary));
-}
-
-.big-button.hand-hovering .border-fill {
-    filter: drop-shadow(0 0 10px var(--accent-primary));
+.big-button.hand-hovering .border-progress-fill {
+    opacity: 1;
+    box-shadow: 0 0 15px var(--accent-primary), inset 0 0 10px rgba(74, 222, 128, 0.3);
 }
 
 /* Circular progress for settings button */
@@ -830,9 +832,9 @@ html, body {
 .settings-panel {
     background: var(--bg-secondary);
     border-radius: 24px;
-    padding: var(--spacing-medium);
-    max-width: 500px;
-    width: 90%;
+    padding: var(--spacing-large);
+    max-width: 600px;
+    width: 95%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -987,25 +989,25 @@ html, body {
 .volume-handle {
     position: absolute;
     top: 50%;
-    right: 0;
+    left: 70%; /* Default position, updated via JS */
     width: 24px;
     height: 24px;
     background: var(--accent-primary);
     border: 3px solid white;
     border-radius: 50%;
-    transform: translate(50%, -50%);
+    transform: translate(-50%, -50%);
     cursor: grab;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: transform 0.1s ease;
+    transition: left 0.1s ease;
 }
 
 .volume-handle:hover {
-    transform: translate(50%, -50%) scale(1.15);
+    transform: translate(-50%, -50%) scale(1.15);
 }
 
 .volume-slider:active .volume-handle {
     cursor: grabbing;
-    transform: translate(50%, -50%) scale(1.2);
+    transform: translate(-50%, -50%) scale(1.2);
 }
 
 /* Contrast Options */
