@@ -1,0 +1,1015 @@
+/* ===========================================
+   re-Action Health Technologies - Balloon Pop
+   Accessibility-First Styling
+   =========================================== */
+
+/* CSS Custom Properties for Theming */
+:root {
+    /* High Contrast Colors */
+    --color-red: #FF3B30;
+    --color-blue: #007AFF;
+    --color-green: #34C759;
+    --color-yellow: #FFCC00;
+    --color-purple: #AF52DE;
+    --color-orange: #FF9500;
+
+    /* UI Colors */
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-overlay: rgba(0, 0, 0, 0.85);
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --accent-primary: #4ade80;
+    --accent-secondary: #22c55e;
+
+    /* Sizing */
+    --text-huge: 72px;
+    --text-large: 48px;
+    --text-medium: 32px;
+    --text-normal: 24px;
+    --text-small: 18px;
+
+    /* Spacing */
+    --spacing-large: 40px;
+    --spacing-medium: 24px;
+    --spacing-small: 12px;
+
+    /* Animations */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.4s ease;
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* ===========================================
+   Webcam & Canvas
+   =========================================== */
+
+#webcam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Mirror the video for intuitive interaction */
+    transform: scaleX(-1);
+    z-index: 1;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    /* Canvas is also mirrored to match video */
+    transform: scaleX(-1);
+}
+
+/* ===========================================
+   UI Overlay
+   =========================================== */
+
+#uiOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#uiOverlay > * {
+    pointer-events: auto;
+}
+
+/* ===========================================
+   Screens (Welcome, Calibration, etc.)
+   =========================================== */
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-overlay);
+    opacity: 0;
+    transition: opacity var(--transition-medium);
+}
+
+.screen.active {
+    display: flex;
+    opacity: 1;
+}
+
+.screen-content {
+    text-align: center;
+    padding: var(--spacing-large);
+    max-width: 800px;
+}
+
+/* ===========================================
+   Welcome Screen
+   =========================================== */
+
+/* Company Logo */
+.company-logo {
+    max-width: 400px;
+    width: 80%;
+    height: auto;
+    margin-bottom: var(--spacing-large);
+    filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.2));
+}
+
+@media (max-width: 768px) {
+    .company-logo {
+        max-width: 280px;
+    }
+}
+
+.game-title {
+    font-size: var(--text-huge);
+    font-weight: 800;
+    margin-bottom: var(--spacing-medium);
+    background: linear-gradient(135deg, var(--color-red), var(--color-yellow), var(--color-green), var(--color-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+.instruction-text {
+    font-size: var(--text-medium);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-large);
+    line-height: 1.4;
+}
+
+.hand-demo {
+    font-size: 100px;
+    margin-bottom: var(--spacing-large);
+    animation: wave 1s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+}
+
+.hand-icon {
+    display: inline-block;
+}
+
+.camera-hint {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-medium);
+}
+
+/* ===========================================
+   Buttons
+   =========================================== */
+
+.big-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 280px;
+    padding: var(--spacing-medium) var(--spacing-large);
+    font-size: var(--text-medium);
+    font-weight: 700;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    margin: var(--spacing-small);
+}
+
+.big-button.primary,
+.big-button:not(.secondary) {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: var(--bg-primary);
+    box-shadow: 0 8px 30px rgba(74, 222, 128, 0.4);
+}
+
+.big-button.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 3px solid var(--text-secondary);
+}
+
+.big-button:hover {
+    transform: scale(1.05);
+}
+
+.big-button:active {
+    transform: scale(0.98);
+}
+
+/* ===========================================
+   Calibration Screen
+   =========================================== */
+
+.calibration-title {
+    font-size: var(--text-large);
+    margin-bottom: var(--spacing-medium);
+}
+
+#handStatus {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-large);
+    margin: var(--spacing-large) 0;
+}
+
+.hand-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-medium);
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    min-width: 200px;
+    border: 4px solid var(--text-secondary);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.hand-indicator.detected {
+    border-color: var(--accent-primary);
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.hand-label {
+    font-size: var(--text-normal);
+    font-weight: 700;
+    margin-bottom: var(--spacing-small);
+}
+
+.hand-status {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+}
+
+.hand-indicator.detected .hand-status {
+    color: var(--accent-primary);
+}
+
+.wave-instruction {
+    font-size: var(--text-medium);
+    color: var(--accent-primary);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ===========================================
+   Challenge Intro Screen
+   =========================================== */
+
+.level-label {
+    font-size: var(--text-large);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-small);
+}
+
+#levelNumber {
+    color: var(--accent-primary);
+}
+
+.challenge-text {
+    font-size: var(--text-huge);
+    font-weight: 800;
+    margin: var(--spacing-medium) 0;
+    line-height: 1.3;
+}
+
+.challenge-colors {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-medium);
+    margin: var(--spacing-large) 0;
+}
+
+.color-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-medium);
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    min-width: 120px;
+}
+
+.color-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: var(--spacing-small);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.color-name {
+    font-size: var(--text-normal);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.color-count {
+    font-size: var(--text-large);
+    font-weight: 800;
+}
+
+.ready-text {
+    font-size: var(--text-medium);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-medium);
+}
+
+.countdown {
+    font-size: 120px;
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-top: var(--spacing-medium);
+    animation: countdownPulse 1s ease-in-out infinite;
+}
+
+@keyframes countdownPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ===========================================
+   In-Game HUD
+   =========================================== */
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: var(--spacing-medium);
+    pointer-events: none;
+}
+
+.hud.hidden {
+    display: none;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-item {
+    background: rgba(0, 0, 0, 0.7);
+    padding: var(--spacing-small) var(--spacing-medium);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.hud-label {
+    display: block;
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hud-value {
+    display: block;
+    font-size: var(--text-large);
+    font-weight: 800;
+}
+
+.timer-display .hud-value {
+    color: var(--color-yellow);
+}
+
+.score-display .hud-value {
+    color: var(--accent-primary);
+}
+
+.challenge-display {
+    flex: 1;
+    margin: 0 var(--spacing-medium);
+}
+
+.challenge-mini {
+    font-size: var(--text-medium);
+    font-weight: 700;
+}
+
+.hud-progress {
+    margin-top: var(--spacing-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-medium);
+}
+
+.progress-bar {
+    flex: 1;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 10px;
+    transition: width var(--transition-fast);
+    width: 0%;
+}
+
+.progress-text {
+    font-size: var(--text-normal);
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.7);
+    padding: var(--spacing-small) var(--spacing-medium);
+    border-radius: 10px;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* ===========================================
+   Round End Screen
+   =========================================== */
+
+.result-title {
+    font-size: var(--text-huge);
+    margin-bottom: var(--spacing-large);
+    color: var(--accent-primary);
+}
+
+.score-summary {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-large);
+    margin-bottom: var(--spacing-large);
+}
+
+.final-score, .balloons-popped {
+    background: var(--bg-secondary);
+    padding: var(--spacing-medium) var(--spacing-large);
+    border-radius: 20px;
+    min-width: 180px;
+}
+
+.score-label, .popped-label {
+    display: block;
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-small);
+}
+
+.score-number, .popped-number {
+    display: block;
+    font-size: var(--text-huge);
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.end-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-medium);
+}
+
+/* ===========================================
+   Loading Overlay
+   =========================================== */
+
+.loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-primary);
+    z-index: 100;
+    transition: opacity var(--transition-medium);
+}
+
+.loading.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-spinner {
+    width: 80px;
+    height: 80px;
+    border: 6px solid var(--bg-secondary);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--spacing-medium);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: var(--text-normal);
+    color: var(--text-secondary);
+}
+
+/* ===========================================
+   Balloon Color Classes (for reference in JS)
+   =========================================== */
+
+.balloon-red { background: var(--color-red); }
+.balloon-blue { background: var(--color-blue); }
+.balloon-green { background: var(--color-green); }
+.balloon-yellow { background: var(--color-yellow); }
+.balloon-purple { background: var(--color-purple); }
+
+/* Color circle backgrounds */
+.color-circle.red { background: var(--color-red); }
+.color-circle.blue { background: var(--color-blue); }
+.color-circle.green { background: var(--color-green); }
+.color-circle.yellow { background: var(--color-yellow); }
+.color-circle.purple { background: var(--color-purple); }
+
+/* ===========================================
+   Responsive Adjustments
+   =========================================== */
+
+@media (max-width: 768px) {
+    :root {
+        --text-huge: 48px;
+        --text-large: 36px;
+        --text-medium: 24px;
+        --text-normal: 18px;
+        --text-small: 14px;
+        --spacing-large: 24px;
+        --spacing-medium: 16px;
+        --spacing-small: 8px;
+    }
+
+    .hand-demo {
+        font-size: 60px;
+    }
+
+    .countdown {
+        font-size: 80px;
+    }
+
+    #handStatus {
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .hand-indicator {
+        min-width: 160px;
+    }
+
+    .big-button {
+        min-width: 200px;
+        padding: var(--spacing-small) var(--spacing-medium);
+    }
+
+    .score-summary {
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .color-circle {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --text-huge: 36px;
+        --text-large: 28px;
+        --text-medium: 20px;
+    }
+
+    .challenge-colors {
+        flex-wrap: wrap;
+    }
+
+    .color-target {
+        min-width: 80px;
+        padding: var(--spacing-small);
+    }
+}
+
+/* ===========================================
+   Accessibility: Reduced Motion
+   =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===========================================
+   High Contrast Mode
+   =========================================== */
+
+@media (prefers-contrast: high) {
+    :root {
+        --bg-primary: #000000;
+        --bg-secondary: #1a1a1a;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+    }
+
+    .big-button {
+        border: 3px solid white;
+    }
+}
+
+/* ===========================================
+   Hand Hover System
+   =========================================== */
+
+.hoverable {
+    position: relative;
+    overflow: hidden;
+}
+
+.hoverable.hand-hovering {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(74, 222, 128, 0.6);
+}
+
+.hover-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 8px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.1s linear;
+    border-radius: 0 0 20px 20px;
+}
+
+.hoverable.hand-hovering .hover-progress-bar {
+    box-shadow: 0 0 10px var(--accent-primary);
+}
+
+/* Circular progress for settings button */
+.hover-progress-ring {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    pointer-events: none;
+}
+
+.hover-progress-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.hover-progress-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 4;
+}
+
+.hover-progress-fill {
+    fill: none;
+    stroke: var(--accent-primary);
+    stroke-width: 4;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 283;
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+/* ===========================================
+   Settings Button
+   =========================================== */
+
+.settings-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.settings-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.settings-button svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* ===========================================
+   Settings Overlay
+   =========================================== */
+
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    opacity: 1;
+    transition: opacity var(--transition-medium);
+}
+
+.settings-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.settings-panel {
+    background: var(--bg-secondary);
+    border-radius: 30px;
+    padding: var(--spacing-large);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.settings-title {
+    font-size: var(--text-large);
+    text-align: center;
+    margin-bottom: var(--spacing-large);
+    color: var(--text-primary);
+}
+
+.settings-section {
+    margin-bottom: var(--spacing-large);
+    padding-bottom: var(--spacing-medium);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-section:last-of-type {
+    border-bottom: none;
+}
+
+.settings-section-title {
+    font-size: var(--text-medium);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-medium);
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-medium);
+    flex-wrap: wrap;
+    gap: var(--spacing-small);
+}
+
+.setting-label {
+    font-size: var(--text-normal);
+    color: var(--text-primary);
+}
+
+/* Toggle Button */
+.toggle-button {
+    min-width: 100px;
+    padding: var(--spacing-small) var(--spacing-medium);
+    font-size: var(--text-normal);
+    font-weight: 700;
+    border: 3px solid var(--accent-primary);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--accent-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.toggle-button.off {
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.toggle-button:hover {
+    transform: scale(1.05);
+}
+
+/* Volume Control */
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-small);
+}
+
+.volume-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid var(--text-secondary);
+    background: transparent;
+    color: var(--text-primary);
+    font-size: var(--text-medium);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.volume-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+.volume-bar {
+    width: 150px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.volume-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: 10px;
+    transition: width var(--transition-fast);
+}
+
+/* Contrast Options */
+.contrast-options {
+    display: flex;
+    gap: var(--spacing-small);
+    flex-wrap: wrap;
+}
+
+.contrast-btn {
+    padding: var(--spacing-small) var(--spacing-medium);
+    font-size: var(--text-small);
+    font-weight: 700;
+    border: 3px solid var(--text-secondary);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.contrast-btn:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.contrast-btn.active {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+/* ===========================================
+   Contrast Themes
+   =========================================== */
+
+/* High Contrast Theme */
+body.theme-high-contrast {
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --bg-overlay: rgba(0, 0, 0, 0.95);
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --color-red: #FF4444;
+    --color-blue: #4444FF;
+    --color-green: #44FF44;
+    --color-yellow: #FFFF44;
+    --color-purple: #FF44FF;
+}
+
+body.theme-high-contrast .big-button {
+    border: 4px solid white;
+}
+
+body.theme-high-contrast .balloon-red,
+body.theme-high-contrast .color-circle.red { background: #FF4444; }
+body.theme-high-contrast .balloon-blue,
+body.theme-high-contrast .color-circle.blue { background: #4444FF; }
+body.theme-high-contrast .balloon-green,
+body.theme-high-contrast .color-circle.green { background: #44FF44; }
+body.theme-high-contrast .balloon-yellow,
+body.theme-high-contrast .color-circle.yellow { background: #FFFF44; }
+body.theme-high-contrast .balloon-purple,
+body.theme-high-contrast .color-circle.purple { background: #FF44FF; }
+
+/* Maximum Contrast Theme */
+body.theme-max-contrast {
+    --bg-primary: #000000;
+    --bg-secondary: #000000;
+    --bg-overlay: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --accent-primary: #00FF00;
+    --accent-secondary: #00FF00;
+    --color-red: #FF0000;
+    --color-blue: #0000FF;
+    --color-green: #00FF00;
+    --color-yellow: #FFFF00;
+    --color-purple: #FF00FF;
+}
+
+body.theme-max-contrast .screen {
+    background: #000000;
+}
+
+body.theme-max-contrast .big-button {
+    border: 5px solid white;
+    background: #000000;
+    color: #ffffff;
+}
+
+body.theme-max-contrast .big-button.primary {
+    background: #00FF00;
+    color: #000000;
+}
+
+body.theme-max-contrast .settings-panel {
+    border: 5px solid white;
+}
+
+body.theme-max-contrast .hud-item {
+    background: #000000;
+    border: 3px solid white;
+}
+
+/* ===========================================
+   Hand Hover Indicator Text
+   =========================================== */
+
+.hover-hint {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--text-small);
+    color: var(--accent-primary);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.hoverable.hand-hovering .hover-hint {
+    opacity: 1;
+}
