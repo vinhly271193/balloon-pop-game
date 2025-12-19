@@ -713,12 +713,12 @@ html, body {
 /* Track - subtle border outline (always visible) */
 .border-progress-track {
     position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 26px;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 6px solid rgba(255, 255, 255, 0.3);
+    border-radius: 28px;
     pointer-events: none;
     z-index: 100;
 }
@@ -726,12 +726,12 @@ html, body {
 /* Fill - animated border using conic-gradient mask */
 .border-progress-fill {
     position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border: 5px solid var(--accent-primary);
-    border-radius: 26px;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 8px solid var(--accent-primary);
+    border-radius: 28px;
     pointer-events: none;
     z-index: 101;
     box-shadow: 0 0 12px var(--accent-primary), 0 0 24px rgba(74, 222, 128, 0.5);
@@ -742,6 +742,16 @@ html, body {
 
 .big-button.hand-hovering .border-progress-fill {
     box-shadow: 0 0 20px var(--accent-primary), 0 0 40px rgba(74, 222, 128, 0.6);
+}
+
+/* Secondary button (Play Again) - white outline */
+.big-button.secondary .border-progress-fill {
+    border-color: #ffffff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7), 0 0 24px rgba(255, 255, 255, 0.4);
+}
+
+.big-button.secondary.hand-hovering .border-progress-fill {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.5);
 }
 
 /* Circular progress for settings button */
