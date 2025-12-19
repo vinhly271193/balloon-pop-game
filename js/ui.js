@@ -79,7 +79,7 @@ class UIManager {
             soundEnabled: true,
             volume: 0.7,
             contrastMode: 'normal',
-            background: 'none'
+            background: 'sky'
         };
 
         // Hand hover state
@@ -147,6 +147,11 @@ class UIManager {
 
         // Load saved settings
         this.loadSettings();
+
+        // Apply default background if not loaded from settings
+        if (this.settings.background) {
+            this.setBackground(this.settings.background);
+        }
     }
 
     /**

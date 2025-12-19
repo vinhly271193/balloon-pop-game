@@ -75,6 +75,9 @@ html, body {
     /* Mirror the video for intuitive interaction */
     transform: scaleX(-1);
     z-index: 1;
+    /* Hide the webcam feed - only show hand tracking */
+    opacity: 0;
+    pointer-events: none;
 }
 
 #gameCanvas {
@@ -86,6 +89,8 @@ html, body {
     z-index: 2;
     /* Canvas is also mirrored to match video */
     transform: scaleX(-1);
+    /* Transparent background so nature bg shows through */
+    background: transparent;
 }
 
 /* ===========================================
