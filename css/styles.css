@@ -1,26 +1,40 @@
 /* ===========================================
-   re-Action Health Technologies - Balloon Pop
-   Accessibility-First Styling
+   re-Action Health Technologies - Garden Grow
+   Accessibility-First Styling - Garden Theme
    =========================================== */
 
 /* CSS Custom Properties for Theming */
 :root {
-    /* High Contrast Colors */
-    --color-red: #FF3B30;
-    --color-blue: #007AFF;
-    --color-green: #34C759;
-    --color-yellow: #FFCC00;
-    --color-purple: #AF52DE;
-    --color-orange: #FF9500;
+    /* Plant Colors */
+    --color-tomato: #FF6347;
+    --color-sunflower: #FFD700;
+    --color-carrot: #FF8C00;
+    --color-lettuce: #90EE90;
+    --color-blueberry: #4169E1;
 
-    /* UI Colors */
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-overlay: rgba(0, 0, 0, 0.85);
+    /* Legacy color aliases for compatibility */
+    --color-red: #FF6347;
+    --color-blue: #4169E1;
+    --color-green: #90EE90;
+    --color-yellow: #FFD700;
+    --color-purple: #9370DB;
+    --color-orange: #FF8C00;
+
+    /* Garden UI Colors */
+    --bg-primary: #1a2e1a;
+    --bg-secondary: #213e21;
+    --bg-overlay: rgba(0, 20, 0, 0.85);
     --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
+    --text-secondary: #a8d5a8;
     --accent-primary: #4ade80;
     --accent-secondary: #22c55e;
+
+    /* Garden-specific colors */
+    --soil-brown: #8B4513;
+    --soil-dark: #654321;
+    --sky-blue: #87CEEB;
+    --sunlight-warm: #FFE4B5;
+    --terracotta: #E07A5F;
 
     /* Sizing */
     --text-huge: 72px;
@@ -168,6 +182,51 @@ html, body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Garden-themed title */
+.game-title.garden-title {
+    background: linear-gradient(135deg, var(--color-tomato), var(--color-sunflower), var(--color-lettuce), var(--color-blueberry));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Garden icon animation */
+.hand-icon.garden-icon {
+    animation: grow 2s ease-in-out infinite;
+}
+
+@keyframes grow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Welcome message for returning players */
+.welcome-message {
+    font-size: var(--text-normal);
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-medium);
+    min-height: 30px;
+}
+
+/* Garden preview on welcome screen */
+.garden-preview {
+    margin-top: var(--spacing-medium);
+    padding: var(--spacing-small);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+}
+
+.garden-preview canvas {
+    border-radius: 8px;
+    background: linear-gradient(180deg, var(--sky-blue) 0%, var(--soil-brown) 80%);
+}
+
+.garden-progress-text {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-small);
 }
 
 .instruction-text {
@@ -374,6 +433,170 @@ html, body {
 }
 
 /* ===========================================
+   Chapter Screens (Story System)
+   =========================================== */
+
+.chapter-screen {
+    background: linear-gradient(180deg, rgba(0, 40, 0, 0.95) 0%, rgba(0, 20, 0, 0.98) 100%);
+}
+
+.chapter-content {
+    max-width: 600px;
+}
+
+.chapter-icon {
+    font-size: 80px;
+    display: block;
+    margin-bottom: var(--spacing-medium);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.chapter-number {
+    font-size: var(--text-normal);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: var(--spacing-small);
+}
+
+.chapter-title {
+    font-size: var(--text-large);
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-medium);
+}
+
+.chapter-intro-text {
+    font-size: var(--text-normal);
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-large);
+}
+
+.chapter-goal-label {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: var(--spacing-small);
+}
+
+.chapter-goal {
+    font-size: var(--text-medium);
+    color: var(--color-sunflower);
+    font-weight: 700;
+    margin-bottom: var(--spacing-large);
+}
+
+.tap-to-continue {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Chapter Complete Celebration */
+.chapter-screen.celebration {
+    background: radial-gradient(ellipse at center, rgba(74, 222, 128, 0.2) 0%, rgba(0, 40, 0, 0.95) 70%);
+}
+
+.complete-icon {
+    font-size: 100px;
+    display: block;
+    margin-bottom: var(--spacing-medium);
+    animation: celebrate 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes celebrate {
+    0% { transform: scale(1) rotate(-5deg); }
+    100% { transform: scale(1.1) rotate(5deg); }
+}
+
+.complete-title {
+    font-size: var(--text-large);
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-medium);
+}
+
+.chapter-reward {
+    font-size: var(--text-medium);
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-medium);
+}
+
+.unlock-message {
+    font-size: var(--text-normal);
+    color: var(--color-sunflower);
+    font-weight: 700;
+    margin-bottom: var(--spacing-large);
+}
+
+/* ===========================================
+   Plants Grown (Round End)
+   =========================================== */
+
+.plants-grown {
+    background: var(--bg-secondary);
+    padding: var(--spacing-medium) var(--spacing-large);
+    border-radius: 20px;
+    min-width: 180px;
+}
+
+.grown-label {
+    display: block;
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-small);
+}
+
+.grown-number {
+    display: block;
+    font-size: var(--text-huge);
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.encouragement-text {
+    font-size: var(--text-normal);
+    color: var(--color-sunflower);
+    font-style: italic;
+    margin-bottom: var(--spacing-medium);
+    min-height: 30px;
+}
+
+/* ===========================================
+   Garden Spinner (Loading)
+   =========================================== */
+
+.loading-spinner.garden-spinner {
+    border-color: var(--soil-brown);
+    border-top-color: var(--accent-primary);
+    position: relative;
+}
+
+.loading-spinner.garden-spinner::after {
+    content: '🌱';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    animation: sprout 1s ease-in-out infinite;
+}
+
+@keyframes sprout {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* ===========================================
    In-Game HUD
    =========================================== */
 
@@ -485,14 +708,14 @@ html, body {
     margin-bottom: var(--spacing-large);
 }
 
-.final-score, .balloons-popped {
+.final-score, .plants-grown {
     background: var(--bg-secondary);
     padding: var(--spacing-medium) var(--spacing-large);
     border-radius: 20px;
     min-width: 180px;
 }
 
-.score-label, .popped-label {
+.score-label, .grown-label {
     display: block;
     font-size: var(--text-small);
     color: var(--text-secondary);
@@ -500,7 +723,7 @@ html, body {
     margin-bottom: var(--spacing-small);
 }
 
-.score-number, .popped-number {
+.score-number, .grown-number {
     display: block;
     font-size: var(--text-huge);
     font-weight: 800;
@@ -558,21 +781,55 @@ html, body {
 }
 
 /* ===========================================
-   Balloon Color Classes (for reference in JS)
+   Plant Type Color Classes
    =========================================== */
 
-.balloon-red { background: var(--color-red); }
-.balloon-blue { background: var(--color-blue); }
-.balloon-green { background: var(--color-green); }
-.balloon-yellow { background: var(--color-yellow); }
-.balloon-purple { background: var(--color-purple); }
+/* Plant type backgrounds */
+.plant-tomato { background: var(--color-tomato); }
+.plant-sunflower { background: var(--color-sunflower); }
+.plant-carrot { background: var(--color-carrot); }
+.plant-lettuce { background: var(--color-lettuce); }
+.plant-blueberry { background: var(--color-blueberry); }
 
-/* Color circle backgrounds */
+/* Color circle backgrounds - plant types */
+.color-circle.tomato { background: var(--color-tomato); }
+.color-circle.sunflower { background: var(--color-sunflower); }
+.color-circle.carrot { background: var(--color-carrot); }
+.color-circle.lettuce { background: var(--color-lettuce); }
+.color-circle.blueberry { background: var(--color-blueberry); }
+
+/* Legacy color circle backgrounds for compatibility */
 .color-circle.red { background: var(--color-red); }
 .color-circle.blue { background: var(--color-blue); }
 .color-circle.green { background: var(--color-green); }
 .color-circle.yellow { background: var(--color-yellow); }
 .color-circle.purple { background: var(--color-purple); }
+
+/* Plant indicator with icon */
+.plant-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-medium);
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    min-width: 120px;
+}
+
+.plant-icon {
+    font-size: 40px;
+    margin-bottom: var(--spacing-small);
+}
+
+.plant-name {
+    font-size: var(--text-normal);
+    font-weight: 700;
+}
+
+.plant-count {
+    font-size: var(--text-large);
+    font-weight: 800;
+}
 
 /* ===========================================
    Responsive Adjustments

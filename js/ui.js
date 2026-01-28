@@ -1,5 +1,5 @@
 /**
- * UI Manager for Balloon Pop Game
+ * UI Manager for Garden Grow Game
  * Handles all screen transitions, UI updates, and hand hover interactions
  */
 
@@ -9,7 +9,9 @@ class UIManager {
         this.screens = {
             welcome: document.getElementById('welcomeScreen'),
             calibration: document.getElementById('calibrationScreen'),
+            chapterIntro: document.getElementById('chapterIntroScreen'),
             challengeIntro: document.getElementById('challengeIntroScreen'),
+            chapterComplete: document.getElementById('chapterCompleteScreen'),
             roundEnd: document.getElementById('roundEndScreen')
         };
 
@@ -37,7 +39,7 @@ class UIManager {
         // Round end elements
         this.roundResult = document.getElementById('roundResult');
         this.finalScore = document.getElementById('finalScore');
-        this.balloonsPopped = document.getElementById('balloonsPopped');
+        this.plantsGrown = document.getElementById('plantsGrown');
 
         // Buttons
         this.startBtn = document.getElementById('startBtn');
@@ -568,7 +570,7 @@ class UIManager {
      */
     saveSettings() {
         try {
-            localStorage.setItem('balloonPop_settings', JSON.stringify(this.settings));
+            localStorage.setItem('gardenGrow_settings', JSON.stringify(this.settings));
         } catch (e) {
             console.warn('Could not save settings:', e);
         }
@@ -579,7 +581,7 @@ class UIManager {
      */
     loadSettings() {
         try {
-            const saved = localStorage.getItem('balloonPop_settings');
+            const saved = localStorage.getItem('gardenGrow_settings');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 this.settings = { ...this.settings, ...parsed };
@@ -699,25 +701,27 @@ class UIManager {
 
             challenge.targets.forEach(target => {
                 if (target.color === 'any') {
-                    // Show "Any Color" indicator
+                    // Show "Any Plant" indicator
                     const div = document.createElement('div');
-                    div.className = 'color-target';
+                    div.className = 'color-target plant-indicator';
                     div.innerHTML = `
-                        <div class="color-circle" style="background: linear-gradient(135deg, #FF3B30, #007AFF, #34C759)"></div>
-                        <span class="color-name">ANY</span>
-                        <span class="color-count">${target.count}</span>
+                        <span class="plant-icon">🌱</span>
+                        <span class="plant-name">ANY</span>
+                        <span class="plant-count">${target.count}</span>
                     `;
                     this.challengeColors.appendChild(div);
                 } else {
-                    const colorInfo = BALLOON_COLORS[target.color];
-                    const div = document.createElement('div');
-                    div.className = 'color-target';
-                    div.innerHTML = `
-                        <div class="color-circle" style="background: ${colorInfo.primary}"></div>
-                        <span class="color-name" style="color: ${colorInfo.primary}">${colorInfo.name}</span>
-                        <span class="color-count">${target.count}</span>
-                    `;
-                    this.challengeColors.appendChild(div);
+                    const plantInfo = PLANT_TYPES[target.color];
+                    if (plantInfo) {
+                        const div = document.createElement('div');
+                        div.className = 'color-target plant-indicator';
+                        div.innerHTML = `
+                            <span class="plant-icon">${plantInfo.icon}</span>
+                            <span class="plant-name" style="color: ${plantInfo.plantColor}">${plantInfo.name}</span>
+                            <span class="plant-count">${target.count}</span>
+                        `;
+                        this.challengeColors.appendChild(div);
+                    }
                 }
             });
         }
@@ -833,9 +837,9 @@ class UIManager {
             this.finalScore.textContent = result.score;
         }
 
-        // Update balloons popped
-        if (this.balloonsPopped) {
-            this.balloonsPopped.textContent = result.totalPopped;
+        // Update plants grown
+        if (this.plantsGrown) {
+            this.plantsGrown.textContent = result.totalPopped;
         }
 
         // Show/hide next level button based on completion

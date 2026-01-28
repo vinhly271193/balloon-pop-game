@@ -1,5 +1,5 @@
 /**
- * Hand Tracking Module for Balloon Pop Game
+ * Hand Tracking Module for Garden Grow Game
  * Uses MediaPipe Hands for real-time hand detection
  */
 

@@ -1,5 +1,5 @@
 /**
- * Game Manager for Balloon Pop Game
+ * Game Manager for Garden Grow Game
  * Handles game state, loop, and coordination between systems
  */
 
@@ -8,9 +8,11 @@ const GameState = {
     LOADING: 'loading',
     WELCOME: 'welcome',
     CALIBRATION: 'calibration',
+    CHAPTER_INTRO: 'chapterIntro',
     CHALLENGE_INTRO: 'challengeIntro',
     PLAYING: 'playing',
     ROUND_END: 'roundEnd',
+    CHAPTER_COMPLETE: 'chapterComplete',
     PAUSED: 'paused'
 };
 
@@ -31,7 +33,7 @@ class Game {
         this.timerInterval = null;
 
         // Systems (will be initialized)
-        this.balloonSpawner = null;
+        this.gardenBed = null;
 
         // Current challenge reference
         this.currentChallenge = null;
@@ -43,15 +45,18 @@ class Game {
         // Animation frame ID
         this.animationFrameId = null;
 
-        // Weighted spawn for challenge colors
+        // Weighted spawn for challenge plants
         this.spawnWeights = {};
+
+        // Pending chapter complete (shown after round end)
+        this.pendingChapterComplete = null;
     }
 
     /**
      * Initialize the game
      */
     async init() {
-        console.log('Initializing game...');
+        console.log('Initializing Garden Grow game...');
 
         // Get DOM elements
         this.canvas = document.getElementById('gameCanvas');
@@ -62,8 +67,8 @@ class Game {
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
 
-        // Initialize balloon spawner
-        this.balloonSpawner = new BalloonSpawner(this.canvas);
+        // Initialize garden bed (seed spawner)
+        this.gardenBed = new GardenBed(this.canvas);
 
         // Initialize UI
         uiManager.init({
@@ -90,8 +95,91 @@ class Game {
         uiManager.setLoading(false);
         this.setState(GameState.WELCOME);
 
-        console.log('Game initialized');
+        // Update welcome screen based on story progress
+        this.updateWelcomeScreen();
+
+        console.log('Garden Grow game initialized');
         return true;
+    }
+
+    /**
+     * Update welcome screen based on player progress
+     */
+    updateWelcomeScreen() {
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const startBtnText = document.getElementById('startBtnText');
+        const gardenProgressText = document.getElementById('gardenProgressText');
+
+        if (welcomeMessage) {
+            welcomeMessage.textContent = storyManager.getWelcomeMessage();
+        }
+
+        if (startBtnText) {
+            startBtnText.textContent = storyManager.isReturningPlayer() ? 'Continue Growing' : 'Start Growing';
+        }
+
+        if (gardenProgressText) {
+            const totalPlants = storyManager.totalPlantsGrown;
+            if (totalPlants > 0) {
+                gardenProgressText.textContent = `Your Garden: ${totalPlants} plants grown`;
+            } else {
+                gardenProgressText.textContent = 'Your garden is ready to bloom!';
+            }
+        }
+
+        // Draw garden preview if returning player
+        this.drawGardenPreview();
+    }
+
+    /**
+     * Draw mini garden preview on welcome screen
+     */
+    drawGardenPreview() {
+        const previewCanvas = document.getElementById('gardenPreviewCanvas');
+        if (!previewCanvas) return;
+
+        const ctx = previewCanvas.getContext('2d');
+        const width = previewCanvas.width;
+        const height = previewCanvas.height;
+
+        // Clear
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw sky
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(0, 0, width, height * 0.6);
+
+        // Draw grass/ground
+        ctx.fillStyle = '#228B22';
+        ctx.fillRect(0, height * 0.6, width, height * 0.2);
+
+        // Draw soil
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(0, height * 0.8, width, height * 0.2);
+
+        // Draw plants based on completed chapters
+        const plantIcons = ['🌱', '🍅', '🌻', '🥕', '🥬', '🫐'];
+        const completedCount = Math.min(storyManager.completedChapters.length * 2, 6);
+
+        for (let i = 0; i < completedCount; i++) {
+            const x = 30 + (i % 3) * 90;
+            const y = height * 0.55 + Math.floor(i / 3) * 30;
+
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(plantIcons[i % plantIcons.length], x, y);
+        }
+
+        // Add some empty soil spots
+        for (let i = completedCount; i < 6; i++) {
+            const x = 30 + (i % 3) * 90;
+            const y = height * 0.85;
+
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.ellipse(x, y, 15, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 
     /**
@@ -122,6 +210,11 @@ class Game {
                 this.calibrationStartTime = Date.now();
                 break;
 
+            case GameState.CHAPTER_INTRO:
+                uiManager.showHUD(false);
+                this.showChapterIntro();
+                break;
+
             case GameState.CHALLENGE_INTRO:
                 uiManager.showHUD(false);
                 this.showChallengeIntro();
@@ -136,11 +229,12 @@ class Game {
             case GameState.ROUND_END:
                 this.stopRound();
                 uiManager.showHUD(false);
-                uiManager.showRoundEnd({
-                    isComplete: this.currentChallenge?.isComplete || false,
-                    score: this.currentChallenge?.score || 0,
-                    totalPopped: this.currentChallenge?.totalPopped || 0
-                });
+                this.showRoundEnd();
+                break;
+
+            case GameState.CHAPTER_COMPLETE:
+                uiManager.showHUD(false);
+                this.showChapterComplete();
                 break;
 
             case GameState.PAUSED:
@@ -185,21 +279,31 @@ class Game {
                     this.calibrationWaveDetected = true;
                     setTimeout(() => {
                         if (this.state === GameState.CALIBRATION) {
-                            this.setState(GameState.CHALLENGE_INTRO);
+                            // Check if we need to show chapter intro
+                            const currentLevel = challengeManager.currentLevel;
+                            const newChapter = storyManager.isNewChapterStart(currentLevel);
+
+                            if (newChapter) {
+                                this.setState(GameState.CHAPTER_INTRO);
+                            } else {
+                                this.setState(GameState.CHALLENGE_INTRO);
+                            }
                         }
                     }, 500);
                 }
             }
         }
 
-        // During gameplay, check for balloon collisions
-        if (this.state === GameState.PLAYING && this.balloonSpawner) {
-            const poppedColors = this.balloonSpawner.checkCollisions(data.positions);
+        // During gameplay, check for seed collisions
+        if (this.state === GameState.PLAYING && this.gardenBed) {
+            // Check collisions returns harvested plant keys
+            const harvestedPlants = this.gardenBed.checkCollisions(data.positions);
 
-            // Record pops to challenge
-            poppedColors.forEach(colorKey => {
+            // Record harvests to challenge
+            harvestedPlants.forEach(plantKey => {
                 if (this.currentChallenge) {
-                    this.currentChallenge.recordPop(colorKey);
+                    this.currentChallenge.recordHarvest(plantKey);
+                    storyManager.recordPlantGrown();
 
                     // Update UI
                     uiManager.updateScore(this.currentChallenge.score);
@@ -218,16 +322,27 @@ class Game {
     }
 
     /**
+     * Show chapter intro screen
+     */
+    showChapterIntro() {
+        const chapter = storyManager.getCurrentChapter();
+
+        storyManager.showChapterIntro(chapter, () => {
+            this.setState(GameState.CHALLENGE_INTRO);
+        });
+    }
+
+    /**
      * Show challenge intro with countdown
      */
     showChallengeIntro() {
         // Get or create challenge
         this.currentChallenge = challengeManager.startChallenge();
 
-        // Set balloon spawner difficulty
-        this.balloonSpawner.setDifficulty(this.currentChallenge.level);
+        // Set garden bed difficulty
+        this.gardenBed.setDifficulty(this.currentChallenge.level);
 
-        // Calculate spawn weights (favor target colors)
+        // Calculate spawn weights (favor target plants)
         this.calculateSpawnWeights();
 
         // Show intro screen
@@ -237,37 +352,37 @@ class Game {
     }
 
     /**
-     * Calculate spawn weights for balloons
+     * Calculate spawn weights for plants
      */
     calculateSpawnWeights() {
-        const targetColors = challengeManager.getTargetColors();
-        const allColors = Object.keys(BALLOON_COLORS);
+        const targetPlants = challengeManager.getTargetPlants();
+        const allPlants = Object.keys(PLANT_TYPES);
 
         this.spawnWeights = {};
 
-        allColors.forEach(color => {
-            // Target colors have higher weight
-            this.spawnWeights[color] = targetColors.includes(color) ? 3 : 1;
+        allPlants.forEach(plant => {
+            // Target plants have higher weight
+            this.spawnWeights[plant] = targetPlants.includes(plant) ? 3 : 1;
         });
     }
 
     /**
-     * Get weighted random color for spawning
+     * Get weighted random plant for spawning
      */
-    getWeightedRandomColor() {
-        const colors = Object.keys(this.spawnWeights);
-        const totalWeight = colors.reduce((sum, color) => sum + this.spawnWeights[color], 0);
+    getWeightedRandomPlant() {
+        const plants = Object.keys(this.spawnWeights);
+        const totalWeight = plants.reduce((sum, plant) => sum + this.spawnWeights[plant], 0);
 
         let random = Math.random() * totalWeight;
 
-        for (const color of colors) {
-            random -= this.spawnWeights[color];
+        for (const plant of plants) {
+            random -= this.spawnWeights[plant];
             if (random <= 0) {
-                return color;
+                return plant;
             }
         }
 
-        return colors[0];
+        return plants[0];
     }
 
     /**
@@ -283,8 +398,8 @@ class Game {
         uiManager.updateScore(this.currentChallenge.score);
         uiManager.updateProgress(0, this.currentChallenge.getProgressText());
 
-        // Clear any existing balloons
-        this.balloonSpawner.clear();
+        // Clear any existing seeds
+        this.gardenBed.clear();
 
         // Start timer
         this.timerInterval = setInterval(() => {
@@ -313,14 +428,87 @@ class Game {
 
         // Record challenge completion
         challengeManager.completeChallenge();
+
+        // Check if this completes a chapter
+        if (this.currentChallenge && this.currentChallenge.isComplete) {
+            const completedChapter = storyManager.isChapterComplete(this.currentChallenge.level);
+            if (completedChapter) {
+                this.pendingChapterComplete = completedChapter;
+            }
+        }
+    }
+
+    /**
+     * Show round end screen
+     */
+    showRoundEnd() {
+        const isComplete = this.currentChallenge?.isComplete || false;
+        const encouragementText = document.getElementById('encouragementText');
+        const plantsGrown = document.getElementById('plantsGrown');
+
+        // Update plants grown display (use garden terminology)
+        if (plantsGrown) {
+            plantsGrown.textContent = this.currentChallenge?.totalHarvested || 0;
+        }
+
+        // Show encouragement message
+        if (encouragementText) {
+            encouragementText.textContent = storyManager.getProgressMessage();
+        }
+
+        uiManager.showRoundEnd({
+            isComplete: isComplete,
+            score: this.currentChallenge?.score || 0,
+            totalPopped: this.currentChallenge?.totalHarvested || 0
+        });
+
+        // Update result title for garden theme
+        const roundResult = document.getElementById('roundResult');
+        if (roundResult) {
+            if (isComplete) {
+                roundResult.textContent = 'Beautiful Garden!';
+                roundResult.style.color = '#4ade80';
+            } else {
+                roundResult.textContent = 'Keep Growing!';
+                roundResult.style.color = '#FFD700';
+            }
+        }
+    }
+
+    /**
+     * Show chapter complete celebration
+     */
+    showChapterComplete() {
+        if (this.pendingChapterComplete) {
+            storyManager.completeChapter(this.pendingChapterComplete.chapter);
+
+            storyManager.showChapterComplete(this.pendingChapterComplete, () => {
+                this.pendingChapterComplete = null;
+                this.setState(GameState.CHALLENGE_INTRO);
+            });
+        }
     }
 
     /**
      * Handle next level button
      */
     onNextLevel() {
-        challengeManager.nextLevel();
-        this.setState(GameState.CHALLENGE_INTRO);
+        // Check if we have a pending chapter complete
+        if (this.pendingChapterComplete) {
+            this.setState(GameState.CHAPTER_COMPLETE);
+        } else {
+            challengeManager.nextLevel();
+
+            // Check if next level starts a new chapter
+            const currentLevel = challengeManager.currentLevel;
+            const newChapter = storyManager.isNewChapterStart(currentLevel);
+
+            if (newChapter) {
+                this.setState(GameState.CHAPTER_INTRO);
+            } else {
+                this.setState(GameState.CHALLENGE_INTRO);
+            }
+        }
     }
 
     /**
@@ -328,7 +516,15 @@ class Game {
      */
     onPlayAgain() {
         challengeManager.restart();
-        this.setState(GameState.CHALLENGE_INTRO);
+        this.pendingChapterComplete = null;
+
+        // Check if we should show chapter intro for level 1
+        const newChapter = storyManager.isNewChapterStart(1);
+        if (newChapter) {
+            this.setState(GameState.CHAPTER_INTRO);
+        } else {
+            this.setState(GameState.CHALLENGE_INTRO);
+        }
     }
 
     /**
@@ -368,26 +564,26 @@ class Game {
 
         // Update and render based on state
         if (this.state === GameState.PLAYING) {
-            // Custom spawn logic with weighted colors
-            this.balloonSpawner.spawnTimer += deltaTime * 1000;
-            if (this.balloonSpawner.spawnTimer >= this.balloonSpawner.spawnInterval) {
-                const color = this.getWeightedRandomColor();
-                this.balloonSpawner.spawnColoredBalloon(color);
-                this.balloonSpawner.spawnTimer = 0;
+            // Custom spawn logic with weighted plants
+            this.gardenBed.spawnTimer += deltaTime * 1000;
+            if (this.gardenBed.spawnTimer >= this.gardenBed.spawnInterval) {
+                const plant = this.getWeightedRandomPlant();
+                this.gardenBed.spawnSpecificSeed(plant);
+                this.gardenBed.spawnTimer = 0;
             }
 
-            // Update balloons (without auto-spawn)
-            this.balloonSpawner.balloons.forEach(balloon => {
-                balloon.update(deltaTime, this.balloonSpawner.speedMultiplier);
+            // Update seeds (without auto-spawn)
+            this.gardenBed.seeds.forEach(seed => {
+                seed.update(deltaTime, this.gardenBed.speedMultiplier);
             });
 
-            // Remove off-screen balloons
-            this.balloonSpawner.balloons = this.balloonSpawner.balloons.filter(balloon =>
-                !balloon.isOffScreen && !balloon.isAnimationComplete()
+            // Remove off-screen seeds
+            this.gardenBed.seeds = this.gardenBed.seeds.filter(seed =>
+                !seed.isOffScreen && !seed.isAnimationComplete()
             );
 
-            // Draw balloons
-            this.balloonSpawner.draw(this.ctx);
+            // Draw garden (including soil strip and seeds)
+            this.gardenBed.draw(this.ctx);
         }
 
         // Draw hand indicators (always when tracking is active)

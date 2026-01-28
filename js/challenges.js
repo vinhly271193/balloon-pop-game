@@ -1,98 +1,98 @@
 /**
- * Challenge System for Balloon Pop Game
- * Defines challenges and tracks progress
+ * Task System for Garden Grow Game
+ * Defines gardening challenges and tracks progress
  */
 
-// Challenge definitions
+// Challenge definitions - garden themed
 const CHALLENGE_TEMPLATES = [
-    // Level 1: Simple - any balloons
+    // Level 1: Simple - any plants
     {
         level: 1,
         type: 'any',
         targets: [{ color: 'any', count: 3 }],
         timeLimit: 60,
-        description: 'Pop 3 balloons!'
+        description: 'Grow 3 plants!'
     },
-    // Level 2: Single color
+    // Level 2: Single plant type
     {
         level: 2,
         type: 'single',
-        targets: [{ color: 'red', count: 5 }],
+        targets: [{ color: 'tomato', count: 5 }],
         timeLimit: 60,
-        description: 'Pop 5 RED balloons!'
+        description: 'Grow 5 TOMATO plants!'
     },
-    // Level 3: Different single color
+    // Level 3: Different plant type
     {
         level: 3,
         type: 'single',
-        targets: [{ color: 'blue', count: 4 }],
+        targets: [{ color: 'sunflower', count: 4 }],
         timeLimit: 55,
-        description: 'Pop 4 BLUE balloons!'
+        description: 'Grow 4 SUNFLOWER plants!'
     },
-    // Level 4: Single color, more
+    // Level 4: Single type, more
     {
         level: 4,
         type: 'single',
-        targets: [{ color: 'green', count: 5 }],
+        targets: [{ color: 'carrot', count: 5 }],
         timeLimit: 55,
-        description: 'Pop 5 GREEN balloons!'
+        description: 'Grow 5 CARROT plants!'
     },
-    // Level 5: Two colors
+    // Level 5: Two types
     {
         level: 5,
         type: 'multi',
         targets: [
-            { color: 'red', count: 3 },
-            { color: 'blue', count: 2 }
+            { color: 'tomato', count: 3 },
+            { color: 'sunflower', count: 2 }
         ],
         timeLimit: 50,
-        description: 'Pop 3 RED and 2 BLUE!'
+        description: 'Grow 3 TOMATO and 2 SUNFLOWER!'
     },
-    // Level 6: Yellow focus
+    // Level 6: Lettuce focus
     {
         level: 6,
         type: 'single',
-        targets: [{ color: 'yellow', count: 5 }],
+        targets: [{ color: 'lettuce', count: 5 }],
         timeLimit: 50,
-        description: 'Pop 5 YELLOW balloons!'
+        description: 'Grow 5 LETTUCE plants!'
     },
-    // Level 7: Purple focus
+    // Level 7: Blueberry focus
     {
         level: 7,
         type: 'single',
-        targets: [{ color: 'purple', count: 5 }],
+        targets: [{ color: 'blueberry', count: 5 }],
         timeLimit: 50,
-        description: 'Pop 5 PURPLE balloons!'
+        description: 'Grow 5 BLUEBERRY plants!'
     },
-    // Level 8: Two colors
+    // Level 8: Two types
     {
         level: 8,
         type: 'multi',
         targets: [
-            { color: 'green', count: 3 },
-            { color: 'yellow', count: 3 }
+            { color: 'carrot', count: 3 },
+            { color: 'lettuce', count: 3 }
         ],
         timeLimit: 45,
-        description: 'Pop 3 GREEN and 3 YELLOW!'
+        description: 'Grow 3 CARROT and 3 LETTUCE!'
     },
     // Level 9: Higher count
     {
         level: 9,
         type: 'single',
-        targets: [{ color: 'red', count: 7 }],
+        targets: [{ color: 'tomato', count: 7 }],
         timeLimit: 45,
-        description: 'Pop 7 RED balloons!'
+        description: 'Grow 7 TOMATO plants!'
     },
-    // Level 10: Two colors, higher
+    // Level 10: Two types, higher
     {
         level: 10,
         type: 'multi',
         targets: [
-            { color: 'blue', count: 4 },
-            { color: 'purple', count: 3 }
+            { color: 'sunflower', count: 4 },
+            { color: 'blueberry', count: 3 }
         ],
         timeLimit: 45,
-        description: 'Pop 4 BLUE and 3 PURPLE!'
+        description: 'Grow 4 SUNFLOWER and 3 BLUEBERRY!'
     }
 ];
 
@@ -112,39 +112,44 @@ class Challenge {
 
         this.isComplete = false;
         this.score = 0;
-        this.totalPopped = 0;
+        this.totalHarvested = 0;
     }
 
     /**
-     * Record a popped balloon
-     * @param {string} colorKey - The color of the popped balloon
-     * @returns {boolean} - Whether this balloon counted toward the challenge
+     * Record a harvested plant
+     * @param {string} plantKey - The type of plant harvested
+     * @returns {boolean} - Whether this plant counted toward the challenge
      */
-    recordPop(colorKey) {
-        this.totalPopped++;
+    recordHarvest(plantKey) {
+        this.totalHarvested++;
 
         if (this.type === 'any') {
-            // Any color counts
+            // Any plant counts
             this.progress['any'] = (this.progress['any'] || 0) + 1;
             this.score += 10;
             this.checkCompletion();
             return true;
         }
 
-        // Check if this color is a target
-        const target = this.targets.find(t => t.color === colorKey);
+        // Check if this plant type is a target
+        const target = this.targets.find(t => t.color === plantKey);
         if (target) {
-            if (this.progress[colorKey] < target.count) {
-                this.progress[colorKey]++;
+            if (this.progress[plantKey] < target.count) {
+                this.progress[plantKey]++;
                 this.score += 10;
                 this.checkCompletion();
                 return true;
             }
         }
 
-        // Bonus points for non-target balloons (but they don't count toward goal)
+        // Bonus points for non-target plants (but they don't count toward goal)
         this.score += 2;
         return false;
+    }
+
+    // Backward compatibility alias
+    recordPop(colorKey) {
+        return this.recordHarvest(colorKey);
     }
 
     /**
@@ -190,7 +195,9 @@ class Challenge {
         // Multi-target: show each
         return this.targets.map(target => {
             const current = Math.min(this.progress[target.color] || 0, target.count);
-            return `${BALLOON_COLORS[target.color]?.name || target.color}: ${current}/${target.count}`;
+            const plantInfo = PLANT_TYPES[target.color];
+            const displayName = plantInfo?.name || target.color.toUpperCase();
+            return `${displayName}: ${current}/${target.count}`;
         }).join(' | ');
     }
 
@@ -199,6 +206,13 @@ class Challenge {
      */
     getMiniDisplayText() {
         return this.description;
+    }
+
+    /**
+     * Get total harvested count (for display)
+     */
+    get totalPopped() {
+        return this.totalHarvested;
     }
 }
 
@@ -229,18 +243,18 @@ class ChallengeManager {
      * Generate a challenge for higher levels
      */
     generateChallenge(level) {
-        const colors = Object.keys(BALLOON_COLORS);
+        const plants = Object.keys(PLANT_TYPES);
         const difficulty = Math.min(level - 10, 10); // Cap difficulty scaling
 
         // Decide type: single or multi
         const isMulti = level > 12 && Math.random() > 0.5;
 
         if (isMulti) {
-            // Two color challenge
-            const color1 = colors[Math.floor(Math.random() * colors.length)];
-            let color2 = colors[Math.floor(Math.random() * colors.length)];
-            while (color2 === color1) {
-                color2 = colors[Math.floor(Math.random() * colors.length)];
+            // Two plant challenge
+            const plant1 = plants[Math.floor(Math.random() * plants.length)];
+            let plant2 = plants[Math.floor(Math.random() * plants.length)];
+            while (plant2 === plant1) {
+                plant2 = plants[Math.floor(Math.random() * plants.length)];
             }
 
             const count1 = 3 + Math.floor(difficulty / 2);
@@ -250,23 +264,23 @@ class ChallengeManager {
                 level,
                 type: 'multi',
                 targets: [
-                    { color: color1, count: count1 },
-                    { color: color2, count: count2 }
+                    { color: plant1, count: count1 },
+                    { color: plant2, count: count2 }
                 ],
                 timeLimit: Math.max(35, 50 - difficulty * 2),
-                description: `Pop ${count1} ${BALLOON_COLORS[color1].name} and ${count2} ${BALLOON_COLORS[color2].name}!`
+                description: `Grow ${count1} ${PLANT_TYPES[plant1].name} and ${count2} ${PLANT_TYPES[plant2].name}!`
             };
         } else {
-            // Single color challenge
-            const color = colors[Math.floor(Math.random() * colors.length)];
+            // Single plant challenge
+            const plant = plants[Math.floor(Math.random() * plants.length)];
             const count = 5 + Math.floor(difficulty / 2);
 
             return {
                 level,
                 type: 'single',
-                targets: [{ color, count }],
+                targets: [{ color: plant, count }],
                 timeLimit: Math.max(35, 50 - difficulty * 2),
-                description: `Pop ${count} ${BALLOON_COLORS[color].name} balloons!`
+                description: `Grow ${count} ${PLANT_TYPES[plant].name} plants!`
             };
         }
     }
@@ -284,13 +298,18 @@ class ChallengeManager {
     }
 
     /**
-     * Record a balloon pop
+     * Record a plant harvest
      */
-    recordPop(colorKey) {
+    recordHarvest(plantKey) {
         if (this.currentChallenge) {
-            return this.currentChallenge.recordPop(colorKey);
+            return this.currentChallenge.recordHarvest(plantKey);
         }
         return false;
+    }
+
+    // Backward compatibility alias
+    recordPop(colorKey) {
+        return this.recordHarvest(colorKey);
     }
 
     /**
@@ -325,16 +344,21 @@ class ChallengeManager {
     }
 
     /**
-     * Get target colors for current challenge (for spawn weighting)
+     * Get target plant types for current challenge (for spawn weighting)
      */
     getTargetColors() {
-        if (!this.currentChallenge) return Object.keys(BALLOON_COLORS);
+        if (!this.currentChallenge) return Object.keys(PLANT_TYPES);
 
         if (this.currentChallenge.type === 'any') {
-            return Object.keys(BALLOON_COLORS);
+            return Object.keys(PLANT_TYPES);
         }
 
         return this.currentChallenge.targets.map(t => t.color);
+    }
+
+    // Alias for garden theme
+    getTargetPlants() {
+        return this.getTargetColors();
     }
 
     /**
@@ -342,9 +366,12 @@ class ChallengeManager {
      */
     saveHighScore() {
         try {
-            localStorage.setItem('balloonPop_highScore', this.highScore.toString());
+            localStorage.setItem('gardenGrow_progress', JSON.stringify({
+                highScore: this.highScore,
+                highestLevel: Math.max(this.currentLevel, this.loadProgress().highestLevel || 1)
+            }));
         } catch (e) {
-            console.warn('Could not save high score:', e);
+            console.warn('Could not save progress:', e);
         }
     }
 
@@ -353,10 +380,22 @@ class ChallengeManager {
      */
     loadHighScore() {
         try {
-            const saved = localStorage.getItem('balloonPop_highScore');
-            return saved ? parseInt(saved, 10) : 0;
+            const progress = this.loadProgress();
+            return progress.highScore || 0;
         } catch (e) {
             return 0;
+        }
+    }
+
+    /**
+     * Load full progress from localStorage
+     */
+    loadProgress() {
+        try {
+            const saved = localStorage.getItem('gardenGrow_progress');
+            return saved ? JSON.parse(saved) : { highScore: 0, highestLevel: 1 };
+        } catch (e) {
+            return { highScore: 0, highestLevel: 1 };
         }
     }
 }

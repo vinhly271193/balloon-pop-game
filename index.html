@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balloon Pop - re-Action Health Technologies</title>
+    <title>Garden Grow - re-Action Health Technologies</title>
     <link rel="stylesheet" href="css/styles.css">
 
     <!-- MediaPipe Dependencies -->
@@ -29,24 +29,31 @@
             <div id="welcomeScreen" class="screen active">
                 <div class="screen-content">
                     <img src="assets/images/logo.png" alt="re:Action Health Technologies" class="company-logo">
-                    <h1 class="game-title">Balloon Pop!</h1>
-                    <p class="instruction-text">Use your hands to pop the balloons</p>
+                    <h1 class="game-title garden-title">Garden Grow!</h1>
+                    <p class="instruction-text">Use your hands to help plants grow</p>
                     <div class="hand-demo">
-                        <span class="hand-icon">&#128400;</span>
+                        <span class="hand-icon garden-icon">🌱</span>
                     </div>
+                    <p id="welcomeMessage" class="welcome-message"></p>
                     <button id="startBtn" class="big-button hoverable has-border-progress" data-hover-action="start">
-                        <span>Start Game</span>
+                        <span id="startBtnText">Start Growing</span>
                         <div class="border-progress-track"></div>
                         <div class="border-progress-fill"></div>
                     </button>
                     <p class="camera-hint">Camera access required</p>
+
+                    <!-- Garden Progress Preview -->
+                    <div id="gardenProgressPreview" class="garden-preview">
+                        <canvas id="gardenPreviewCanvas" width="300" height="100"></canvas>
+                        <p id="gardenProgressText" class="garden-progress-text"></p>
+                    </div>
                 </div>
             </div>
 
             <!-- Calibration Screen -->
             <div id="calibrationScreen" class="screen">
                 <div class="screen-content">
-                    <h2 class="calibration-title">Show Your Hands!</h2>
+                    <h2 class="calibration-title">Show Your Gardening Hands!</h2>
                     <p class="instruction-text">Hold your hands up so the camera can see them</p>
                     <div id="handStatus">
                         <div class="hand-indicator" id="leftHandIndicator">
@@ -58,7 +65,31 @@
                             <span class="hand-status">Not detected</span>
                         </div>
                     </div>
-                    <p class="wave-instruction">Wave to continue!</p>
+                    <p class="wave-instruction">Wave to start gardening!</p>
+                </div>
+            </div>
+
+            <!-- Chapter Intro Screen -->
+            <div id="chapterIntroScreen" class="screen chapter-screen">
+                <div class="screen-content chapter-content">
+                    <span class="chapter-icon">🌱</span>
+                    <p class="chapter-number">Chapter 1</p>
+                    <h2 class="chapter-title">The Forgotten Garden</h2>
+                    <p class="chapter-intro-text">An old garden has been waiting for someone special...</p>
+                    <p class="chapter-goal-label">Your Goal:</p>
+                    <p class="chapter-goal">Plant your first seeds</p>
+                    <p class="tap-to-continue">Tap anywhere to continue</p>
+                </div>
+            </div>
+
+            <!-- Chapter Complete Screen -->
+            <div id="chapterCompleteScreen" class="screen chapter-screen celebration">
+                <div class="screen-content chapter-content">
+                    <span class="complete-icon">🎉</span>
+                    <h2 class="complete-title">Chapter Complete!</h2>
+                    <p class="chapter-reward">The garden is waking up!</p>
+                    <p class="unlock-message"></p>
+                    <p class="tap-to-continue">Tap anywhere to continue</p>
                 </div>
             </div>
 
@@ -70,9 +101,9 @@
                         <!-- Challenge text will be inserted here -->
                     </div>
                     <div id="challengeColors" class="challenge-colors">
-                        <!-- Color indicators will be inserted here -->
+                        <!-- Plant indicators will be inserted here -->
                     </div>
-                    <p class="ready-text">Get Ready!</p>
+                    <p class="ready-text">Get Ready to Grow!</p>
                     <div class="countdown" id="countdown">3</div>
                 </div>
             </div>
@@ -88,7 +119,7 @@
                         <span id="currentChallenge" class="challenge-mini"></span>
                     </div>
                     <div class="hud-item score-display">
-                        <span class="hud-label">Score</span>
+                        <span class="hud-label">Plants</span>
                         <span id="scoreValue" class="hud-value">0</span>
                     </div>
                 </div>
@@ -103,25 +134,26 @@
             <!-- Round End Screen -->
             <div id="roundEndScreen" class="screen">
                 <div class="screen-content">
-                    <h2 id="roundResult" class="result-title">Great Job!</h2>
+                    <h2 id="roundResult" class="result-title">Beautiful Garden!</h2>
                     <div class="score-summary">
                         <div class="final-score">
                             <span class="score-label">Score</span>
                             <span id="finalScore" class="score-number">0</span>
                         </div>
-                        <div class="balloons-popped">
-                            <span class="popped-label">Balloons Popped</span>
-                            <span id="balloonsPopped" class="popped-number">0</span>
+                        <div class="plants-grown">
+                            <span class="grown-label">Plants Grown</span>
+                            <span id="plantsGrown" class="grown-number">0</span>
                         </div>
                     </div>
+                    <p id="encouragementText" class="encouragement-text"></p>
                     <div class="end-buttons">
                         <button id="nextLevelBtn" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
-                            <span>Next Level</span>
+                            <span>Keep Growing</span>
                             <div class="border-progress-track"></div>
                             <div class="border-progress-fill"></div>
                         </button>
                         <button id="playAgainBtn" class="big-button secondary hoverable has-border-progress" data-hover-action="playAgain">
-                            <span>Play Again</span>
+                            <span>Start Over</span>
                             <div class="border-progress-track"></div>
                             <div class="border-progress-fill"></div>
                         </button>
@@ -201,7 +233,7 @@
                                 <div class="bg-preview-box bg-preview-none"></div>
                                 <span>None</span>
                             </button>
-                            <button id="bgGarden" class="bg-btn bg-preview hoverable" data-hover-action="bgGarden">
+                            <button id="bgGarden" class="bg-btn bg-preview hoverable active" data-hover-action="bgGarden">
                                 <div class="bg-preview-box bg-preview-garden"></div>
                                 <span>Garden</span>
                             </button>
@@ -213,7 +245,7 @@
                                 <div class="bg-preview-box bg-preview-forest"></div>
                                 <span>Forest</span>
                             </button>
-                            <button id="bgSky" class="bg-btn bg-preview hoverable active" data-hover-action="bgSky">
+                            <button id="bgSky" class="bg-btn bg-preview hoverable" data-hover-action="bgSky">
                                 <div class="bg-preview-box bg-preview-sky"></div>
                                 <span>Sky</span>
                             </button>
@@ -230,15 +262,16 @@
 
         <!-- Loading Indicator -->
         <div id="loadingOverlay" class="loading">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">Loading hand tracking...</p>
+            <div class="loading-spinner garden-spinner"></div>
+            <p class="loading-text">Preparing the garden...</p>
         </div>
     </div>
 
     <!-- Game Scripts -->
     <script src="js/audio.js"></script>
-    <script src="js/balloon.js"></script>
+    <script src="js/garden.js"></script>
     <script src="js/challenges.js"></script>
+    <script src="js/story.js"></script>
     <script src="js/handTracking.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>

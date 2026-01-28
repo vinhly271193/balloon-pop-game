@@ -1,13 +1,13 @@
 /**
- * Main Entry Point for Balloon Pop Game
+ * Main Entry Point for Garden Grow Game
  * re-Action Health Technologies
  *
- * A dementia-accessible browser game using webcam hand tracking
+ * A therapeutic browser game for dementia patients using webcam hand tracking
  */
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Balloon Pop Game - Initializing...');
+    console.log('Garden Grow Game - Initializing...');
     console.log('re-Action Health Technologies');
     console.log('URL:', window.location.href);
     console.log('Secure context:', window.isSecureContext);
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const success = await game.init();
 
         if (success) {
-            console.log('Game ready!');
+            console.log('Garden ready!');
         } else {
             console.error('Game initialization failed');
             showInitializationError();
@@ -61,7 +61,7 @@ function showBrowserSupportError() {
     if (loadingOverlay) {
         loadingOverlay.innerHTML = `
             <div style="text-align: center; padding: 40px; max-width: 600px;">
-                <h2 style="font-size: 36px; margin-bottom: 20px; color: #FF3B30;">
+                <h2 style="font-size: 36px; margin-bottom: 20px; color: #FF6347;">
                     Browser Not Supported
                 </h2>
                 <p style="font-size: 24px; margin-bottom: 20px; color: #ffffff;">
@@ -89,8 +89,8 @@ function showInitializationError() {
     if (loadingOverlay) {
         loadingOverlay.innerHTML = `
             <div style="text-align: center; padding: 40px; max-width: 600px;">
-                <h2 style="font-size: 36px; margin-bottom: 20px; color: #FF3B30;">
-                    Unable to Start Game
+                <h2 style="font-size: 36px; margin-bottom: 20px; color: #FF6347;">
+                    Unable to Start Garden
                 </h2>
                 <p style="font-size: 24px; margin-bottom: 20px; color: #ffffff;">
                     There was a problem loading the hand tracking system.
@@ -102,7 +102,7 @@ function showInitializationError() {
                     padding: 16px 40px;
                     font-size: 24px;
                     background: #4ade80;
-                    color: #1a1a2e;
+                    color: #1a2e1a;
                     border: none;
                     border-radius: 12px;
                     cursor: pointer;
@@ -144,12 +144,12 @@ document.addEventListener('contextmenu', (e) => {
 console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║    🎈 BALLOON POP - Hand Tracking Game 🎈                ║
+║    🌱 GARDEN GROW - Therapeutic Hand Tracking Game 🌻    ║
 ║                                                           ║
 ║    re-Action Health Technologies                          ║
-║    Designed for accessibility                             ║
+║    Helping gardens bloom, one hand at a time              ║
 ║                                                           ║
-║    Controls: Use your hands to pop balloons!              ║
+║    Touch seeds with your hands to grow beautiful plants!  ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
 `);
