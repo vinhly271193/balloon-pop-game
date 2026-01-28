@@ -564,25 +564,10 @@ class Game {
 
         // Update and render based on state
         if (this.state === GameState.PLAYING) {
-            // Custom spawn logic with weighted plants
-            this.gardenBed.spawnTimer += deltaTime * 1000;
-            if (this.gardenBed.spawnTimer >= this.gardenBed.spawnInterval) {
-                const plant = this.getWeightedRandomPlant();
-                this.gardenBed.spawnSpecificSeed(plant);
-                this.gardenBed.spawnTimer = 0;
-            }
+            // Update garden (handles needs, growth, etc.)
+            this.gardenBed.update(deltaTime);
 
-            // Update seeds (without auto-spawn)
-            this.gardenBed.seeds.forEach(seed => {
-                seed.update(deltaTime, this.gardenBed.speedMultiplier);
-            });
-
-            // Remove off-screen seeds
-            this.gardenBed.seeds = this.gardenBed.seeds.filter(seed =>
-                !seed.isOffScreen && !seed.isAnimationComplete()
-            );
-
-            // Draw garden (including soil strip and seeds)
+            // Draw garden scene
             this.gardenBed.draw(this.ctx);
         }
 

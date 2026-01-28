@@ -1448,16 +1448,28 @@ body.theme-max-contrast .hud-item {
     opacity: 1;
 }
 
-/* Garden Theme - Soft greens with floral hints */
+/* Garden Theme - Peaceful garden scene */
 .nature-bg.bg-garden {
     background:
-        radial-gradient(ellipse at 20% 80%, rgba(144, 238, 144, 0.4) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(255, 182, 193, 0.3) 0%, transparent 40%),
-        radial-gradient(ellipse at 60% 90%, rgba(255, 255, 150, 0.2) 0%, transparent 30%),
+        /* Sun in corner */
+        radial-gradient(circle at 85% 10%, rgba(255, 220, 100, 0.6) 0%, rgba(255, 200, 50, 0.3) 8%, transparent 15%),
+        /* Fluffy clouds */
+        radial-gradient(ellipse at 15% 15%, rgba(255, 255, 255, 0.8) 0%, transparent 20%),
+        radial-gradient(ellipse at 35% 12%, rgba(255, 255, 255, 0.6) 0%, transparent 15%),
+        radial-gradient(ellipse at 60% 18%, rgba(255, 255, 255, 0.7) 0%, transparent 18%),
+        /* Distant trees/bushes */
+        radial-gradient(ellipse at 10% 65%, rgba(34, 100, 34, 0.8) 0%, transparent 15%),
+        radial-gradient(ellipse at 25% 62%, rgba(50, 120, 50, 0.7) 0%, transparent 12%),
+        radial-gradient(ellipse at 75% 60%, rgba(40, 110, 40, 0.8) 0%, transparent 14%),
+        radial-gradient(ellipse at 90% 63%, rgba(34, 100, 34, 0.7) 0%, transparent 13%),
+        /* Main gradient: sky to grass to soil */
         linear-gradient(180deg,
-            rgba(135, 206, 150, 0.7) 0%,
-            rgba(100, 180, 100, 0.6) 50%,
-            rgba(80, 150, 80, 0.7) 100%);
+            #87CEEB 0%,
+            #98D8E8 25%,
+            #90EE90 50%,
+            #228B22 65%,
+            #8B4513 80%,
+            #654321 100%);
 }
 
 /* Beach Theme - Ocean blues to sandy beige */

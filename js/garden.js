@@ -1,9 +1,9 @@
 /**
  * Garden System for Garden Grow Game
- * Handles seed rendering, growth animation, and harvest mechanics
+ * Plant nurturing gameplay with needs management
  */
 
-// Plant type definitions with garden theme
+// Plant type definitions
 const PLANT_TYPES = {
     tomato: {
         name: 'TOMATO',
@@ -44,354 +44,292 @@ const PLANT_TYPES = {
 
 // Growth stages
 const GrowthStage = {
-    SEED: 'seed',
+    EMPTY: 'empty',
+    SEED_PLANTED: 'seedPlanted',
     SPROUTING: 'sprouting',
     GROWING: 'growing',
-    BLOOMING: 'blooming',
-    HARVESTED: 'harvested'
+    MATURE: 'mature',
+    HARVESTABLE: 'harvestable'
 };
 
-class Seed {
-    constructor(x, y, plantKey, canvas) {
+/**
+ * Represents the plant pot where seeds are planted
+ */
+class PlantPot {
+    constructor(x, y, canvas) {
         this.x = x;
         this.y = y;
-        this.plantKey = plantKey;
-        this.plant = PLANT_TYPES[plantKey];
         this.canvas = canvas;
 
-        // Size properties - generous for accessibility
-        this.seedSize = 20;
-        this.maxPlantHeight = 120;
-        this.hitRadius = 70; // Generous hit zone for accessibility
+        // Pot dimensions
+        this.potWidth = 120;
+        this.potHeight = 100;
+        this.rimHeight = 15;
 
-        // Movement properties - slower than balloons for therapeutic feel
-        this.baseSpeed = 0.8;
-        this.speed = this.baseSpeed + Math.random() * 0.3;
-        this.swayOffset = Math.random() * Math.PI * 2;
-        this.swaySpeed = 0.015 + Math.random() * 0.01;
-        this.swayAmount = 8 + Math.random() * 5;
-
-        // State
-        this.growthStage = GrowthStage.SEED;
+        // Plant state
+        this.plantType = null;
+        this.growthStage = GrowthStage.EMPTY;
         this.growthProgress = 0; // 0 to 1
-        this.isHarvested = false;
-        this.isOffScreen = false;
-        this.isTouched = false;
 
-        // Growth animation timing
-        this.growthStartTime = 0;
-        this.growthDuration = 1000; // 1 second to fully grow
-
-        // Harvest animation
-        this.harvestParticles = [];
-        this.harvestAnimationTime = 0;
-        this.harvestAnimationDuration = 0.8;
-        this.floatingIcon = null;
-
-        // Sparkle effect
-        this.sparkles = [];
+        // Hit detection
+        this.hitRadius = 80;
     }
 
     /**
-     * Update seed/plant position and state
+     * Check if a point is over the pot
      */
-    update(deltaTime, speedMultiplier = 1) {
-        if (this.isHarvested) {
-            this.updateHarvestAnimation(deltaTime);
+    isPointOver(x, y) {
+        const dx = x - this.x;
+        const dy = y - (this.y - this.potHeight / 2);
+        return Math.abs(dx) < this.potWidth / 2 + 20 && Math.abs(dy) < this.potHeight / 2 + 20;
+    }
+
+    /**
+     * Plant a seed in the pot
+     */
+    plantSeed(plantType) {
+        if (this.growthStage === GrowthStage.EMPTY) {
+            this.plantType = plantType;
+            this.growthStage = GrowthStage.SEED_PLANTED;
+            this.growthProgress = 0;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update plant growth based on needs satisfaction
+     */
+    updateGrowth(needsSatisfied, deltaTime) {
+        if (this.growthStage === GrowthStage.EMPTY || this.growthStage === GrowthStage.HARVESTABLE) {
             return;
         }
 
-        if (this.isTouched) {
-            this.updateGrowth(deltaTime);
-            return;
-        }
+        // Only grow if needs are satisfied (average > 40%)
+        if (needsSatisfied > 0.4) {
+            const growthRate = 0.05 * needsSatisfied; // Faster growth with better care
+            this.growthProgress += growthRate * deltaTime;
 
-        // Move upward slowly
-        this.y -= this.speed * speedMultiplier;
-
-        // Gentle swaying like plants in breeze
-        this.swayOffset += this.swaySpeed;
-        this.x += Math.sin(this.swayOffset) * 0.3;
-
-        // Check if off screen
-        if (this.y + this.maxPlantHeight < 0) {
-            this.isOffScreen = true;
+            // Update growth stage
+            if (this.growthProgress >= 1) {
+                this.growthProgress = 1;
+                this.advanceGrowthStage();
+            }
         }
     }
 
     /**
-     * Update growth animation when touched
+     * Advance to next growth stage
      */
-    updateGrowth(deltaTime) {
-        const now = Date.now();
-        const elapsed = now - this.growthStartTime;
-        this.growthProgress = Math.min(elapsed / this.growthDuration, 1);
-
-        // Update growth stage based on progress
-        if (this.growthProgress < 0.3) {
-            this.growthStage = GrowthStage.SPROUTING;
-        } else if (this.growthProgress < 0.6) {
-            this.growthStage = GrowthStage.GROWING;
-        } else if (this.growthProgress < 1) {
-            this.growthStage = GrowthStage.BLOOMING;
-        } else {
-            // Growth complete - harvest!
-            this.harvest();
+    advanceGrowthStage() {
+        switch (this.growthStage) {
+            case GrowthStage.SEED_PLANTED:
+                this.growthStage = GrowthStage.SPROUTING;
+                this.growthProgress = 0;
+                break;
+            case GrowthStage.SPROUTING:
+                this.growthStage = GrowthStage.GROWING;
+                this.growthProgress = 0;
+                break;
+            case GrowthStage.GROWING:
+                this.growthStage = GrowthStage.MATURE;
+                this.growthProgress = 0;
+                break;
+            case GrowthStage.MATURE:
+                this.growthStage = GrowthStage.HARVESTABLE;
+                this.growthProgress = 1;
+                break;
         }
-
-        // Add sparkles during growth
-        if (Math.random() < 0.3) {
-            this.addSparkle();
-        }
-
-        // Update sparkles
-        this.sparkles = this.sparkles.filter(s => {
-            s.life -= deltaTime;
-            s.y -= 1;
-            s.alpha = s.life / s.maxLife;
-            return s.life > 0;
-        });
     }
 
     /**
-     * Add a sparkle effect
+     * Harvest the plant and reset
      */
-    addSparkle() {
-        this.sparkles.push({
-            x: this.x + (Math.random() - 0.5) * 60,
-            y: this.y - this.growthProgress * this.maxPlantHeight * 0.5 + (Math.random() - 0.5) * 40,
-            size: 2 + Math.random() * 4,
-            alpha: 1,
-            life: 0.5 + Math.random() * 0.5,
-            maxLife: 0.5 + Math.random() * 0.5
-        });
-    }
-
-    /**
-     * Update harvest animation particles
-     */
-    updateHarvestAnimation(deltaTime) {
-        this.harvestAnimationTime += deltaTime;
-
-        // Update particles
-        this.harvestParticles.forEach(particle => {
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-            particle.vy += 0.2; // Gentle gravity
-            particle.alpha -= 0.015;
-            particle.scale *= 0.98;
-        });
-
-        // Update floating icon
-        if (this.floatingIcon) {
-            this.floatingIcon.y -= 2;
-            this.floatingIcon.alpha -= 0.02;
-            this.floatingIcon.scale += 0.01;
+    harvest() {
+        if (this.growthStage === GrowthStage.HARVESTABLE) {
+            const harvested = this.plantType;
+            this.plantType = null;
+            this.growthStage = GrowthStage.EMPTY;
+            this.growthProgress = 0;
+            return harvested;
         }
-
-        // Remove dead particles
-        this.harvestParticles = this.harvestParticles.filter(p => p.alpha > 0);
+        return null;
     }
 
     /**
-     * Draw the seed/plant
+     * Draw the plant pot and any plant inside
      */
     draw(ctx) {
-        if (this.isHarvested) {
-            this.drawHarvestAnimation(ctx);
-            return;
-        }
-
         ctx.save();
 
-        // Apply gentle sway
-        const swayAngle = Math.sin(this.swayOffset) * 0.05;
-        ctx.translate(this.x, this.y);
-        ctx.rotate(swayAngle);
-        ctx.translate(-this.x, -this.y);
+        // Draw pot
+        this.drawPot(ctx);
 
-        if (!this.isTouched) {
-            this.drawSeed(ctx);
-        } else {
-            this.drawGrowingPlant(ctx);
+        // Draw plant based on growth stage
+        if (this.growthStage !== GrowthStage.EMPTY) {
+            this.drawPlant(ctx);
         }
-
-        // Draw sparkles
-        this.drawSparkles(ctx);
 
         ctx.restore();
     }
 
     /**
-     * Draw seed (before touched)
+     * Draw the terracotta pot
      */
-    drawSeed(ctx) {
+    drawPot(ctx) {
         const x = this.x;
         const y = this.y;
 
-        // Seed body (oval shape)
+        // Pot body (trapezoid shape)
         ctx.beginPath();
-        ctx.ellipse(x, y, this.seedSize * 0.6, this.seedSize, 0, 0, Math.PI * 2);
+        ctx.moveTo(x - this.potWidth / 2, y - this.potHeight);
+        ctx.lineTo(x - this.potWidth / 2 + 15, y);
+        ctx.lineTo(x + this.potWidth / 2 - 15, y);
+        ctx.lineTo(x + this.potWidth / 2, y - this.potHeight);
+        ctx.closePath();
 
-        // Gradient for 3D effect
-        const gradient = ctx.createRadialGradient(
-            x - this.seedSize * 0.2, y - this.seedSize * 0.3, 0,
-            x, y, this.seedSize
-        );
-        gradient.addColorStop(0, this.lightenColor(this.plant.seedColor, 40));
-        gradient.addColorStop(0.5, this.plant.seedColor);
-        gradient.addColorStop(1, this.darkenColor(this.plant.seedColor, 30));
+        // Terracotta gradient
+        const potGradient = ctx.createLinearGradient(x - this.potWidth / 2, y, x + this.potWidth / 2, y);
+        potGradient.addColorStop(0, '#C4A484');
+        potGradient.addColorStop(0.3, '#E07A5F');
+        potGradient.addColorStop(0.7, '#E07A5F');
+        potGradient.addColorStop(1, '#B8860B');
 
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = potGradient;
         ctx.fill();
-
-        // Seed highlight
-        ctx.beginPath();
-        ctx.ellipse(x - this.seedSize * 0.2, y - this.seedSize * 0.3, this.seedSize * 0.2, this.seedSize * 0.15, -0.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.fill();
-
-        // Seed texture lines
-        ctx.beginPath();
-        ctx.moveTo(x, y - this.seedSize * 0.7);
-        ctx.lineTo(x, y + this.seedSize * 0.7);
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 3;
         ctx.stroke();
+
+        // Pot rim
+        ctx.beginPath();
+        ctx.moveTo(x - this.potWidth / 2 - 5, y - this.potHeight);
+        ctx.lineTo(x - this.potWidth / 2 - 5, y - this.potHeight - this.rimHeight);
+        ctx.lineTo(x + this.potWidth / 2 + 5, y - this.potHeight - this.rimHeight);
+        ctx.lineTo(x + this.potWidth / 2 + 5, y - this.potHeight);
+        ctx.closePath();
+
+        ctx.fillStyle = '#D2691E';
+        ctx.fill();
+        ctx.stroke();
+
+        // Soil inside pot (visible at top)
+        ctx.beginPath();
+        ctx.ellipse(x, y - this.potHeight + 5, this.potWidth / 2 - 5, 15, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#5D4037';
+        ctx.fill();
     }
 
     /**
-     * Draw growing plant based on growth stage
+     * Draw the plant based on growth stage
      */
-    drawGrowingPlant(ctx) {
+    drawPlant(ctx) {
         const x = this.x;
-        const baseY = this.y;
-        const progress = this.growthProgress;
+        const baseY = this.y - this.potHeight - 10;
+        const plant = PLANT_TYPES[this.plantType];
 
-        // Calculate current plant height
-        const currentHeight = progress * this.maxPlantHeight;
+        if (!plant) return;
 
-        // Draw soil mound at base
-        this.drawSoilMound(ctx, x, baseY);
+        switch (this.growthStage) {
+            case GrowthStage.SEED_PLANTED:
+                // Show seed in soil
+                ctx.beginPath();
+                ctx.ellipse(x, this.y - this.potHeight + 5, 8, 12, 0, 0, Math.PI * 2);
+                ctx.fillStyle = plant.seedColor;
+                ctx.fill();
+                break;
 
-        if (this.growthStage === GrowthStage.SPROUTING) {
-            // Stage 1: Tiny sprout emerging
-            this.drawSprout(ctx, x, baseY, progress / 0.3);
-        } else if (this.growthStage === GrowthStage.GROWING) {
-            // Stage 2: Stem growing with leaves
-            const stageProgress = (progress - 0.3) / 0.3;
-            this.drawStem(ctx, x, baseY, 0.3 + stageProgress * 0.4);
-            this.drawLeaves(ctx, x, baseY, stageProgress);
-        } else if (this.growthStage === GrowthStage.BLOOMING) {
-            // Stage 3: Full plant with fruit/flower
-            const stageProgress = (progress - 0.6) / 0.4;
-            this.drawStem(ctx, x, baseY, 0.7 + stageProgress * 0.3);
-            this.drawLeaves(ctx, x, baseY, 1);
-            this.drawFruit(ctx, x, baseY, stageProgress);
+            case GrowthStage.SPROUTING:
+                // Small sprout
+                const sproutHeight = 20 + this.growthProgress * 30;
+                ctx.beginPath();
+                ctx.moveTo(x, baseY);
+                ctx.quadraticCurveTo(x + 5, baseY - sproutHeight / 2, x, baseY - sproutHeight);
+                ctx.strokeStyle = '#90EE90';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Tiny leaves
+                if (this.growthProgress > 0.5) {
+                    this.drawSmallLeaf(ctx, x, baseY - sproutHeight + 5, -0.5, 10);
+                    this.drawSmallLeaf(ctx, x, baseY - sproutHeight + 5, 0.5, 10);
+                }
+                break;
+
+            case GrowthStage.GROWING:
+                // Growing plant with stem and leaves
+                const stemHeight = 60 + this.growthProgress * 40;
+
+                // Stem
+                ctx.beginPath();
+                ctx.moveTo(x, baseY);
+                ctx.quadraticCurveTo(x + 3, baseY - stemHeight / 2, x, baseY - stemHeight);
+                ctx.strokeStyle = plant.stemColor;
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Leaves
+                this.drawLeaf(ctx, x - 3, baseY - stemHeight * 0.3, -0.6, 20, 30);
+                this.drawLeaf(ctx, x + 3, baseY - stemHeight * 0.5, 0.6, 20, 30);
+                if (this.growthProgress > 0.5) {
+                    this.drawLeaf(ctx, x - 2, baseY - stemHeight * 0.7, -0.4, 15, 25);
+                }
+                break;
+
+            case GrowthStage.MATURE:
+            case GrowthStage.HARVESTABLE:
+                // Full plant with fruit/flower
+                const fullHeight = 120;
+
+                // Stem
+                ctx.beginPath();
+                ctx.moveTo(x, baseY);
+                ctx.quadraticCurveTo(x + 2, baseY - fullHeight / 2, x, baseY - fullHeight);
+                ctx.strokeStyle = plant.stemColor;
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Leaves
+                this.drawLeaf(ctx, x - 5, baseY - fullHeight * 0.25, -0.6, 25, 40);
+                this.drawLeaf(ctx, x + 5, baseY - fullHeight * 0.4, 0.6, 25, 40);
+                this.drawLeaf(ctx, x - 3, baseY - fullHeight * 0.55, -0.4, 20, 35);
+                this.drawLeaf(ctx, x + 3, baseY - fullHeight * 0.7, 0.4, 20, 35);
+
+                // Fruit/flower at top
+                this.drawFruit(ctx, x, baseY - fullHeight - 10, plant);
+
+                // Glow effect if harvestable
+                if (this.growthStage === GrowthStage.HARVESTABLE) {
+                    ctx.beginPath();
+                    ctx.arc(x, baseY - fullHeight - 10, 40, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 100, 0.2)';
+                    ctx.fill();
+                }
+                break;
         }
     }
 
-    /**
-     * Draw soil mound at plant base
-     */
-    drawSoilMound(ctx, x, y) {
+    drawSmallLeaf(ctx, x, y, angle, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
         ctx.beginPath();
-        ctx.ellipse(x, y + 5, 25, 10, 0, 0, Math.PI);
-        ctx.fillStyle = '#8B4513';
+        ctx.ellipse(size / 2, 0, size, size / 2, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#90EE90';
         ctx.fill();
 
-        // Soil texture
-        ctx.beginPath();
-        ctx.ellipse(x, y + 5, 20, 7, 0, 0, Math.PI);
-        ctx.fillStyle = '#A0522D';
-        ctx.fill();
+        ctx.restore();
     }
 
-    /**
-     * Draw initial sprout
-     */
-    drawSprout(ctx, x, baseY, progress) {
-        const sproutHeight = progress * 30;
-
-        // Curved stem
-        ctx.beginPath();
-        ctx.moveTo(x, baseY);
-        ctx.quadraticCurveTo(
-            x + 5 * progress,
-            baseY - sproutHeight * 0.5,
-            x,
-            baseY - sproutHeight
-        );
-        ctx.strokeStyle = '#90EE90';
-        ctx.lineWidth = 3 + progress * 2;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // Tiny leaf bud
-        if (progress > 0.5) {
-            ctx.beginPath();
-            ctx.ellipse(x, baseY - sproutHeight, 5 * (progress - 0.5) * 2, 8 * (progress - 0.5) * 2, 0.3, 0, Math.PI * 2);
-            ctx.fillStyle = '#98FB98';
-            ctx.fill();
-        }
-    }
-
-    /**
-     * Draw plant stem
-     */
-    drawStem(ctx, x, baseY, heightProgress) {
-        const stemHeight = heightProgress * this.maxPlantHeight;
-
-        // Main stem with slight curve
-        ctx.beginPath();
-        ctx.moveTo(x, baseY);
-        ctx.quadraticCurveTo(
-            x + Math.sin(this.swayOffset) * 5,
-            baseY - stemHeight * 0.5,
-            x,
-            baseY - stemHeight
-        );
-
-        // Stem gradient
-        const gradient = ctx.createLinearGradient(x, baseY, x, baseY - stemHeight);
-        gradient.addColorStop(0, '#228B22');
-        gradient.addColorStop(1, '#32CD32');
-
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 6 - heightProgress * 2;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-    }
-
-    /**
-     * Draw leaves
-     */
-    drawLeaves(ctx, x, baseY, progress) {
-        const stemHeight = (0.3 + progress * 0.4) * this.maxPlantHeight;
-
-        // Left leaf
-        this.drawLeaf(ctx, x - 5, baseY - stemHeight * 0.4, -0.6, 15 * progress, 25 * progress);
-
-        // Right leaf
-        this.drawLeaf(ctx, x + 5, baseY - stemHeight * 0.5, 0.6, 15 * progress, 25 * progress);
-
-        // Top leaves if progress > 0.5
-        if (progress > 0.5) {
-            const topProgress = (progress - 0.5) * 2;
-            this.drawLeaf(ctx, x - 3, baseY - stemHeight * 0.7, -0.4, 10 * topProgress, 18 * topProgress);
-            this.drawLeaf(ctx, x + 3, baseY - stemHeight * 0.75, 0.4, 10 * topProgress, 18 * topProgress);
-        }
-    }
-
-    /**
-     * Draw a single leaf
-     */
     drawLeaf(ctx, x, y, angle, width, height) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);
 
-        // Leaf shape
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.quadraticCurveTo(width, -height * 0.3, width * 0.8, -height);
@@ -400,496 +338,801 @@ class Seed {
         const gradient = ctx.createLinearGradient(0, 0, width, -height);
         gradient.addColorStop(0, '#228B22');
         gradient.addColorStop(1, '#90EE90');
-
         ctx.fillStyle = gradient;
         ctx.fill();
 
-        // Leaf vein
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(width * 0.5, -height * 0.4, width * 0.7, -height * 0.8);
-        ctx.strokeStyle = 'rgba(0, 100, 0, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
         ctx.restore();
     }
 
-    /**
-     * Draw fruit/flower at top
-     */
-    drawFruit(ctx, x, baseY, progress) {
-        const stemHeight = this.maxPlantHeight;
-        const fruitY = baseY - stemHeight + 10;
-        const fruitSize = 20 + progress * 15;
-
-        // Different fruit rendering based on plant type
-        ctx.save();
-
-        if (this.plantKey === 'sunflower') {
-            // Sunflower - yellow petals around brown center
-            this.drawSunflower(ctx, x, fruitY, fruitSize, progress);
-        } else if (this.plantKey === 'carrot') {
-            // Carrot - orange root showing from soil
-            this.drawCarrot(ctx, x, baseY, fruitSize, progress);
-        } else {
-            // Default fruit (tomato, blueberry, lettuce)
-            this.drawDefaultFruit(ctx, x, fruitY, fruitSize, progress);
-        }
-
-        ctx.restore();
-    }
-
-    /**
-     * Draw sunflower
-     */
-    drawSunflower(ctx, x, y, size, progress) {
-        // Petals
-        const petalCount = 12;
-        for (let i = 0; i < petalCount; i++) {
-            const angle = (i / petalCount) * Math.PI * 2;
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angle);
-
+    drawFruit(ctx, x, y, plant) {
+        if (this.plantType === 'sunflower') {
+            // Sunflower head
+            const petalCount = 12;
+            for (let i = 0; i < petalCount; i++) {
+                const angle = (i / petalCount) * Math.PI * 2;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.ellipse(0, -25, 8, 20, 0, 0, Math.PI * 2);
+                ctx.fillStyle = plant.plantColor;
+                ctx.fill();
+                ctx.restore();
+            }
             ctx.beginPath();
-            ctx.ellipse(0, -size * 0.8, size * 0.25, size * 0.6, 0, 0, Math.PI * 2);
-            ctx.fillStyle = this.plant.plantColor;
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fillStyle = '#8B4513';
+            ctx.fill();
+        } else {
+            // Round fruit
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(x - 8, y - 8, 0, x, y, 25);
+            gradient.addColorStop(0, '#fff');
+            gradient.addColorStop(0.3, plant.plantColor);
+            gradient.addColorStop(1, plant.seedColor);
+            ctx.fillStyle = gradient;
             ctx.fill();
 
-            ctx.restore();
-        }
-
-        // Center
-        ctx.beginPath();
-        ctx.arc(x, y, size * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = '#8B4513';
-        ctx.fill();
-
-        // Center texture
-        ctx.beginPath();
-        ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
-        ctx.fillStyle = '#654321';
-        ctx.fill();
-    }
-
-    /**
-     * Draw carrot (visible from soil)
-     */
-    drawCarrot(ctx, x, baseY, size, progress) {
-        // Carrot top greens
-        for (let i = 0; i < 5; i++) {
-            const angle = (i - 2) * 0.3;
-            ctx.save();
-            ctx.translate(x, baseY - 30);
-            ctx.rotate(angle);
-
+            // Small stem
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -40 * progress);
-            ctx.strokeStyle = '#228B22';
+            ctx.moveTo(x, y - 25);
+            ctx.lineTo(x, y - 32);
+            ctx.strokeStyle = plant.stemColor;
             ctx.lineWidth = 3;
             ctx.stroke();
-
-            // Feathery leaves
-            for (let j = 1; j < 4; j++) {
-                ctx.beginPath();
-                ctx.moveTo(0, -j * 10);
-                ctx.lineTo(-8, -j * 10 - 5);
-                ctx.moveTo(0, -j * 10);
-                ctx.lineTo(8, -j * 10 - 5);
-                ctx.strokeStyle = '#32CD32';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            ctx.restore();
         }
-
-        // Carrot body peeking from soil
-        if (progress > 0.5) {
-            const carrotShow = (progress - 0.5) * 2;
-            ctx.beginPath();
-            ctx.moveTo(x - 12, baseY);
-            ctx.lineTo(x + 12, baseY);
-            ctx.lineTo(x, baseY + 20 * carrotShow);
-            ctx.closePath();
-            ctx.fillStyle = this.plant.plantColor;
-            ctx.fill();
-        }
-    }
-
-    /**
-     * Draw default round fruit
-     */
-    drawDefaultFruit(ctx, x, y, size, progress) {
-        // Main fruit body
-        ctx.beginPath();
-        ctx.arc(x, y, size * progress, 0, Math.PI * 2);
-
-        const gradient = ctx.createRadialGradient(
-            x - size * 0.3, y - size * 0.3, 0,
-            x, y, size
-        );
-        gradient.addColorStop(0, this.lightenColor(this.plant.plantColor, 30));
-        gradient.addColorStop(0.5, this.plant.plantColor);
-        gradient.addColorStop(1, this.darkenColor(this.plant.plantColor, 20));
-
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        // Highlight
-        ctx.beginPath();
-        ctx.ellipse(x - size * 0.25, y - size * 0.25, size * 0.2, size * 0.15, -0.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.fill();
-
-        // Small stem on top for tomato/blueberry
-        if (this.plantKey !== 'lettuce') {
-            ctx.beginPath();
-            ctx.moveTo(x - 3, y - size * progress + 2);
-            ctx.lineTo(x, y - size * progress - 5);
-            ctx.lineTo(x + 3, y - size * progress + 2);
-            ctx.fillStyle = '#228B22';
-            ctx.fill();
-        }
-    }
-
-    /**
-     * Draw sparkle effects
-     */
-    drawSparkles(ctx) {
-        this.sparkles.forEach(sparkle => {
-            ctx.beginPath();
-            ctx.arc(sparkle.x, sparkle.y, sparkle.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 200, ${sparkle.alpha})`;
-            ctx.fill();
-        });
-    }
-
-    /**
-     * Draw harvest animation
-     */
-    drawHarvestAnimation(ctx) {
-        ctx.save();
-
-        // Draw particles
-        this.harvestParticles.forEach(particle => {
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.size * particle.scale, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${particle.r}, ${particle.g}, ${particle.b}, ${particle.alpha})`;
-            ctx.fill();
-        });
-
-        // Draw floating icon
-        if (this.floatingIcon && this.floatingIcon.alpha > 0) {
-            ctx.globalAlpha = this.floatingIcon.alpha;
-            ctx.font = `${40 * this.floatingIcon.scale}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(this.plant.icon, this.floatingIcon.x, this.floatingIcon.y);
-        }
-
-        ctx.restore();
-    }
-
-    /**
-     * Check collision with a point (hand position)
-     */
-    checkCollision(pointX, pointY) {
-        if (this.isHarvested || this.isTouched) return false;
-
-        const dx = pointX - this.x;
-        const dy = pointY - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        return distance < this.hitRadius;
-    }
-
-    /**
-     * Start growth when touched by hand
-     */
-    touch() {
-        if (this.isTouched || this.isHarvested) return;
-
-        this.isTouched = true;
-        this.growthStartTime = Date.now();
-        this.growthStage = GrowthStage.SPROUTING;
-
-        // Play plant sound
-        if (typeof audioManager !== 'undefined') {
-            audioManager.play('plant');
-        }
-    }
-
-    /**
-     * Harvest the plant (called when growth completes)
-     */
-    harvest() {
-        if (this.isHarvested) return;
-
-        this.isHarvested = true;
-        this.growthStage = GrowthStage.HARVESTED;
-        this.createHarvestParticles();
-
-        // Create floating icon
-        this.floatingIcon = {
-            x: this.x,
-            y: this.y - this.maxPlantHeight,
-            alpha: 1,
-            scale: 1
-        };
-
-        // Play harvest sound
-        if (typeof audioManager !== 'undefined') {
-            audioManager.play('harvest');
-        }
-    }
-
-    /**
-     * Create particles for harvest animation
-     */
-    createHarvestParticles() {
-        const rgb = this.hexToRgb(this.plant.plantColor);
-        const particleCount = 12;
-
-        for (let i = 0; i < particleCount; i++) {
-            const angle = (Math.PI * 2 / particleCount) * i + Math.random() * 0.5;
-            const speed = 3 + Math.random() * 5;
-
-            this.harvestParticles.push({
-                x: this.x,
-                y: this.y - this.maxPlantHeight * 0.7,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 2,
-                size: 5 + Math.random() * 8,
-                scale: 1,
-                alpha: 1,
-                r: rgb.r,
-                g: rgb.g,
-                b: rgb.b
-            });
-        }
-
-        // Add some green leaf particles
-        for (let i = 0; i < 5; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = 2 + Math.random() * 3;
-
-            this.harvestParticles.push({
-                x: this.x + (Math.random() - 0.5) * 30,
-                y: this.y - this.maxPlantHeight * 0.5,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 1,
-                size: 4 + Math.random() * 6,
-                scale: 1,
-                alpha: 1,
-                r: 50,
-                g: 200,
-                b: 50
-            });
-        }
-    }
-
-    /**
-     * Check if harvest animation is complete
-     */
-    isAnimationComplete() {
-        return this.isHarvested && this.harvestParticles.length === 0 &&
-               (!this.floatingIcon || this.floatingIcon.alpha <= 0);
-    }
-
-    /**
-     * Set seed speed multiplier
-     */
-    setSpeed(multiplier) {
-        this.speed = this.baseSpeed * multiplier;
-    }
-
-    // Color utility functions
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : { r: 255, g: 255, b: 255 };
-    }
-
-    lightenColor(hex, percent) {
-        const rgb = this.hexToRgb(hex);
-        const lighten = (c) => Math.min(255, Math.floor(c + (255 - c) * (percent / 100)));
-        return `rgb(${lighten(rgb.r)}, ${lighten(rgb.g)}, ${lighten(rgb.b)})`;
-    }
-
-    darkenColor(hex, percent) {
-        const rgb = this.hexToRgb(hex);
-        const darken = (c) => Math.floor(c * (1 - percent / 100));
-        return `rgb(${darken(rgb.r)}, ${darken(rgb.g)}, ${darken(rgb.b)})`;
     }
 }
 
 /**
- * Garden Bed (Seed Spawner) - manages seed creation and the garden
+ * Represents a draggable seed
+ */
+class DraggableSeed {
+    constructor(x, y, plantType, canvas) {
+        this.x = x;
+        this.y = y;
+        this.homeX = x;
+        this.homeY = y;
+        this.plantType = plantType;
+        this.plant = PLANT_TYPES[plantType];
+        this.canvas = canvas;
+
+        this.size = 30;
+        this.hitRadius = 50;
+        this.isBeingHeld = false;
+        this.isPlanted = false;
+    }
+
+    /**
+     * Check if point is over the seed
+     */
+    isPointOver(x, y) {
+        if (this.isPlanted) return false;
+        const dx = x - this.x;
+        const dy = y - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.hitRadius;
+    }
+
+    /**
+     * Pick up the seed
+     */
+    pickup() {
+        this.isBeingHeld = true;
+    }
+
+    /**
+     * Move seed to hand position
+     */
+    moveTo(x, y) {
+        if (this.isBeingHeld) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    /**
+     * Drop the seed
+     */
+    drop() {
+        this.isBeingHeld = false;
+    }
+
+    /**
+     * Return to home position
+     */
+    returnHome() {
+        this.x = this.homeX;
+        this.y = this.homeY;
+        this.isBeingHeld = false;
+        this.isPlanted = false;
+    }
+
+    /**
+     * Mark as planted
+     */
+    plant() {
+        this.isPlanted = true;
+    }
+
+    /**
+     * Draw the seed
+     */
+    draw(ctx) {
+        if (this.isPlanted) return;
+
+        ctx.save();
+
+        // Glow if being held
+        if (this.isBeingHeld) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size + 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 200, 0.4)';
+            ctx.fill();
+        }
+
+        // Seed packet/container appearance
+        ctx.beginPath();
+        ctx.roundRect(this.x - this.size, this.y - this.size * 1.2, this.size * 2, this.size * 2.4, 8);
+        ctx.fillStyle = '#F5DEB3';
+        ctx.fill();
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Plant icon on packet
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.plant.icon, this.x, this.y);
+
+        // Label
+        ctx.font = 'bold 10px Arial';
+        ctx.fillStyle = '#5D4037';
+        ctx.fillText(this.plant.name, this.x, this.y + this.size);
+
+        ctx.restore();
+    }
+}
+
+/**
+ * Represents the watering can tool
+ */
+class WateringCan {
+    constructor(x, y, canvas) {
+        this.x = x;
+        this.y = y;
+        this.homeX = x;
+        this.homeY = y;
+        this.canvas = canvas;
+
+        this.width = 80;
+        this.height = 60;
+        this.hitRadius = 60;
+        this.isBeingHeld = false;
+        this.isWatering = false;
+        this.waterDrops = [];
+    }
+
+    /**
+     * Check if point is over the watering can
+     */
+    isPointOver(x, y) {
+        const dx = x - this.x;
+        const dy = y - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.hitRadius;
+    }
+
+    pickup() {
+        this.isBeingHeld = true;
+    }
+
+    moveTo(x, y) {
+        if (this.isBeingHeld) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    drop() {
+        this.isBeingHeld = false;
+        this.isWatering = false;
+    }
+
+    returnHome() {
+        this.x = this.homeX;
+        this.y = this.homeY;
+        this.isBeingHeld = false;
+        this.isWatering = false;
+    }
+
+    /**
+     * Start watering (create drops)
+     */
+    water() {
+        this.isWatering = true;
+        // Add water drops
+        for (let i = 0; i < 3; i++) {
+            this.waterDrops.push({
+                x: this.x + 30 + Math.random() * 10,
+                y: this.y + 20,
+                vy: 2 + Math.random() * 2,
+                alpha: 1
+            });
+        }
+    }
+
+    /**
+     * Update water drops
+     */
+    update(deltaTime) {
+        this.waterDrops.forEach(drop => {
+            drop.y += drop.vy;
+            drop.alpha -= 0.02;
+        });
+        this.waterDrops = this.waterDrops.filter(d => d.alpha > 0);
+    }
+
+    /**
+     * Draw the watering can
+     */
+    draw(ctx) {
+        ctx.save();
+
+        // Glow if being held
+        if (this.isBeingHeld) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.hitRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.3)';
+            ctx.fill();
+        }
+
+        const x = this.x;
+        const y = this.y;
+
+        // Can body
+        ctx.beginPath();
+        ctx.ellipse(x, y, 35, 25, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#4A90D9';
+        ctx.fill();
+        ctx.strokeStyle = '#2E5A87';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Spout
+        ctx.beginPath();
+        ctx.moveTo(x + 25, y - 5);
+        ctx.lineTo(x + 50, y - 20);
+        ctx.lineTo(x + 55, y - 15);
+        ctx.lineTo(x + 30, y + 5);
+        ctx.closePath();
+        ctx.fillStyle = '#4A90D9';
+        ctx.fill();
+        ctx.stroke();
+
+        // Handle
+        ctx.beginPath();
+        ctx.arc(x - 10, y - 30, 20, 0.5, Math.PI - 0.5);
+        ctx.strokeStyle = '#2E5A87';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+
+        // Water drops
+        this.waterDrops.forEach(drop => {
+            ctx.beginPath();
+            ctx.ellipse(drop.x, drop.y, 4, 6, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100, 180, 255, ${drop.alpha})`;
+            ctx.fill();
+        });
+
+        ctx.restore();
+    }
+}
+
+/**
+ * Plant needs management system
+ */
+class PlantNeeds {
+    constructor() {
+        // Need levels (0 to 1)
+        this.water = 0.7;
+        this.sun = 0.8;
+        this.food = 0.6;
+
+        // Depletion rates per second
+        this.waterDepleteRate = 0.03;
+        this.sunDepleteRate = 0.02;
+        this.foodDepleteRate = 0.025;
+    }
+
+    /**
+     * Update needs (deplete over time)
+     */
+    update(deltaTime) {
+        this.water = Math.max(0, this.water - this.waterDepleteRate * deltaTime);
+        this.sun = Math.max(0, this.sun - this.sunDepleteRate * deltaTime);
+        this.food = Math.max(0, this.food - this.foodDepleteRate * deltaTime);
+    }
+
+    /**
+     * Add water
+     */
+    addWater(amount = 0.15) {
+        this.water = Math.min(1, this.water + amount);
+    }
+
+    /**
+     * Add sun (from sun interaction)
+     */
+    addSun(amount = 0.1) {
+        this.sun = Math.min(1, this.sun + amount);
+    }
+
+    /**
+     * Add food/fertilizer
+     */
+    addFood(amount = 0.12) {
+        this.food = Math.min(1, this.food + amount);
+    }
+
+    /**
+     * Get average satisfaction level
+     */
+    getAverageSatisfaction() {
+        return (this.water + this.sun + this.food) / 3;
+    }
+
+    /**
+     * Get color based on level
+     */
+    getBarColor(level) {
+        if (level > 0.6) return '#4ade80'; // Green
+        if (level > 0.3) return '#fbbf24'; // Yellow
+        return '#ef4444'; // Red
+    }
+
+    /**
+     * Draw needs bars
+     */
+    draw(ctx, x, y) {
+        const barWidth = 150;
+        const barHeight = 25;
+        const spacing = 40;
+
+        ctx.save();
+
+        // Background panel
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.roundRect(x - 20, y - 20, barWidth + 80, spacing * 3 + 30, 15);
+        ctx.fill();
+
+        // Title
+        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'left';
+        ctx.fillText('Plant Needs', x, y);
+
+        // Water bar
+        this.drawBar(ctx, x, y + spacing, barWidth, barHeight, this.water, '💧', 'Water');
+
+        // Sun bar
+        this.drawBar(ctx, x, y + spacing * 2, barWidth, barHeight, this.sun, '☀️', 'Sun');
+
+        // Food bar
+        this.drawBar(ctx, x, y + spacing * 3, barWidth, barHeight, this.food, '🌱', 'Food');
+
+        ctx.restore();
+    }
+
+    drawBar(ctx, x, y, width, height, level, icon, label) {
+        // Icon
+        ctx.font = '20px Arial';
+        ctx.fillText(icon, x, y + height / 2 + 6);
+
+        // Bar background
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.roundRect(x + 30, y, width, height, 5);
+        ctx.fill();
+
+        // Bar fill
+        ctx.fillStyle = this.getBarColor(level);
+        ctx.roundRect(x + 30, y, width * level, height, 5);
+        ctx.fill();
+
+        // Bar border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.roundRect(x + 30, y, width, height, 5);
+        ctx.stroke();
+
+        // Label
+        ctx.font = '12px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x + 30 + width / 2, y + height / 2 + 4);
+    }
+}
+
+/**
+ * Sun interaction area
+ */
+class SunArea {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = 60;
+        this.pulsePhase = 0;
+    }
+
+    isPointOver(x, y) {
+        const dx = x - this.x;
+        const dy = y - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.radius;
+    }
+
+    update(deltaTime) {
+        this.pulsePhase += deltaTime * 3;
+    }
+
+    draw(ctx) {
+        ctx.save();
+
+        const pulse = 1 + Math.sin(this.pulsePhase) * 0.1;
+
+        // Glow
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * pulse);
+        gradient.addColorStop(0, 'rgba(255, 220, 100, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(255, 200, 50, 0.4)');
+        gradient.addColorStop(1, 'rgba(255, 180, 0, 0)');
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Sun icon
+        ctx.font = '50px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('☀️', this.x, this.y);
+
+        ctx.restore();
+    }
+}
+
+/**
+ * Fertilizer/Food bag
+ */
+class FertilizerBag {
+    constructor(x, y, canvas) {
+        this.x = x;
+        this.y = y;
+        this.homeX = x;
+        this.homeY = y;
+        this.canvas = canvas;
+
+        this.width = 60;
+        this.height = 70;
+        this.hitRadius = 50;
+        this.isBeingHeld = false;
+    }
+
+    isPointOver(x, y) {
+        const dx = x - this.x;
+        const dy = y - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.hitRadius;
+    }
+
+    pickup() {
+        this.isBeingHeld = true;
+    }
+
+    moveTo(x, y) {
+        if (this.isBeingHeld) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    drop() {
+        this.isBeingHeld = false;
+    }
+
+    returnHome() {
+        this.x = this.homeX;
+        this.y = this.homeY;
+        this.isBeingHeld = false;
+    }
+
+    draw(ctx) {
+        ctx.save();
+
+        if (this.isBeingHeld) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.hitRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(144, 238, 144, 0.3)';
+            ctx.fill();
+        }
+
+        // Bag
+        ctx.beginPath();
+        ctx.roundRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height, 8);
+        ctx.fillStyle = '#8B4513';
+        ctx.fill();
+        ctx.strokeStyle = '#5D4037';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Label
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🌱', this.x, this.y - 10);
+
+        ctx.font = 'bold 10px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('FOOD', this.x, this.y + 20);
+
+        ctx.restore();
+    }
+}
+
+/**
+ * Main Garden manager - coordinates all garden elements
  */
 class GardenBed {
     constructor(canvas) {
         this.canvas = canvas;
-        this.seeds = [];
-        this.spawnTimer = 0;
-        this.baseSpawnInterval = 2000; // Slower than balloons - more therapeutic
-        this.spawnInterval = this.baseSpawnInterval;
-        this.speedMultiplier = 1;
 
-        // Soil strip height at bottom
-        this.soilHeight = 60;
+        // Position elements
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height * 0.65;
+
+        // Create plant pot in center
+        this.plantPot = new PlantPot(centerX, centerY, canvas);
+
+        // Create plant needs
+        this.plantNeeds = new PlantNeeds();
+
+        // Create tools and seeds (positioned around the pot)
+        this.seed = null;
+        this.wateringCan = new WateringCan(canvas.width - 150, canvas.height - 150, canvas);
+        this.fertilizerBag = new FertilizerBag(150, canvas.height - 150, canvas);
+        this.sunArea = new SunArea(canvas.width - 150, 150);
+
+        // Currently held item
+        this.heldItem = null;
+
+        // Available seeds
+        this.availableSeeds = [];
+        this.currentSeedIndex = 0;
+
+        // Spawn initial seed
+        this.spawnNewSeed();
+
+        // Interaction timers
+        this.sunInteractionTime = 0;
+        this.waterInteractionTime = 0;
+        this.foodInteractionTime = 0;
     }
 
     /**
-     * Update garden bed and all seeds
+     * Spawn a new seed packet
      */
-    update(deltaTime) {
-        this.spawnTimer += deltaTime * 1000;
+    spawnNewSeed() {
+        const plantTypes = Object.keys(PLANT_TYPES);
+        const plantType = plantTypes[this.currentSeedIndex % plantTypes.length];
+        this.currentSeedIndex++;
 
-        // Spawn new seed if timer elapsed
-        if (this.spawnTimer >= this.spawnInterval) {
-            this.spawnSeed();
-            this.spawnTimer = 0;
-        }
-
-        // Update all seeds
-        this.seeds.forEach(seed => {
-            seed.update(deltaTime, this.speedMultiplier);
-        });
-
-        // Remove off-screen and fully animated seeds
-        this.seeds = this.seeds.filter(seed =>
-            !seed.isOffScreen && !seed.isAnimationComplete()
+        this.seed = new DraggableSeed(
+            this.canvas.width / 2,
+            100,
+            plantType,
+            this.canvas
         );
     }
 
     /**
-     * Draw soil strip and all seeds
+     * Update all garden elements
      */
-    draw(ctx) {
-        // Draw soil strip at bottom
-        this.drawSoil(ctx);
+    update(deltaTime) {
+        // Update needs if plant is growing
+        if (this.plantPot.growthStage !== GrowthStage.EMPTY) {
+            this.plantNeeds.update(deltaTime);
 
-        // Draw seeds in order (oldest first so newest appear on top)
-        this.seeds.forEach(seed => {
-            seed.draw(ctx);
-        });
-    }
-
-    /**
-     * Draw the soil strip at bottom of screen
-     */
-    drawSoil(ctx) {
-        const soilY = this.canvas.height - this.soilHeight;
-
-        // Main soil
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(0, soilY, this.canvas.width, this.soilHeight);
-
-        // Soil texture - darker layer
-        ctx.fillStyle = '#654321';
-        ctx.fillRect(0, soilY, this.canvas.width, 10);
-
-        // Add some grass tufts
-        ctx.strokeStyle = '#228B22';
-        ctx.lineWidth = 2;
-        for (let x = 20; x < this.canvas.width; x += 40 + Math.random() * 30) {
-            const grassHeight = 15 + Math.random() * 10;
-            ctx.beginPath();
-            ctx.moveTo(x, soilY);
-            ctx.quadraticCurveTo(x - 5, soilY - grassHeight / 2, x - 3, soilY - grassHeight);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, soilY);
-            ctx.quadraticCurveTo(x + 3, soilY - grassHeight / 2, x + 5, soilY - grassHeight);
-            ctx.stroke();
+            // Update plant growth based on needs
+            const satisfaction = this.plantNeeds.getAverageSatisfaction();
+            this.plantPot.updateGrowth(satisfaction, deltaTime);
         }
+
+        // Update sun area animation
+        this.sunArea.update(deltaTime);
+
+        // Update watering can drops
+        this.wateringCan.update(deltaTime);
     }
 
     /**
-     * Spawn a new seed from soil
-     */
-    spawnSeed(specificPlant = null) {
-        const padding = 100;
-        const x = padding + Math.random() * (this.canvas.width - padding * 2);
-        const y = this.canvas.height - this.soilHeight + 20; // Start just above soil
-
-        const plantKeys = Object.keys(PLANT_TYPES);
-        const plantKey = specificPlant || plantKeys[Math.floor(Math.random() * plantKeys.length)];
-
-        const seed = new Seed(x, y, plantKey, this.canvas);
-        seed.setSpeed(this.speedMultiplier);
-        this.seeds.push(seed);
-
-        return seed;
-    }
-
-    /**
-     * Spawn seed of specific plant type
-     */
-    spawnSpecificSeed(plantKey) {
-        return this.spawnSeed(plantKey);
-    }
-
-    /**
-     * Check collision with hand positions and trigger growth
-     * Returns array of touched plant keys (for harvest tracking)
+     * Handle hand interactions
      */
     checkCollisions(handPositions) {
         const harvestedPlants = [];
 
-        handPositions.forEach(pos => {
-            this.seeds.forEach(seed => {
-                if (!seed.isTouched && !seed.isHarvested && seed.checkCollision(pos.x, pos.y)) {
-                    seed.touch();
-                    // The seed will harvest itself after growth completes
-                    // We track it here for when it completes
-                }
-            });
-        });
-
-        // Check for completed harvests
-        this.seeds.forEach(seed => {
-            if (seed.isHarvested && seed.harvestAnimationTime < 0.1) {
-                // Just harvested this frame
-                harvestedPlants.push(seed.plantKey);
+        if (!handPositions || handPositions.length === 0) {
+            // Release any held items
+            if (this.heldItem) {
+                this.releaseItem();
             }
-        });
+            return harvestedPlants;
+        }
+
+        const handPos = handPositions[0]; // Use first hand
+
+        // If holding something, move it
+        if (this.heldItem) {
+            this.heldItem.moveTo(handPos.x, handPos.y);
+
+            // Check for drop interactions
+            if (this.heldItem === this.seed && this.plantPot.isPointOver(handPos.x, handPos.y)) {
+                // Drop seed in pot
+                if (this.plantPot.plantSeed(this.seed.plantType)) {
+                    this.seed.plant();
+                    this.heldItem = null;
+                    audioManager.play('plant');
+
+                    // Reset needs for new plant
+                    this.plantNeeds = new PlantNeeds();
+
+                    // Spawn new seed after delay
+                    setTimeout(() => this.spawnNewSeed(), 1000);
+                }
+            } else if (this.heldItem === this.wateringCan && this.plantPot.isPointOver(handPos.x, handPos.y)) {
+                // Water the plant
+                this.waterInteractionTime += 0.016;
+                if (this.waterInteractionTime > 0.3) {
+                    this.plantNeeds.addWater();
+                    this.wateringCan.water();
+                    this.waterInteractionTime = 0;
+                    audioManager.play('water');
+                }
+            } else if (this.heldItem === this.fertilizerBag && this.plantPot.isPointOver(handPos.x, handPos.y)) {
+                // Feed the plant
+                this.foodInteractionTime += 0.016;
+                if (this.foodInteractionTime > 0.5) {
+                    this.plantNeeds.addFood();
+                    this.foodInteractionTime = 0;
+                    audioManager.play('plant');
+                }
+            }
+        } else {
+            // Try to pick something up
+            if (this.seed && !this.seed.isPlanted && this.seed.isPointOver(handPos.x, handPos.y)) {
+                this.seed.pickup();
+                this.heldItem = this.seed;
+            } else if (this.wateringCan.isPointOver(handPos.x, handPos.y)) {
+                this.wateringCan.pickup();
+                this.heldItem = this.wateringCan;
+            } else if (this.fertilizerBag.isPointOver(handPos.x, handPos.y)) {
+                this.fertilizerBag.pickup();
+                this.heldItem = this.fertilizerBag;
+            }
+
+            // Sun interaction (just hover)
+            if (this.sunArea.isPointOver(handPos.x, handPos.y)) {
+                this.sunInteractionTime += 0.016;
+                if (this.sunInteractionTime > 0.2) {
+                    this.plantNeeds.addSun();
+                    this.sunInteractionTime = 0;
+                }
+            }
+
+            // Check for harvest
+            if (this.plantPot.growthStage === GrowthStage.HARVESTABLE &&
+                this.plantPot.isPointOver(handPos.x, handPos.y)) {
+                const harvested = this.plantPot.harvest();
+                if (harvested) {
+                    harvestedPlants.push(harvested);
+                    audioManager.play('harvest');
+
+                    // Spawn new seed
+                    setTimeout(() => this.spawnNewSeed(), 500);
+                }
+            }
+        }
 
         return harvestedPlants;
     }
 
     /**
-     * Set difficulty parameters
+     * Release currently held item
      */
-    setDifficulty(level) {
-        // Slightly decrease spawn interval as level increases, but keep it relaxing
-        this.spawnInterval = Math.max(1200, this.baseSpawnInterval - (level - 1) * 80);
+    releaseItem() {
+        if (this.heldItem) {
+            this.heldItem.drop();
 
-        // Gentle speed increase
-        this.speedMultiplier = 1 + (level - 1) * 0.1;
+            // Return tools to home position
+            if (this.heldItem === this.wateringCan || this.heldItem === this.fertilizerBag) {
+                this.heldItem.returnHome();
+            } else if (this.heldItem === this.seed && !this.seed.isPlanted) {
+                this.seed.returnHome();
+            }
+
+            this.heldItem = null;
+        }
     }
 
     /**
-     * Clear all seeds
+     * Draw the entire garden scene
+     */
+    draw(ctx) {
+        // Draw sun area
+        this.sunArea.draw(ctx);
+
+        // Draw plant pot
+        this.plantPot.draw(ctx);
+
+        // Draw seed (if not planted)
+        if (this.seed) {
+            this.seed.draw(ctx);
+        }
+
+        // Draw tools
+        this.wateringCan.draw(ctx);
+        this.fertilizerBag.draw(ctx);
+
+        // Draw needs panel (only if plant is growing)
+        if (this.plantPot.growthStage !== GrowthStage.EMPTY) {
+            this.plantNeeds.draw(ctx, 30, 100);
+        }
+
+        // Draw instructions
+        this.drawInstructions(ctx);
+    }
+
+    /**
+     * Draw helpful instructions
+     */
+    drawInstructions(ctx) {
+        ctx.save();
+        ctx.font = '18px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.textAlign = 'center';
+
+        if (this.plantPot.growthStage === GrowthStage.EMPTY) {
+            ctx.fillText('Pick up the seed and drop it in the pot!', this.canvas.width / 2, 50);
+        } else if (this.plantPot.growthStage === GrowthStage.HARVESTABLE) {
+            ctx.fillText('Your plant is ready! Touch it to harvest!', this.canvas.width / 2, 50);
+        } else {
+            ctx.fillText('Keep your plant healthy - water it, give it sun and food!', this.canvas.width / 2, 50);
+        }
+
+        ctx.restore();
+    }
+
+    /**
+     * Clear the garden (for reset)
      */
     clear() {
-        this.seeds = [];
-        this.spawnTimer = 0;
+        this.plantPot = new PlantPot(this.canvas.width / 2, this.canvas.height * 0.65, this.canvas);
+        this.plantNeeds = new PlantNeeds();
+        this.seed = null;
+        this.heldItem = null;
+        this.spawnNewSeed();
     }
 
-    /**
-     * Get active seed count
-     */
+    // Compatibility methods
+    setDifficulty(level) {
+        // Adjust depletion rates based on level
+        const modifier = 1 + (level - 1) * 0.1;
+        this.plantNeeds.waterDepleteRate = 0.03 * modifier;
+        this.plantNeeds.sunDepleteRate = 0.02 * modifier;
+        this.plantNeeds.foodDepleteRate = 0.025 * modifier;
+    }
+
     getActiveSeedCount() {
-        return this.seeds.filter(s => !s.isHarvested).length;
+        return this.plantPot.growthStage !== GrowthStage.EMPTY ? 1 : 0;
     }
 }
 
-// Backward compatibility - keep BALLOON_COLORS alias
+// Backward compatibility alias
 const BALLOON_COLORS = PLANT_TYPES;
