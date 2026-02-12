@@ -137,25 +137,25 @@ class DDAEngine {
             let speedTarget = 1.0;
             let hitBoxTarget = 1.0;
 
-            if (harvestRate > 3) {
-                // High performer: make slightly harder
-                speedTarget = 1.0 + (harvestRate - 3) * 0.1; // up to ~1.5x
-                hitBoxTarget = 1.0 - (harvestRate - 3) * 0.05; // down to ~0.8x
-            } else if (harvestRate < 1) {
-                // Struggling: make easier
-                speedTarget = 0.7;
-                hitBoxTarget = 1.5; // magnetic/easier
+            if (harvestRate > 4) {
+                // High performer: gentle increase only for very fast players
+                speedTarget = 1.0 + (harvestRate - 4) * 0.08; // up to ~1.4x
+                hitBoxTarget = 1.0 - (harvestRate - 4) * 0.03; // down to ~0.85x
+            } else if (harvestRate < 2) {
+                // Struggling: make noticeably easier (tuned for dementia patients)
+                speedTarget = 0.6;
+                hitBoxTarget = 1.7; // very magnetic/forgiving
             }
 
-            // Idle player gets easier
-            if (player.idleTime > 5) {
-                speedTarget *= 0.7;
-                hitBoxTarget *= 1.3;
+            // Idle player gets easier (3s — dementia patients lose focus quickly)
+            if (player.idleTime > 3) {
+                speedTarget *= 0.6;
+                hitBoxTarget *= 1.4;
             }
 
-            // Clamp values
-            speedTarget = Math.max(0.5, Math.min(2.0, speedTarget));
-            hitBoxTarget = Math.max(0.7, Math.min(1.8, hitBoxTarget));
+            // Clamp values (wider range on the easy side)
+            speedTarget = Math.max(0.4, Math.min(1.8, speedTarget));
+            hitBoxTarget = Math.max(0.8, Math.min(2.0, hitBoxTarget));
 
             player.targetSeedSpeed = speedTarget;
             player.targetHitBoxMultiplier = hitBoxTarget;

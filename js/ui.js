@@ -5,6 +5,40 @@
 
 class UIManager {
     constructor() {
+        // State (non-DOM)
+        this.currentScreen = 'welcome';
+        this.countdownInterval = null;
+        this.isDraggingVolume = false;
+
+        // Settings state
+        this.settings = {
+            soundEnabled: true,
+            volume: 0.7,
+            contrastMode: 'normal',
+            background: 'sky'
+        };
+
+        // Hand hover state
+        this.hoverState = {
+            currentElement: null,
+            hoverStartTime: 0,
+            hoverDuration: 3000, // 3 seconds to activate
+            isHovering: false
+        };
+
+        // All hoverable elements
+        this.hoverableElements = [];
+
+        // DOM element references (populated in _cacheElements)
+        this.screens = {};
+        this.hud = {};
+        this.hud2P = {};
+    }
+
+    /**
+     * Cache all DOM element references (called at start of init, after DOM is ready)
+     */
+    _cacheElements() {
         // Screen elements
         this.screens = {
             welcome: document.getElementById('welcomeScreen'),
@@ -84,9 +118,6 @@ class UIManager {
         this.contrastHigh = document.getElementById('contrastHigh');
         this.contrastMax = document.getElementById('contrastMax');
 
-        // Volume slider drag state
-        this.isDraggingVolume = false;
-
         // Background elements
         this.natureBackground = document.getElementById('natureBackground');
         this.bgNone = document.getElementById('bgNone');
@@ -94,35 +125,15 @@ class UIManager {
         this.bgBeach = document.getElementById('bgBeach');
         this.bgForest = document.getElementById('bgForest');
         this.bgSky = document.getElementById('bgSky');
-
-        // State
-        this.currentScreen = 'welcome';
-        this.countdownInterval = null;
-
-        // Settings state
-        this.settings = {
-            soundEnabled: true,
-            volume: 0.7,
-            contrastMode: 'normal',
-            background: 'sky'
-        };
-
-        // Hand hover state
-        this.hoverState = {
-            currentElement: null,
-            hoverStartTime: 0,
-            hoverDuration: 3000, // 3 seconds to activate
-            isHovering: false
-        };
-
-        // All hoverable elements
-        this.hoverableElements = [];
     }
 
     /**
      * Initialize UI event listeners
      */
     init(callbacks) {
+        // Cache all DOM elements (safe: called after DOMContentLoaded)
+        this._cacheElements();
+
         this.callbacks = callbacks || {};
 
         // Traditional click handlers (still work)
@@ -484,7 +495,7 @@ class UIManager {
         this.updateVolumeUI();
 
         // Play a pop sound to demonstrate volume
-        audioManager.play('pop');
+        audioManager.play('water');
 
         this.saveSettings();
     }
@@ -536,7 +547,7 @@ class UIManager {
         document.addEventListener('mouseup', () => {
             if (this.isDraggingVolume) {
                 this.isDraggingVolume = false;
-                audioManager.play('pop');
+                audioManager.play('water');
                 this.saveSettings();
             }
         });
@@ -556,7 +567,7 @@ class UIManager {
         document.addEventListener('touchend', () => {
             if (this.isDraggingVolume) {
                 this.isDraggingVolume = false;
-                audioManager.play('pop');
+                audioManager.play('water');
                 this.saveSettings();
             }
         });
@@ -564,7 +575,7 @@ class UIManager {
         // Click directly on the bar
         this.volumeSlider.addEventListener('click', (e) => {
             setVolumeFromEvent(e);
-            audioManager.play('pop');
+            audioManager.play('water');
             this.saveSettings();
         });
     }

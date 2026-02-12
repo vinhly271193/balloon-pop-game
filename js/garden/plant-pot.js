@@ -35,6 +35,9 @@ class PlantPot {
         // Watering progress (0-1, set by GardenManager when can is held over pot)
         this.waterPourProgress = 0;
         this.isBeingWatered = false;
+
+        // Growth stage pulse effect (1 = full pulse, decays to 0)
+        this.growthPulse = 0;
     }
 
     /**
@@ -102,6 +105,8 @@ class PlantPot {
                 this.growthProgress = 1;
                 break;
         }
+        // Trigger visual pulse on every stage transition
+        this.growthPulse = 1;
     }
 
     /**
@@ -122,6 +127,11 @@ class PlantPot {
      * Update water level and overflow particles
      */
     update(deltaTime) {
+        // Decay growth pulse (fast decay over ~0.4s)
+        if (this.growthPulse > 0) {
+            this.growthPulse = Math.max(0, this.growthPulse - deltaTime * 2.5);
+        }
+
         // Lerp water level toward target
         this.waterLevel += (this.waterLevelTarget - this.waterLevel) * Math.min(1, 4 * deltaTime);
         this.wavePhase += deltaTime * 3;
@@ -396,6 +406,15 @@ class PlantPot {
 
         if (!plant) return;
 
+        // Apply growth pulse scale effect (centered on plant base)
+        if (this.growthPulse > 0) {
+            const pulseScale = 1 + this.growthPulse * 0.15; // max 15% larger
+            ctx.save();
+            ctx.translate(x, baseY);
+            ctx.scale(pulseScale, pulseScale);
+            ctx.translate(-x, -baseY);
+        }
+
         switch (this.growthStage) {
             case GrowthStage.SEED_PLANTED:
                 // Show seed in soil
@@ -475,6 +494,11 @@ class PlantPot {
                     ctx.fill();
                 }
                 break;
+        }
+
+        // Close growth pulse transform
+        if (this.growthPulse > 0) {
+            ctx.restore();
         }
     }
 

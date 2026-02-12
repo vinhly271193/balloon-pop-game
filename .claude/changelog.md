@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-02-12 — Code health: refactoring, audio pooling, DDA tuning, growth feedback
+
+### Refactoring
+- **Garden-bed zone helpers**: Added `getZoneKeys()`, `getZoneNeeds()`, `getZonePot()`, `getZoneSeed()`, `getZoneWateringCan()`, `getZoneFertilizer()`, `getZoneSunArea()` — replaces ~30 occurrences of `if (competitive) { map.get(key) } else { this.prop }` with single-line helper calls
+- **Collapsed update/draw/setDifficulty**: Sun areas, watering cans, seeds, tools, and needs panels now iterate `getZoneKeys()` instead of branching on game mode
+- **DDA works in all modes**: `applyDDA()` now maps playerId to zone key, applying hitbox and depletion adjustments in solo/co-op (previously only competitive)
+- **UIManager DOM-ready guard**: Moved all 60+ `document.getElementById()` calls from constructor to `_cacheElements()` called at start of `init()` — prevents silent null references if script runs before DOM is ready
+
+### New features
+- **Growth pulse effect**: Plants visually scale up 15% on each growth stage transition (seed→sprout→growing→mature→harvestable) with a smooth 0.4s decay — gives clear visual feedback that the plant is progressing
+- **Master audio gain node**: All sounds now route through a single master GainNode instead of connecting directly to `audioContext.destination` — proper volume control and single point for muting
+
+### Improvements
+- **DDA tuned for dementia patients**: Struggling threshold raised (1→2 harvests/10s triggers help sooner), high performer threshold raised (3→4, less aggressive difficulty increase), ease factors increased (speed 0.6x, hitbox 1.7x), idle timeout lowered (5s→3s for faster re-engagement), wider clamp range on easy side (hitbox up to 2.0x)
+- **Cached noise buffer**: White noise AudioBuffer is now pre-generated once during init instead of recreating 0.5s of random data on every plant sound
+- **Removed legacy pop alias**: Deleted `this.sounds.pop` from audio.js and replaced 4 remaining `audioManager.play('pop')` calls in ui.js with `'water'`
+
+### Files changed
+- `js/garden/garden-bed.js` — Zone helper methods, collapsed update/draw/setDifficulty, applyDDA for all modes
+- `js/audio.js` — Master GainNode, cached noise buffer, removed pop alias
+- `js/ui.js` — DOM queries moved to _cacheElements(), pop→water sound
+- `js/dda.js` — Tuned thresholds and clamp ranges for dementia patients
+- `js/garden/plant-pot.js` — Growth pulse property, trigger on stage advance, decay in update, scale transform in drawPlant
+
+---
+
 ## 2026-02-12 — Major robustness overhaul: fix crashes, freezes, and gameplay blockers
 
 ### Game-breaking fixes

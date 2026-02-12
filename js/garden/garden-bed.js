@@ -103,6 +103,46 @@ class GardenBed {
         this.hintPlayerIdleTime = new Map();
     }
 
+    // ── Zone abstraction helpers ──────────────────────────────────
+
+    /** Returns zone keys for the current game mode */
+    getZoneKeys() {
+        return this.gameMode === 'competitive' ? [1, 2] : ['shared'];
+    }
+
+    /** Get plant needs for a zone */
+    getZoneNeeds(zoneKey) {
+        return this.plantNeedsMap.get(zoneKey) || this.plantNeeds;
+    }
+
+    /** Get plant pot for a zone */
+    getZonePot(zoneKey) {
+        if (this.gameMode === 'competitive') return this.plantPots[zoneKey - 1];
+        return this.plantPots[0];
+    }
+
+    /** Get seed for a zone */
+    getZoneSeed(zoneKey) {
+        return this.seedsMap.get(zoneKey) || this.seed;
+    }
+
+    /** Get watering can for a zone */
+    getZoneWateringCan(zoneKey) {
+        return this.wateringCansMap.get(zoneKey) || this.wateringCan;
+    }
+
+    /** Get fertilizer bag for a zone */
+    getZoneFertilizer(zoneKey) {
+        return this.fertilizerBagsMap.get(zoneKey) || this.fertilizerBag;
+    }
+
+    /** Get sun area for a zone */
+    getZoneSunArea(zoneKey) {
+        return this.sunAreasMap.get(zoneKey) || this.sunArea;
+    }
+
+    // ── Configuration ──────────────────────────────────────────
+
     /**
      * Configure garden for multi-player
      */
@@ -294,40 +334,31 @@ class GardenBed {
     applyDDA(playerId, { seedSpeed, hitBoxMultiplier }) {
         this.ddaModifiers.set(playerId, { seedSpeed, hitBoxMultiplier });
 
-        // Apply hitbox multiplier to player's tools
-        if (this.gameMode === 'competitive') {
-            const pot = this.plantPots[playerId - 1];
-            if (pot) {
-                pot.hitRadius = 80 * hitBoxMultiplier;
-            }
+        // Map playerId to the relevant zone key
+        const zoneKey = this.gameMode === 'competitive' ? playerId : 'shared';
+        // In co-op/solo, only apply DDA from player 1 (avoid double-applying)
+        if (this.gameMode !== 'competitive' && playerId !== 1) return;
 
-            const wateringCan = this.wateringCansMap.get(playerId);
-            if (wateringCan) {
-                wateringCan.hitRadius = 60 * hitBoxMultiplier;
-            }
+        const pot = this.getZonePot(zoneKey);
+        if (pot) pot.hitRadius = 80 * hitBoxMultiplier;
 
-            const fertilizer = this.fertilizerBagsMap.get(playerId);
-            if (fertilizer) {
-                fertilizer.hitRadius = 50 * hitBoxMultiplier;
-            }
+        const wateringCan = this.getZoneWateringCan(zoneKey);
+        if (wateringCan) wateringCan.hitRadius = 60 * hitBoxMultiplier;
 
-            const sunArea = this.sunAreasMap.get(playerId);
-            if (sunArea) {
-                sunArea.radius = 120 * hitBoxMultiplier;
-            }
+        const fertilizer = this.getZoneFertilizer(zoneKey);
+        if (fertilizer) fertilizer.hitRadius = 50 * hitBoxMultiplier;
 
-            const seed = this.seedsMap.get(playerId);
-            if (seed) {
-                seed.hitRadius = 50 * hitBoxMultiplier;
-            }
+        const sunArea = this.getZoneSunArea(zoneKey);
+        if (sunArea) sunArea.radius = 120 * hitBoxMultiplier;
 
-            // Apply depletion rate modifier
-            const needs = this.plantNeedsMap.get(playerId);
-            if (needs) {
-                needs.waterDepleteRate = 0.03 * seedSpeed;
-                needs.sunDepleteRate = 0.02 * seedSpeed;
-                needs.foodDepleteRate = 0.025 * seedSpeed;
-            }
+        const seed = this.getZoneSeed(zoneKey);
+        if (seed) seed.hitRadius = 50 * hitBoxMultiplier;
+
+        const needs = this.getZoneNeeds(zoneKey);
+        if (needs) {
+            needs.waterDepleteRate = 0.03 * seedSpeed;
+            needs.sunDepleteRate = 0.02 * seedSpeed;
+            needs.foodDepleteRate = 0.025 * seedSpeed;
         }
     }
 
@@ -343,15 +374,14 @@ class GardenBed {
      * Returns { fromX, fromY, toX, toY, hintType } or null
      */
     determineHintForZone(zoneKey) {
-        const isCompetitive = this.gameMode === 'competitive';
-        const pot = isCompetitive ? this.plantPots[zoneKey - 1] : this.plantPots[0];
+        const pot = this.getZonePot(zoneKey);
         if (!pot) return null;
 
-        const seed = isCompetitive ? this.seedsMap.get(zoneKey) : this.seed;
-        const wateringCan = isCompetitive ? this.wateringCansMap.get(zoneKey) : this.wateringCan;
-        const fertilizerBag = isCompetitive ? this.fertilizerBagsMap.get(zoneKey) : this.fertilizerBag;
-        const sunArea = isCompetitive ? this.sunAreasMap.get(zoneKey) : this.sunArea;
-        const needs = isCompetitive ? this.plantNeedsMap.get(zoneKey) : this.plantNeeds;
+        const seed = this.getZoneSeed(zoneKey);
+        const wateringCan = this.getZoneWateringCan(zoneKey);
+        const fertilizerBag = this.getZoneFertilizer(zoneKey);
+        const sunArea = this.getZoneSunArea(zoneKey);
+        const needs = this.getZoneNeeds(zoneKey);
 
         // Phase 1: Empty pot + seed exists → arrow from seed to pot
         if (pot.growthStage === GrowthStage.EMPTY && seed && !seed.isPlanted) {
@@ -512,18 +542,10 @@ class GardenBed {
             }
         }
 
-        // Update sun areas
-        if (this.gameMode === 'competitive') {
-            this.sunAreasMap.forEach(sunArea => sunArea.update(deltaTime));
-        } else {
-            this.sunArea.update(deltaTime);
-        }
-
-        // Update watering cans
-        if (this.gameMode === 'competitive') {
-            this.wateringCansMap.forEach(can => can.update(deltaTime));
-        } else {
-            this.wateringCan.update(deltaTime);
+        // Update sun areas and watering cans (per zone)
+        for (const zk of this.getZoneKeys()) {
+            this.getZoneSunArea(zk).update(deltaTime);
+            this.getZoneWateringCan(zk).update(deltaTime);
         }
 
         // Update golden watering cans
@@ -691,13 +713,13 @@ class GardenBed {
     processHandInteraction(handPos, zoneKey) {
         let harvested = null;
 
-        // Get zone-specific items
-        const seed = this.seedsMap.get(zoneKey) || this.seed;
-        const wateringCan = this.wateringCansMap.get(zoneKey) || this.wateringCan;
-        const fertilizerBag = this.fertilizerBagsMap.get(zoneKey) || this.fertilizerBag;
-        const sunArea = this.sunAreasMap.get(zoneKey) || this.sunArea;
+        // Get zone-specific items via helpers
+        const seed = this.getZoneSeed(zoneKey);
+        const wateringCan = this.getZoneWateringCan(zoneKey);
+        const fertilizerBag = this.getZoneFertilizer(zoneKey);
+        const sunArea = this.getZoneSunArea(zoneKey);
         // Read plantNeeds fresh each time via getter to avoid stale reference after seed planting
-        const getPlantNeeds = () => this.plantNeedsMap.get(zoneKey) || this.plantNeeds;
+        const getPlantNeeds = () => this.getZoneNeeds(zoneKey);
 
         let heldItem = this.gameMode === 'competitive'
             ? this.heldItemsMap.get(zoneKey)
@@ -957,9 +979,9 @@ class GardenBed {
             heldItem.drop();
 
             // Return tools to home position
-            const wateringCan = this.wateringCansMap.get(zoneKey) || this.wateringCan;
-            const fertilizerBag = this.fertilizerBagsMap.get(zoneKey) || this.fertilizerBag;
-            const seed = this.seedsMap.get(zoneKey) || this.seed;
+            const wateringCan = this.getZoneWateringCan(zoneKey);
+            const fertilizerBag = this.getZoneFertilizer(zoneKey);
+            const seed = this.getZoneSeed(zoneKey);
 
             if (heldItem === wateringCan || heldItem === fertilizerBag) {
                 heldItem.returnHome();
@@ -1035,61 +1057,44 @@ class GardenBed {
             this.drawDivider(ctx);
         }
 
-        // Draw sun areas
-        if (this.gameMode === 'competitive') {
-            this.sunAreasMap.forEach(sunArea => sunArea.draw(ctx));
-        } else {
-            this.sunArea.draw(ctx);
+        // Draw sun areas, seeds, and tools (per zone)
+        for (const zk of this.getZoneKeys()) {
+            this.getZoneSunArea(zk).draw(ctx);
         }
 
         // Draw plant pots
         this.plantPots.forEach(pot => pot.draw(ctx));
 
-        // Draw seeds
-        if (this.gameMode === 'competitive') {
-            this.seedsMap.forEach(seed => {
-                if (seed) seed.draw(ctx);
-            });
-        } else {
-            if (this.seed) {
-                this.seed.draw(ctx);
-            }
-        }
-
-        // Draw tools
-        if (this.gameMode === 'competitive') {
-            this.wateringCansMap.forEach(can => can.draw(ctx));
-            this.fertilizerBagsMap.forEach(bag => bag.draw(ctx));
-        } else {
-            this.wateringCan.draw(ctx);
-            this.fertilizerBag.draw(ctx);
+        // Draw seeds and tools (per zone)
+        for (const zk of this.getZoneKeys()) {
+            const seed = this.getZoneSeed(zk);
+            if (seed) seed.draw(ctx);
+            this.getZoneWateringCan(zk).draw(ctx);
+            this.getZoneFertilizer(zk).draw(ctx);
         }
 
         // Draw golden watering cans
         this.goldenWateringCans.forEach(can => can.draw(ctx));
 
-        // Draw needs panels (vertically centered)
+        // Draw needs panels (vertically centered, per zone)
         const needsPanelHeight = 150; // spacing(40) * 3 + 30
         const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
-        if (this.gameMode === 'competitive') {
-            // Player 1 needs (right side)
-            const p1Needs = this.plantNeedsMap.get(1);
-            const p1Pot = this.plantPots[0];
-            if (p1Pot && p1Pot.growthStage !== GrowthStage.EMPTY && p1Needs) {
-                p1Needs.draw(ctx, this.canvas.width - 250, needsY);
-            }
+        const needsXPositions = this.gameMode === 'competitive'
+            ? { 1: this.canvas.width - 250, 2: 30 }
+            : { shared: 30 };
 
-            // Player 2 needs (left side)
-            const p2Needs = this.plantNeedsMap.get(2);
-            const p2Pot = this.plantPots[1];
-            if (p2Pot && p2Pot.growthStage !== GrowthStage.EMPTY && p2Needs) {
-                p2Needs.draw(ctx, 30, needsY);
-            }
-        } else {
-            // Shared needs
-            const anyPotGrowing = this.plantPots.some(pot => pot.growthStage !== GrowthStage.EMPTY);
-            if (anyPotGrowing) {
-                this.plantNeeds.draw(ctx, 30, needsY);
+        for (const zk of this.getZoneKeys()) {
+            const pot = this.getZonePot(zk);
+            const needs = this.getZoneNeeds(zk);
+            if (!pot || !needs) continue;
+
+            // For coop/solo, check if any pot is growing
+            const isGrowing = this.gameMode === 'competitive'
+                ? pot.growthStage !== GrowthStage.EMPTY
+                : this.plantPots.some(p => p.growthStage !== GrowthStage.EMPTY);
+
+            if (isGrowing) {
+                needs.draw(ctx, needsXPositions[zk], needsY);
             }
         }
 
@@ -1216,19 +1221,16 @@ class GardenBed {
 
     // Compatibility methods
     setDifficulty(level) {
-        // Adjust depletion rates based on level
+        // Adjust depletion rates based on level (per zone)
         const modifier = 1 + (level - 1) * 0.1;
 
-        if (this.gameMode === 'competitive') {
-            this.plantNeedsMap.forEach(needs => {
+        for (const zk of this.getZoneKeys()) {
+            const needs = this.getZoneNeeds(zk);
+            if (needs) {
                 needs.waterDepleteRate = 0.03 * modifier;
                 needs.sunDepleteRate = 0.02 * modifier;
                 needs.foodDepleteRate = 0.025 * modifier;
-            });
-        } else {
-            this.plantNeeds.waterDepleteRate = 0.03 * modifier;
-            this.plantNeeds.sunDepleteRate = 0.02 * modifier;
-            this.plantNeeds.foodDepleteRate = 0.025 * modifier;
+            }
         }
     }
 

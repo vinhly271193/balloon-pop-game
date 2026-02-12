@@ -11,6 +11,12 @@ class AudioManager {
         this.enabled = true;
         this.volume = 0.7;
 
+        // Master gain node — all sounds route through this
+        this.masterGain = null;
+
+        // Cached noise buffer (avoids recreating 0.5s of random data per call)
+        this._noiseBuffer = null;
+
         // Ambient sound state
         this.ambientNodes = [];
         this.isAmbientPlaying = false;
@@ -26,6 +32,15 @@ class AudioManager {
     async init() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create master gain node — all sounds route through this
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = this.volume;
+            this.masterGain.connect(this.audioContext.destination);
+
+            // Pre-generate noise buffer (reused by all noise calls)
+            this._createNoiseBuffer();
+
             await this.createSounds();
             console.log('Audio initialized successfully');
         } catch (error) {
@@ -64,9 +79,6 @@ class AudioManager {
 
         // Game start (gentle rising tone)
         this.sounds.gameStart = () => this.playGameStart();
-
-        // Legacy alias for backwards compatibility
-        this.sounds.pop = () => this.playPlant();
     }
 
     /**
@@ -88,7 +100,7 @@ class AudioManager {
         gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
 
         osc1.connect(gain1);
-        gain1.connect(this.audioContext.destination);
+        gain1.connect(this.masterGain);
 
         osc1.start();
         osc1.stop(this.audioContext.currentTime + 0.4);
@@ -107,7 +119,7 @@ class AudioManager {
 
         noise.connect(noiseFilter);
         noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.audioContext.destination);
+        noiseGain.connect(this.masterGain);
 
         noise.start();
         noise.stop(this.audioContext.currentTime + 0.3);
@@ -131,7 +143,7 @@ class AudioManager {
         gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
 
         osc1.connect(gain1);
-        gain1.connect(this.audioContext.destination);
+        gain1.connect(this.masterGain);
 
         osc1.start();
         osc1.stop(this.audioContext.currentTime + 0.3);
@@ -148,7 +160,7 @@ class AudioManager {
         gain2.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
 
         osc2.connect(gain2);
-        gain2.connect(this.audioContext.destination);
+        gain2.connect(this.masterGain);
 
         osc2.start();
         osc2.stop(this.audioContext.currentTime + 0.2);
@@ -171,7 +183,7 @@ class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
 
         osc.connect(gain);
-        gain.connect(this.audioContext.destination);
+        gain.connect(this.masterGain);
 
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.15);
@@ -204,7 +216,7 @@ class AudioManager {
             gain.gain.exponentialRampToValueAtTime(0.01, startTime + chirp.duration);
 
             osc.connect(gain);
-            gain.connect(this.audioContext.destination);
+            gain.connect(this.masterGain);
 
             osc.start(startTime);
             osc.stop(startTime + chirp.duration);
@@ -235,7 +247,7 @@ class AudioManager {
             gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
 
             osc.connect(gain);
-            gain.connect(this.audioContext.destination);
+            gain.connect(this.masterGain);
 
             osc.start(startTime);
             osc.stop(startTime + duration);
@@ -263,7 +275,7 @@ class AudioManager {
             gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.5);
 
             oscillator.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
+            gainNode.connect(this.masterGain);
 
             oscillator.start(startTime);
             oscillator.stop(startTime + 0.5);
@@ -293,7 +305,7 @@ class AudioManager {
             gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
 
             oscillator.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
+            gainNode.connect(this.masterGain);
 
             oscillator.start(startTime);
             oscillator.stop(startTime + duration);
@@ -317,7 +329,7 @@ class AudioManager {
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
 
         oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(this.masterGain);
 
         oscillator.start();
         oscillator.stop(this.audioContext.currentTime + 0.2);
@@ -341,26 +353,30 @@ class AudioManager {
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
 
         oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(this.masterGain);
 
         oscillator.start();
         oscillator.stop(this.audioContext.currentTime + 0.4);
     }
 
     /**
-     * Create white noise oscillator for rustling sounds
+     * Pre-generate noise buffer (called once during init)
      */
-    createNoiseOscillator() {
+    _createNoiseBuffer() {
         const bufferSize = this.audioContext.sampleRate * 0.5;
-        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
-        const data = buffer.getChannelData(0);
-
+        this._noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = this._noiseBuffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
             data[i] = Math.random() * 2 - 1;
         }
+    }
 
+    /**
+     * Create white noise oscillator for rustling sounds (reuses cached buffer)
+     */
+    createNoiseOscillator() {
         const noise = this.audioContext.createBufferSource();
-        noise.buffer = buffer;
+        noise.buffer = this._noiseBuffer;
         return noise;
     }
 
@@ -386,7 +402,7 @@ class AudioManager {
 
             noise.connect(filter);
             filter.connect(gain);
-            gain.connect(this.audioContext.destination);
+            gain.connect(this.masterGain);
 
             noise.loop = true;
             noise.start();
@@ -449,6 +465,9 @@ class AudioManager {
      */
     setVolume(value) {
         this.volume = Math.max(0, Math.min(1, value));
+        if (this.masterGain) {
+            this.masterGain.gain.value = this.volume;
+        }
     }
 
     /**
@@ -522,7 +541,7 @@ class AudioManager {
         gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
 
         osc1.connect(gain1);
-        gain1.connect(this.audioContext.destination);
+        gain1.connect(this.masterGain);
         osc1.start();
         osc1.stop(this.audioContext.currentTime + 0.3);
 
@@ -538,7 +557,7 @@ class AudioManager {
         gain2.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
 
         osc2.connect(gain2);
-        gain2.connect(this.audioContext.destination);
+        gain2.connect(this.masterGain);
         osc2.start();
         osc2.stop(this.audioContext.currentTime + 0.2);
     }
@@ -561,7 +580,7 @@ class AudioManager {
         gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
 
         osc1.connect(gain1);
-        gain1.connect(this.audioContext.destination);
+        gain1.connect(this.masterGain);
         osc1.start();
         osc1.stop(this.audioContext.currentTime + 0.4);
     }
@@ -583,7 +602,7 @@ class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
 
         osc.connect(gain);
-        gain.connect(this.audioContext.destination);
+        gain.connect(this.masterGain);
         osc.start();
         osc.stop(this.audioContext.currentTime + 0.15);
     }
@@ -611,7 +630,7 @@ class AudioManager {
             gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.6);
 
             osc.connect(gain);
-            gain.connect(this.audioContext.destination);
+            gain.connect(this.masterGain);
             osc.start(startTime);
             osc.stop(startTime + 0.6);
         });
