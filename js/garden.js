@@ -1144,7 +1144,7 @@ class PlantNeeds {
         ctx.font = 'bold 13px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        ctx.fillText(label, x + 35 + width / 2, y + height / 2 + 5);
+        drawUnmirroredText(ctx, label, x + 35 + width / 2, y + height / 2 + 5);
     }
 }
 
@@ -1189,7 +1189,7 @@ class SunArea {
         ctx.font = '50px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('☀️', this.x, this.y);
+        drawUnmirroredText(ctx, '☀️', this.x, this.y);
 
         ctx.restore();
     }
@@ -1262,11 +1262,11 @@ class FertilizerBag {
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('🌱', this.x, this.y - 10);
+        drawUnmirroredText(ctx, '🌱', this.x, this.y - 10);
 
         ctx.font = 'bold 10px Arial';
         ctx.fillStyle = '#fff';
-        ctx.fillText('FOOD', this.x, this.y + 20);
+        drawUnmirroredText(ctx, 'FOOD', this.x, this.y + 20);
 
         ctx.restore();
     }
