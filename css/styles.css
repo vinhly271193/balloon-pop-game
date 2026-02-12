@@ -100,11 +100,13 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 15;
     /* Canvas is also mirrored to match video */
     transform: scaleX(-1);
     /* Transparent background so nature bg shows through */
     background: transparent;
+    /* Let mouse clicks pass through to UI buttons underneath */
+    pointer-events: none;
 }
 
 /* ===========================================
