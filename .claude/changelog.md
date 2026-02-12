@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-02-12 — Visible hand gloves on light screens
+- **Garden green gloves**: Changed default 1-player glove from white to garden green (#2E8B57 outline, honeydew fill) so hands are clearly visible against the light pastel background on Welcome, Player Select, and Mode Select screens
+- **Stronger outlines**: Increased opacity on finger outlines (0.2→0.5), fingertip outlines (0.5→0.7), glow (0.25→0.4), wrist cuff (0.35→0.5), and thickened palm outline (2.5→3px)
+- **Hands on Welcome screen**: Removed the restriction that hid hand rendering on the Welcome screen — hands now show on all screens once tracking is active
+- Files changed: `js/handTracking.js`, `js/game.js`
+
 ## 2026-02-12 — Index finger item tracking + cartoon glove hand
 - **Item follows index finger**: Held items (seed packets, watering can, fertilizer) now track the index fingertip instead of the pinky — each collision point now carries a `landmarkIndex` so garden.js can distinguish which finger is which
 - **Cartoon glove hand**: Replaced the skeletal bone-style hand rendering with a playful filled cartoon glove — smooth rounded palm blob, thick tapered finger capsules, puffy fingertips with shine highlights, and a cute wrist cuff
