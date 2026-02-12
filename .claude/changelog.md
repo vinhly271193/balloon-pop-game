@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-02-12 — Rearrange gameplay HUD layout
+
+### UI repositioning
+- **Instruction text moved to bottom**: Gameplay instruction text ("Keep your plant healthy...") now appears at the bottom of the screen, inline with the water jug and food button, instead of overlapping the top HUD
+- **Plant pot moved to bottom toolbar**: Plant pots now sit at the same Y level as the water jug and food button, creating a unified bottom toolbar row
+- **Settings cog to bottom-right**: During gameplay, the settings gear now appears at the bottom-right corner (next to the food button) instead of floating below the HUD at top-right
+- **Sun icon doubled in size**: Sun interaction area increased from 50px to 100px icon and 60→120 radius, positioned just below the progress bar for better visibility
+- **Plant Needs panel fixed**: Tightened panel sizing (bars 150px wide, 25px tall, 40px spacing) so progress bars no longer overflow their container
+
+### Files changed
+- `js/garden/garden-bed.js` — Plant pot Y position, sun area Y position, instruction text Y, needs panel height, DDA sun radius
+- `js/garden/plant-needs.js` — Panel dimensions, bar sizing, icon/label fonts, sun icon size and radius
+- `css/styles.css` — Settings button `.hud-active` position from `top: 140px` to `bottom: 20px`
+
+---
+
 ## 2026-02-12 — Fix crashes, merge loading screens, split garden.js
 
 ### Phase 1: Fix 6 crash/freeze bugs
