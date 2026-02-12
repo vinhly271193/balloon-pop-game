@@ -52,7 +52,7 @@ This is required so changes go live on GitHub Pages immediately. Do NOT wait for
 - **Canvas is mirrored** (`scaleX(-1)`): camera left = screen right. All x-coordinate logic must account for this.
 - **MediaPipe "Left" hand = user's RIGHT hand** (mirrored). Don't confuse handedness labels.
 - **`handTracker.dividerX` is 0-1 normalized** — multiply by `canvas.width` before passing to garden.js.
-- **Legacy aliases exist** — `recordPop()` maps to `recordHarvest()`, some old balloon references remain.
+- **No legacy aliases remain** — all balloon references have been removed.
 - **No build step** — all changes are live-editable. No bundler, no transpiler, no npm.
 
 ## Coding Conventions

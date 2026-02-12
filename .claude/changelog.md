@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-02-12 — Major robustness overhaul: fix crashes, freezes, and gameplay blockers
+
+### Game-breaking fixes
+- **Plant growth rate 5x faster**: Plants now grow in ~32s at full satisfaction (was ~100s), making it possible to actually complete levels within 45-60s round timers
+- **Double ROUND_END guard**: Added state guard preventing both timer and challenge-complete from triggering simultaneous ROUND_END transitions (race condition crash)
+- **Resume from pause fixed**: Resuming after tab switch no longer resets the entire round — timer, HUD, and game state are properly restored
+- **Null currentChallenge crash fixed**: stopRound() now null-checks currentChallenge before accessing properties
+
+### New features
+- **"Try Again" button**: When a challenge fails, players now see a "Try Again" button to retry the same level (previously only "Start Over" which reset to level 1)
+- **DDA now active**: Dynamic Difficulty Adjustment values (seedSpeed, hitBoxMultiplier) are now applied to the garden every frame — previously calculated but never used
+- **Challenge-aware seed spawning**: Seeds now use weighted random selection favoring target plants (3x weight), instead of cycling sequentially through all plant types
+- **Competitive scoring fixed**: Harvest data now includes `isTargetPlant` flag so competitive mode correctly awards 100pts for target plants vs 50pts for others
+- **Golden watering can spawning**: Rubber-band mechanic now properly spawns golden watering cans for trailing players in competitive mode
+
+### Robustness improvements
+- **Generation counter for setTimeout**: Replaced boolean `active` flag with incrementing `roundGeneration` counter — prevents stale callbacks across rapid clear/configure cycles
+- **Countdown timer leak fixed**: Challenge intro countdown timer is now cleared on any screen change, not just in destroy()
+- **Stale plantNeeds reference fixed**: Tool interactions now read plantNeeds fresh via getter, preventing stale reference after seed planting creates new PlantNeeds
+- **Error boundaries**: Hand tracking onResults() and game's onHandsDetected() wrapped in try/catch to prevent silent tracking death
+- **Debounced story saves**: localStorage writes for plant growth now batched with 2s debounce instead of writing on every single harvest
+- **Timer paused on tab switch**: Timer interval is properly cleared when pausing, preventing time loss during tab switches
+
+### Code health
+- **Removed legacy balloon aliases**: Deleted `BALLOON_COLORS`, `recordPop()`, and `.balloon-*` CSS selectors
+- **Updated CLAUDE.md**: Removed legacy alias documentation
+
+### Files changed
+- `js/garden/plant-pot.js` — Growth rate 0.05 → 0.25
+- `js/game.js` — Double ROUND_END guard, resume fix, DDA wiring, retryLevel handler, null checks, error boundary
+- `js/ui.js` — Countdown timer cleanup on screen change, retry button support
+- `js/garden/garden-bed.js` — Generation counter, weighted spawning, isTargetPlant in harvest data, stale plantNeeds fix
+- `js/handTracking.js` — Error boundary around onResults
+- `js/challenges.js` — Removed recordPop aliases
+- `js/story.js` — Debounced localStorage saves
+- `js/garden/constants.js` — Removed BALLOON_COLORS alias
+- `index.html` — Added retry buttons for 1P and 2P round end screens
+- `css/styles.css` — Removed .balloon-* CSS selectors
+- `CLAUDE.md` — Updated gotchas section
+
+---
+
 ## 2026-02-12 — Rearrange gameplay HUD layout
 
 ### UI repositioning

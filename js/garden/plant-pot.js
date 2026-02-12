@@ -69,7 +69,7 @@ class PlantPot {
 
         // Only grow if needs are satisfied (average > 40%)
         if (needsSatisfied > 0.4) {
-            const growthRate = 0.05 * needsSatisfied; // Faster growth with better care
+            const growthRate = 0.25 * needsSatisfied; // ~8s per stage at full satisfaction, 4 stages = ~32s
             this.growthProgress += growthRate * deltaTime;
 
             // Update growth stage

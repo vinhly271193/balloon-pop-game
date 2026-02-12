@@ -147,11 +147,6 @@ class Challenge {
         return false;
     }
 
-    // Backward compatibility alias
-    recordPop(colorKey) {
-        return this.recordHarvest(colorKey);
-    }
-
     /**
      * Check if challenge is complete
      */
@@ -305,11 +300,6 @@ class ChallengeManager {
             return this.currentChallenge.recordHarvest(plantKey);
         }
         return false;
-    }
-
-    // Backward compatibility alias
-    recordPop(colorKey) {
-        return this.recordHarvest(colorKey);
     }
 
     /**

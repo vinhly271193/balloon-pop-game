@@ -150,6 +150,7 @@ class HandTracker {
      * Process hand detection results
      */
     onResults(results) {
+      try {
         this.lastResults = results;
         this.handPositions = [];
         this.leftHandDetected = false;
@@ -242,6 +243,9 @@ class HandTracker {
                 positions: this.handPositions
             });
         }
+      } catch (error) {
+        console.error('Hand tracking onResults error:', error);
+      }
     }
 
     /**

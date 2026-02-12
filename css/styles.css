@@ -1536,15 +1536,10 @@ body.theme-high-contrast .big-button {
     border: 4px solid white;
 }
 
-body.theme-high-contrast .balloon-red,
 body.theme-high-contrast .color-circle.red { background: #FF4444; }
-body.theme-high-contrast .balloon-blue,
 body.theme-high-contrast .color-circle.blue { background: #4444FF; }
-body.theme-high-contrast .balloon-green,
 body.theme-high-contrast .color-circle.green { background: #44FF44; }
-body.theme-high-contrast .balloon-yellow,
 body.theme-high-contrast .color-circle.yellow { background: #FFFF44; }
-body.theme-high-contrast .balloon-purple,
 body.theme-high-contrast .color-circle.purple { background: #FF44FF; }
 
 /* Maximum Contrast Theme */

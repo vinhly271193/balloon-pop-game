@@ -66,6 +66,8 @@ class UIManager {
         this.startBtn = document.getElementById('startBtn');
         this.nextLevelBtn = document.getElementById('nextLevelBtn');
         this.playAgainBtn = document.getElementById('playAgainBtn');
+        this.retryLevelBtn = document.getElementById('retryLevelBtn');
+        this.retryLevelBtn2P = document.getElementById('retryLevelBtn2P');
 
         // Settings elements
         this.settingsBtn = document.getElementById('settingsBtn');
@@ -142,11 +144,18 @@ class UIManager {
             }
         });
 
+        this.retryLevelBtn?.addEventListener('click', () => {
+            if (this.callbacks.onRetryLevel) this.callbacks.onRetryLevel();
+        });
+
         this.nextLevelBtn2P?.addEventListener('click', () => {
             if (this.callbacks.onNextLevel) this.callbacks.onNextLevel();
         });
         this.playAgainBtn2P?.addEventListener('click', () => {
             if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
+        });
+        this.retryLevelBtn2P?.addEventListener('click', () => {
+            if (this.callbacks.onRetryLevel) this.callbacks.onRetryLevel();
         });
 
         // Settings button click
@@ -374,6 +383,9 @@ class UIManager {
                 break;
             case 'playAgain':
                 if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
+                break;
+            case 'retryLevel':
+                if (this.callbacks.onRetryLevel) this.callbacks.onRetryLevel();
                 break;
             case 'selectOnePlayer':
                 if (this.callbacks.onSelectOnePlayer) this.callbacks.onSelectOnePlayer();
@@ -661,6 +673,12 @@ class UIManager {
      * Show a specific screen
      */
     showScreen(screenName) {
+        // Cancel any active countdown timer when switching screens
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+
         // Hide all screens
         Object.values(this.screens).forEach(screen => {
             if (screen) {
@@ -689,6 +707,12 @@ class UIManager {
      * Hide all screens
      */
     hideAllScreens() {
+        // Cancel any active countdown timer
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+
         Object.values(this.screens).forEach(screen => {
             if (screen) {
                 screen.classList.remove('active');
@@ -970,6 +994,11 @@ class UIManager {
             this.nextLevelBtn.style.display = result.isComplete ? 'inline-flex' : 'none';
         }
 
+        // Show retry button when challenge not completed
+        if (this.retryLevelBtn) {
+            this.retryLevelBtn.style.display = result.isComplete ? 'none' : 'inline-flex';
+        }
+
         // Re-collect hoverable elements
         setTimeout(() => this.collectHoverableElements(), 100);
     }
@@ -1008,6 +1037,11 @@ class UIManager {
         // Show/hide next level button
         if (this.nextLevelBtn2P) {
             this.nextLevelBtn2P.style.display = isComplete ? 'inline-flex' : 'none';
+        }
+
+        // Show retry button when challenge not completed
+        if (this.retryLevelBtn2P) {
+            this.retryLevelBtn2P.style.display = isComplete ? 'none' : 'inline-flex';
         }
 
         // Re-collect hoverable elements

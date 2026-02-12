@@ -83,6 +83,7 @@ class Game {
             onStart: () => this.onStartClick(),
             onNextLevel: () => this.onNextLevel(),
             onPlayAgain: () => this.onPlayAgain(),
+            onRetryLevel: () => this.onRetryLevel(),
             onSelectOnePlayer: () => this.onSelectOnePlayer(),
             onSelectTwoPlayers: () => this.onSelectTwoPlayers(),
             onSelectCoop: () => this.onSelectCoop(),
@@ -100,8 +101,14 @@ class Game {
             return false;
         }
 
-        // Set up hand detection callback
-        handTracker.onHandsDetected = (data) => this.onHandsDetected(data);
+        // Set up hand detection callback (with error boundary)
+        handTracker.onHandsDetected = (data) => {
+            try {
+                this.onHandsDetected(data);
+            } catch (err) {
+                console.error('Error in onHandsDetected:', err);
+            }
+        };
 
         // Hide loading, show welcome
         uiManager.setLoading(false);
@@ -224,6 +231,12 @@ class Game {
      * Set game state
      */
     setState(newState) {
+        // Guard against double ROUND_END transitions
+        if (newState === GameState.ROUND_END && this.state === GameState.ROUND_END) {
+            console.warn('Blocked duplicate ROUND_END transition');
+            return;
+        }
+
         console.log(`State change: ${this.state} -> ${newState}`);
         this.state = newState;
 
@@ -284,6 +297,11 @@ class Game {
 
             case GameState.PAUSED:
                 this.stopGameLoop();
+                // Pause the timer (will be restarted on resume)
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
                 break;
         }
     }
@@ -636,7 +654,9 @@ class Game {
         }
 
         // Record challenge completion
-        challengeManager.completeChallenge();
+        if (this.currentChallenge) {
+            challengeManager.completeChallenge();
+        }
 
         // Check if this completes a chapter
         if (this.currentChallenge && this.currentChallenge.isComplete) {
@@ -732,11 +752,20 @@ class Game {
     }
 
     /**
-     * Handle play again button
+     * Handle play again button (restart from level 1)
      */
     onPlayAgain() {
         challengeManager.restart();
         this.pendingChapterComplete = null;
+        this.setState(GameState.CHALLENGE_INTRO);
+    }
+
+    /**
+     * Handle retry level button (replay same level)
+     */
+    onRetryLevel() {
+        this.pendingChapterComplete = null;
+        this.currentChallenge = null; // Force fresh challenge creation
         this.setState(GameState.CHALLENGE_INTRO);
     }
 
@@ -780,9 +809,18 @@ class Game {
             // Update DDA engine
             ddaEngine.update(deltaTime, this.gameMode);
 
-            // In competitive mode, check rubber-band
+            // Apply DDA difficulty to garden bed
+            for (const id of [1, 2]) {
+                const diff = ddaEngine.getPlayerDifficulty(id);
+                this.gardenBed.applyDDA(id, diff);
+            }
+
+            // In competitive mode, check rubber-band and spawn golden watering can
             if (this.gameMode === 'competitive') {
-                ddaEngine.checkRubberBand(this.player1Score, this.player2Score);
+                const trailingPlayer = ddaEngine.checkRubberBand(this.player1Score, this.player2Score);
+                if (trailingPlayer) {
+                    this.gardenBed.showGoldenWateringCan(trailingPlayer);
+                }
             }
 
             // Pass idle times to garden for hint arrows
@@ -821,8 +859,33 @@ class Game {
      */
     resume() {
         if (this.state === GameState.PAUSED) {
-            this.setState(GameState.PLAYING);
+            // Resume without going through setState(PLAYING) which calls startRound()
+            this.state = GameState.PLAYING;
+            console.log('State change: paused -> playing (resume)');
+
+            // Restore HUD
+            if (this.playerCount === 2 && (this.gameMode === 'competitive' || this.gameMode === 'coop')) {
+                uiManager.showHUD2P(true);
+            } else {
+                uiManager.showHUD(true);
+            }
+            uiManager.hideAllScreens();
+
+            // Restart game loop and timer
             this.startGameLoop();
+            if (!this.timerInterval) {
+                this.timerInterval = setInterval(() => {
+                    this.timeRemaining -= 1;
+                    if (this.gameMode === 'competitive') {
+                        uiManager.updateTimer2P(this.timeRemaining);
+                    } else {
+                        uiManager.updateTimer(this.timeRemaining);
+                    }
+                    if (this.timeRemaining <= 0) {
+                        this.setState(GameState.ROUND_END);
+                    }
+                }, 1000);
+            }
         }
     }
 

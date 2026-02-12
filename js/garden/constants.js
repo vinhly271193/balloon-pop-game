@@ -69,7 +69,3 @@ const GrowthStage = {
     MATURE: 'mature',
     HARVESTABLE: 'harvestable'
 };
-
-
-// Backward compatibility alias
-const BALLOON_COLORS = PLANT_TYPES;

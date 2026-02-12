@@ -11,8 +11,8 @@ class GardenBed {
     constructor(canvas) {
         this.canvas = canvas;
 
-        // Active flag — prevents setTimeout callbacks after round ends
-        this.active = false;
+        // Round generation counter — prevents stale setTimeout callbacks after round ends
+        this.roundGeneration = 0;
 
         // Cached deltaTime for use in collision handlers (which don't receive deltaTime)
         this.lastDeltaTime = 0.016;
@@ -107,7 +107,7 @@ class GardenBed {
      * Configure garden for multi-player
      */
     configure({ playerCount, gameMode, dividerX }) {
-        this.active = true;
+        this.roundGeneration++;
         this.playerCount = playerCount || 1;
         this.gameMode = gameMode || 'coop';
         this.dividerX = dividerX || null;
@@ -256,9 +256,15 @@ class GardenBed {
      * Spawn a new seed packet
      */
     spawnNewSeed(zoneKey = 'shared') {
-        const plantTypes = Object.keys(PLANT_TYPES);
-        const plantType = plantTypes[this.currentSeedIndex % plantTypes.length];
-        this.currentSeedIndex++;
+        // Use weighted random plant selection if available (challenge-aware)
+        let plantType;
+        if (typeof game !== 'undefined' && game.getWeightedRandomPlant) {
+            plantType = game.getWeightedRandomPlant();
+        } else {
+            const plantTypes = Object.keys(PLANT_TYPES);
+            plantType = plantTypes[this.currentSeedIndex % plantTypes.length];
+            this.currentSeedIndex++;
+        }
 
         let seedX, seedY;
 
@@ -593,7 +599,10 @@ class GardenBed {
 
                     const result = this.processHandInteraction(hand, effectivePlayerId);
                     if (result) {
-                        harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId });
+                        const isTargetPlant = typeof challengeManager !== 'undefined' &&
+                            challengeManager.currentChallenge &&
+                            challengeManager.getTargetPlants().includes(result);
+                        harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId, isTargetPlant });
                     }
                 });
             });
@@ -619,7 +628,10 @@ class GardenBed {
                     points.forEach(hand => {
                         const result = this.processFreeHandInteraction(hand);
                         if (result) {
-                            harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                            const isTargetPlant = typeof challengeManager !== 'undefined' &&
+                                challengeManager.currentChallenge &&
+                                challengeManager.getTargetPlants().includes(result);
+                            harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant });
                         }
                     });
                     return;
@@ -628,7 +640,10 @@ class GardenBed {
                 points.forEach(hand => {
                     const result = this.processHandInteraction(hand, 'shared');
                     if (result) {
-                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                        const isTargetPlant = typeof challengeManager !== 'undefined' &&
+                            challengeManager.currentChallenge &&
+                            challengeManager.getTargetPlants().includes(result);
+                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant });
                     }
                 });
 
@@ -681,7 +696,8 @@ class GardenBed {
         const wateringCan = this.wateringCansMap.get(zoneKey) || this.wateringCan;
         const fertilizerBag = this.fertilizerBagsMap.get(zoneKey) || this.fertilizerBag;
         const sunArea = this.sunAreasMap.get(zoneKey) || this.sunArea;
-        const plantNeeds = this.plantNeedsMap.get(zoneKey) || this.plantNeeds;
+        // Read plantNeeds fresh each time via getter to avoid stale reference after seed planting
+        const getPlantNeeds = () => this.plantNeedsMap.get(zoneKey) || this.plantNeeds;
 
         let heldItem = this.gameMode === 'competitive'
             ? this.heldItemsMap.get(zoneKey)
@@ -767,8 +783,9 @@ class GardenBed {
                         this.plantNeedsMap.set('shared', this.plantNeeds);
                     }
 
-                    // Spawn new seed after delay (guarded)
-                    setTimeout(() => { if (this.active) this.spawnNewSeed(zoneKey); }, 1000);
+                    // Spawn new seed after delay (guarded by generation counter)
+                    const gen = this.roundGeneration;
+                    setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 1000);
                 }
             } else if (heldItem === wateringCan && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 // Water the plant — set tilt state
@@ -788,7 +805,7 @@ class GardenBed {
                 targetPot.waterPourProgress = progress;
 
                 if (newWaterTime > 0.3) {
-                    plantNeeds.addWater();
+                    getPlantNeeds().addWater();
                     wateringCan.water();
                     wateringCan.pourProgress = 0;
                     targetPot.waterPourProgress = 0;
@@ -818,7 +835,7 @@ class GardenBed {
                 const newFoodTime = foodTime + this.lastDeltaTime;
 
                 if (newFoodTime > 0.5) {
-                    plantNeeds.addFood();
+                    getPlantNeeds().addFood();
 
                     if (this.gameMode === 'competitive') {
                         this.foodInteractionTimeMap.set(zoneKey, 0);
@@ -838,7 +855,7 @@ class GardenBed {
                 }
             } else if (heldItem.isGolden && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 // Golden watering can - max all needs instantly
-                plantNeeds.maxAll();
+                getPlantNeeds().maxAll();
                 this.goldenWateringCans.delete(zoneKey);
                 this.heldItemsMap.set(zoneKey, null);
 
@@ -885,7 +902,7 @@ class GardenBed {
                 const newSunTime = sunTime + this.lastDeltaTime;
 
                 if (newSunTime > 0.2) {
-                    plantNeeds.addSun();
+                    getPlantNeeds().addSun();
 
                     if (this.gameMode === 'competitive') {
                         this.sunInteractionTimeMap.set(zoneKey, 0);
@@ -911,8 +928,9 @@ class GardenBed {
                         audioManager.play('harvest');
                     }
 
-                    // Spawn new seed (guarded)
-                    setTimeout(() => { if (this.active) this.spawnNewSeed(zoneKey); }, 500);
+                    // Spawn new seed (guarded by generation counter)
+                    const gen = this.roundGeneration;
+                    setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 500);
                 }
             }
         }
@@ -999,7 +1017,8 @@ class GardenBed {
                 if (typeof audioManager !== 'undefined') {
                     audioManager.play('harvest');
                 }
-                setTimeout(() => { if (this.active) this.spawnNewSeed('shared'); }, 500);
+                const gen = this.roundGeneration;
+                setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed('shared'); }, 500);
                 return harvestedPlant;
             }
         }
@@ -1161,7 +1180,7 @@ class GardenBed {
      * Clear the garden (for reset)
      */
     clear() {
-        this.active = false;
+        this.roundGeneration++; // Invalidate any pending setTimeout callbacks
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height - 150; // Bottom toolbar row
 

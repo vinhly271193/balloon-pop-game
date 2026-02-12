@@ -148,11 +148,19 @@ class StoryManager {
     }
 
     /**
-     * Record a plant being grown
+     * Record a plant being grown (debounced save to avoid excessive localStorage writes)
      */
     recordPlantGrown() {
         this.totalPlantsGrown++;
-        this.saveProgress();
+        this._debouncedSave();
+    }
+
+    /**
+     * Debounced save - batches rapid saves into one write
+     */
+    _debouncedSave() {
+        if (this._saveTimeout) clearTimeout(this._saveTimeout);
+        this._saveTimeout = setTimeout(() => this.saveProgress(), 2000);
     }
 
     /**
