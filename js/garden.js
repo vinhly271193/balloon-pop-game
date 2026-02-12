@@ -2350,34 +2350,39 @@ class GardenBed {
                 });
             });
         } else {
-            // Solo/co-op - use one palm point per physical hand
-            const palmPoints = new Map();
+            // Solo/co-op - group all collision points by hand
+            const handGroups = new Map();
             handPositions.forEach(pos => {
                 const handKey = pos.isLeft ? 'left' : 'right';
-                if (!palmPoints.has(handKey)) {
-                    palmPoints.set(handKey, pos);
+                if (!handGroups.has(handKey)) {
+                    handGroups.set(handKey, []);
                 }
+                handGroups.get(handKey).push(pos);
             });
 
             // Release held item if the holding hand disappeared
-            if (this.heldItem && this.heldItemHand && !palmPoints.has(this.heldItemHand)) {
+            if (this.heldItem && this.heldItemHand && !handGroups.has(this.heldItemHand)) {
                 this.releaseItem();
             }
 
-            palmPoints.forEach((hand, handKey) => {
+            handGroups.forEach((points, handKey) => {
                 // If another hand is holding an item, only allow free-hand interactions
                 if (this.heldItem && this.heldItemHand && this.heldItemHand !== handKey) {
-                    const result = this.processFreeHandInteraction(hand);
-                    if (result) {
-                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
-                    }
+                    points.forEach(hand => {
+                        const result = this.processFreeHandInteraction(hand);
+                        if (result) {
+                            harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                        }
+                    });
                     return;
                 }
 
-                const result = this.processHandInteraction(hand, 'shared');
-                if (result) {
-                    harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
-                }
+                points.forEach(hand => {
+                    const result = this.processHandInteraction(hand, 'shared');
+                    if (result) {
+                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                    }
+                });
 
                 // Track which hand grabbed the item
                 if (this.heldItem && !this.heldItemHand) {
@@ -2796,26 +2801,28 @@ class GardenBed {
         // Draw golden watering cans
         this.goldenWateringCans.forEach(can => can.draw(ctx));
 
-        // Draw needs panels
+        // Draw needs panels (vertically centered)
+        const needsPanelHeight = 170; // spacing(45) * 3 + 35
+        const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
         if (this.gameMode === 'competitive') {
             // Player 1 needs (right side)
             const p1Needs = this.plantNeedsMap.get(1);
             const p1Pot = this.plantPots[0];
             if (p1Pot && p1Pot.growthStage !== GrowthStage.EMPTY && p1Needs) {
-                p1Needs.draw(ctx, this.canvas.width - 250, 160);
+                p1Needs.draw(ctx, this.canvas.width - 250, needsY);
             }
 
             // Player 2 needs (left side)
             const p2Needs = this.plantNeedsMap.get(2);
             const p2Pot = this.plantPots[1];
             if (p2Pot && p2Pot.growthStage !== GrowthStage.EMPTY && p2Needs) {
-                p2Needs.draw(ctx, 30, 160);
+                p2Needs.draw(ctx, 30, needsY);
             }
         } else {
             // Shared needs
             const anyPotGrowing = this.plantPots.some(pot => pot.growthStage !== GrowthStage.EMPTY);
             if (anyPotGrowing) {
-                this.plantNeeds.draw(ctx, 30, 160);
+                this.plantNeeds.draw(ctx, 30, needsY);
             }
         }
 

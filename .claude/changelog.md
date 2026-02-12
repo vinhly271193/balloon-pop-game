@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-02-12 — Fix gameplay freeze in solo/co-op mode + center Plant Needs panel
+- **Gameplay freeze fix**: Solo/co-op mode was only passing the palm center point (landmark 9) to collision detection, but held-item movement requires the index finger point (landmark 8). All collision points per hand are now processed, matching how competitive mode already worked. Items can now be picked up, moved, and dropped on pots correctly.
+- **Plant Needs panel centered**: Moved the Plant Needs panel from a fixed y=160 position to vertically centered on screen, making it easier to read during gameplay.
+- Files changed: `js/garden.js`
+
 ## 2026-02-12 — Full-width garden preview strip on welcome screen
 - **Garden strip**: Replaced the boxed "Your Garden: X plants grown" card with a full-width landscape strip spanning the bottom 20% of the welcome screen — grass with wavy edge, soil layers, planted emoji icons and empty soil mounds
 - **Card removed**: Removed the white card wrapper and text label; the garden visual now blends naturally into the screen background
