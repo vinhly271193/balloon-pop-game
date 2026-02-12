@@ -31,11 +31,11 @@ class HandTracker {
         this.showHandIndicators = true;
         this.handIndicatorSize = 40;
 
-        // Cartoon glove colors - white with subtle shading (1P mode)
+        // Cartoon glove colors - green garden glove (1P mode)
         this.gloveColor = {
-            main: '#FFFFFF',
-            shadow: '#E8E8E8',
-            outline: '#4ECDC4',
+            main: '#F0FFF0',
+            shadow: '#C8E6C8',
+            outline: '#2E8B57',
             highlight: '#FFFFFF'
         };
 
@@ -327,7 +327,7 @@ class HandTracker {
         this._fillSmoothShape(ctx, palmAnchors, glove.main);
 
         // Colored outline
-        this._strokeSmoothShape(ctx, palmAnchors, glove.outline, 2.5);
+        this._strokeSmoothShape(ctx, palmAnchors, glove.outline, 3);
     }
 
     /**
@@ -384,7 +384,7 @@ class HandTracker {
                 ctx.lineTo(b.x, b.y);
                 ctx.strokeStyle = glove.outline;
                 ctx.lineWidth = segWidth * 2 + 3;
-                ctx.globalAlpha = 0.2;
+                ctx.globalAlpha = 0.5;
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
@@ -412,7 +412,7 @@ class HandTracker {
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, r + 4, 0, Math.PI * 2);
             ctx.fillStyle = glove.outline;
-            ctx.globalAlpha = 0.25;
+            ctx.globalAlpha = 0.4;
             ctx.fill();
             ctx.globalAlpha = 1;
 
@@ -426,8 +426,8 @@ class HandTracker {
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
             ctx.strokeStyle = glove.outline;
-            ctx.lineWidth = 2;
-            ctx.globalAlpha = 0.5;
+            ctx.lineWidth = 2.5;
+            ctx.globalAlpha = 0.7;
             ctx.stroke();
             ctx.globalAlpha = 1;
 
@@ -467,7 +467,7 @@ class HandTracker {
         ctx.beginPath();
         ctx.roundRect(-cuffWidth / 2, -cuffH / 2, cuffWidth, cuffH, 5);
         ctx.fillStyle = glove.outline;
-        ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = 0.5;
         ctx.fill();
         ctx.globalAlpha = 1;
 

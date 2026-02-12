@@ -790,7 +790,7 @@ class Game {
         }
 
         // Draw hand indicators (always when tracking is active)
-        if (this.state !== GameState.WELCOME && this.state !== GameState.LOADING) {
+        if (this.state !== GameState.LOADING) {
             handTracker.drawHands(this.ctx);
         }
 
