@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-02-12 — Stability fixes: camera release, null guards, leak prevention
+
+### Critical fixes
+- **Camera stream released on stop**: `handTracker.stop()` now stops all MediaStream tracks and clears `videoElement.srcObject` — camera hardware is properly released when tracking stops, preventing the camera light staying on indefinitely
+- **Stale hand data cleared on stop**: `lastResults`, `handPositions`, and detection flags are nulled when tracking stops — prevents drawing ghost hands from old data
+- **Null targetPot guard**: `processHandInteraction()` and `processFreeHandInteraction()` now early-return if no pot is found — prevents crash when pots array is empty after a `clear()` call
+
+### High-priority fixes
+- **Interaction time maps cleared on reset**: `clear()` now resets all 6 interaction time tracking variables (`sunInteractionTime`, `waterInteractionTime`, `foodInteractionTime` + their Map counterparts) — prevents stale watering/feeding progress carrying across rounds
+- **Timer interval leak guard**: `startRound()` clears any existing timer interval before creating a new one — prevents double-ticking timers if `startRound()` is called twice
+- **Countdown interval safety clear**: `showChallengeIntro()` explicitly clears any existing countdown interval before starting a new countdown — belt-and-suspenders safety alongside `showScreen()`
+- **DraggableSeed plantType fallback**: Constructor falls back to a default seed icon if an invalid plantType is passed — prevents crash in `draw()` when accessing `.icon` on undefined
+- **Null challenge guard**: `showChallengeIntro()` now checks if `challengeManager.startChallenge()` returned null and falls back to welcome screen — prevents crash on retry
+- **Division by zero guard**: `updateParallax()` checks `canvas.width` and `canvas.height` are non-zero before dividing — prevents NaN propagation
+
+### Improvements
+- **Browser support check wired in**: `checkBrowserSupport()` is now called at startup — users on unsupported browsers see a clear error instead of a silent failure
+- **Golden sparkle uses deltaTime**: WateringCan sparkle animation now tracks time via accumulated `deltaTime` instead of `Date.now()` — consistent animation speed regardless of frame rate
+
+### Files changed
+- `js/handTracking.js` — Camera stream release, clear stale data on stop
+- `js/garden/garden-bed.js` — Interaction time map reset in clear(), null targetPot guards
+- `js/garden/tools.js` — DraggableSeed plantType fallback, golden sparkle deltaTime
+- `js/ui.js` — Countdown interval safety clear, division by zero guard in parallax
+- `js/game.js` — Timer interval leak guard, null challenge guard in showChallengeIntro
+- `js/main.js` — Wire checkBrowserSupport() at startup
+
+---
+
 ## 2026-02-12 — Code health: refactoring, audio pooling, DDA tuning, growth feedback
 
 ### Refactoring

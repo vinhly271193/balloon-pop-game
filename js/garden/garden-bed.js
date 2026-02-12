@@ -726,9 +726,9 @@ class GardenBed {
             : this.heldItem;
 
         // Find relevant pot
-        let targetPot = this.plantPot;
+        let targetPot = null;
         if (this.gameMode === 'competitive') {
-            targetPot = this.plantPots[zoneKey - 1];
+            targetPot = this.plantPots[zoneKey - 1] || null;
         } else {
             // Find closest pot in co-op
             let minDist = Infinity;
@@ -743,6 +743,8 @@ class GardenBed {
                 }
             });
         }
+
+        if (!targetPot) return harvested;
 
         // Check golden watering can (competitive only)
         if (this.gameMode === 'competitive') {
@@ -1013,13 +1015,13 @@ class GardenBed {
             this.sunInteractionTime += this.lastDeltaTime;
             if (this.sunInteractionTime > 0.2) {
                 const plantNeeds = this.plantNeedsMap.get('shared') || this.plantNeeds;
-                plantNeeds.addSun();
+                if (plantNeeds) plantNeeds.addSun();
                 this.sunInteractionTime = 0;
             }
         }
 
         // Harvest interaction
-        let targetPot = this.plantPot;
+        let targetPot = null;
         let minDist = Infinity;
         this.plantPots.forEach(pot => {
             const dist = Math.sqrt(
@@ -1209,6 +1211,14 @@ class GardenBed {
         this.pumpkinActivated = false;
         this.timerPaused = false;
         this.timerPauseDuration = 0;
+
+        // Clear interaction time maps to prevent stale progress carrying over
+        this.sunInteractionTime = 0;
+        this.waterInteractionTime = 0;
+        this.foodInteractionTime = 0;
+        this.sunInteractionTimeMap.clear();
+        this.waterInteractionTimeMap.clear();
+        this.foodInteractionTimeMap.clear();
 
         if (this.magicPumpkin) {
             this.magicPumpkin.hide();

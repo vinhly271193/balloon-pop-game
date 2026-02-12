@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Secure context:', window.isSecureContext);
     console.log('navigator.mediaDevices:', navigator.mediaDevices);
 
+    // Check browser support before initializing
+    if (!checkBrowserSupport()) {
+        showBrowserSupportError();
+        return;
+    }
+
     // Initialize the game (camera check happens when user clicks Start)
     try {
         const success = await game.init();

@@ -515,6 +515,13 @@ class Game {
             this.currentChallenge = challengeManager.startChallenge();
         }
 
+        // Safety: if challenge creation failed, fall back to welcome
+        if (!this.currentChallenge) {
+            console.error('Failed to create challenge');
+            this.setState(GameState.WELCOME);
+            return;
+        }
+
         // Set garden bed difficulty
         this.gardenBed.setDifficulty(this.currentChallenge.level);
 
@@ -615,7 +622,11 @@ class Game {
         // Clear any existing seeds
         this.gardenBed.clear();
 
-        // Start timer
+        // Start timer (clear any leaked interval first)
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
         this.timerInterval = setInterval(() => {
             this.timeRemaining -= 1;
 

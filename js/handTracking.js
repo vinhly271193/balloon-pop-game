@@ -144,6 +144,18 @@ class HandTracker {
         if (this.camera) {
             this.camera.stop();
         }
+
+        // Release camera hardware — stop all tracks on the video stream
+        if (this.videoElement && this.videoElement.srcObject) {
+            this.videoElement.srcObject.getTracks().forEach(track => track.stop());
+            this.videoElement.srcObject = null;
+        }
+
+        // Clear stale data so drawHands() doesn't render old positions
+        this.lastResults = null;
+        this.handPositions = [];
+        this.leftHandDetected = false;
+        this.rightHandDetected = false;
     }
 
     /**

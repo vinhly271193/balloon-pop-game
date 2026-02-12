@@ -826,6 +826,12 @@ class UIManager {
         // Play countdown sound
         audioManager.play('countdown');
 
+        // Safety: clear any leaked countdown interval before creating a new one
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
+
         this.countdownInterval = setInterval(() => {
             count--;
             if (count > 0) {
@@ -1089,7 +1095,7 @@ class UIManager {
 
         // Average all hand positions (normalized to -1..1 from center)
         const canvas = document.getElementById('gameCanvas');
-        if (!canvas) return;
+        if (!canvas || !canvas.width || !canvas.height) return;
         let avgX = 0, avgY = 0;
         for (const pos of handPositions) {
             avgX += pos.x / canvas.width;

@@ -14,7 +14,7 @@ class DraggableSeed {
         this.homeX = x;
         this.homeY = y;
         this.plantType = plantType;
-        this.plantInfo = PLANT_TYPES[plantType];
+        this.plantInfo = PLANT_TYPES[plantType] || { name: 'Seed', icon: '🌱', plantColor: '#4ade80' };
         this.canvas = canvas;
 
         this.size = 30;
@@ -142,6 +142,9 @@ class WateringCan {
         // Dwell progress ring
         this.pourProgress = 0; // 0-1
         this.targetPotRef = null; // Reference to the pot being watered
+
+        // Golden sparkle animation time (accumulated via deltaTime)
+        this.sparkleTime = 0;
     }
 
     /**
@@ -239,6 +242,9 @@ class WateringCan {
         });
         this.pourParticles = this.pourParticles.filter(p => p.alpha > 0 && p.life < 0.8);
 
+        // Advance sparkle timer
+        this.sparkleTime += deltaTime * 5;
+
         // Update old water drops
         this.waterDrops.forEach(drop => {
             drop.y += drop.vy;
@@ -312,9 +318,8 @@ class WateringCan {
 
         // Golden sparkle effect
         if (this.isGolden) {
-            const sparkleTime = Date.now() / 200;
             for (let i = 0; i < 3; i++) {
-                const angle = (sparkleTime + i * Math.PI * 2 / 3) % (Math.PI * 2);
+                const angle = (this.sparkleTime + i * Math.PI * 2 / 3) % (Math.PI * 2);
                 const sparkleX = Math.cos(angle) * 40;
                 const sparkleY = Math.sin(angle) * 30;
                 ctx.beginPath();
