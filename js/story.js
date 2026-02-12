@@ -249,22 +249,35 @@ class StoryManager {
         // Show screen
         introScreen.classList.add('active');
 
-        // Auto-dismiss after delay or wait for interaction
+        // Progress bar animation
+        const progressFill = introScreen.querySelector('.chapter-progress-fill');
+        const duration = 5000;
+        const startTime = performance.now();
+        let animFrameId = null;
+
         const dismissHandler = () => {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            if (progressFill) progressFill.style.width = '0%';
             introScreen.classList.remove('active');
             introScreen.removeEventListener('click', dismissHandler);
             if (onComplete) onComplete();
         };
 
+        const animateProgress = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            if (progressFill) progressFill.style.width = `${progress * 100}%`;
+
+            if (progress >= 1) {
+                if (introScreen.classList.contains('active')) dismissHandler();
+                return;
+            }
+            animFrameId = requestAnimationFrame(animateProgress);
+        };
+        animFrameId = requestAnimationFrame(animateProgress);
+
         // Allow click to dismiss
         introScreen.addEventListener('click', dismissHandler);
-
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            if (introScreen.classList.contains('active')) {
-                dismissHandler();
-            }
-        }, 5000);
     }
 
     /**
@@ -308,22 +321,35 @@ class StoryManager {
             audioManager.play('windChimes');
         }
 
-        // Auto-dismiss after delay or wait for interaction
+        // Progress bar animation
+        const progressFill = completeScreen.querySelector('.chapter-progress-fill');
+        const duration = 6000;
+        const startTime = performance.now();
+        let animFrameId = null;
+
         const dismissHandler = () => {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            if (progressFill) progressFill.style.width = '0%';
             completeScreen.classList.remove('active');
             completeScreen.removeEventListener('click', dismissHandler);
             if (onComplete) onComplete();
         };
 
+        const animateProgress = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            if (progressFill) progressFill.style.width = `${progress * 100}%`;
+
+            if (progress >= 1) {
+                if (completeScreen.classList.contains('active')) dismissHandler();
+                return;
+            }
+            animFrameId = requestAnimationFrame(animateProgress);
+        };
+        animFrameId = requestAnimationFrame(animateProgress);
+
         // Allow click to dismiss
         completeScreen.addEventListener('click', dismissHandler);
-
-        // Auto-dismiss after 6 seconds
-        setTimeout(() => {
-            if (completeScreen.classList.contains('active')) {
-                dismissHandler();
-            }
-        }, 6000);
     }
 
     /**
