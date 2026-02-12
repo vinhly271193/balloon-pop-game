@@ -153,6 +153,14 @@ Audits a feature or area for visual consistency, canvas rendering quality, and o
 
 ---
 
+## `/stability-audit` — Stability & Crash Audit
+
+**Triggers:** "stability audit", "find crashes", "check for bugs", "what could crash", "robustness check", "freeze bugs", "memory leaks"
+
+Deep dive audit of the codebase for crash bugs, freezes, memory leaks, race conditions, and code robustness issues. Traces user flows through the code looking for failure modes, then produces a prioritized findings report with severity classifications. Use before releases or demos.
+
+---
+
 ## `/demo-prep` — Prepare for a Demo
 
 **Triggers:** "demo prep", "getting ready for a demo", "stakeholder presentation", "is the app demo ready", "check the flows"
