@@ -155,10 +155,10 @@ html, body {
 }
 
 /* ===========================================
-   Welcome Screen — Light Garden Theme
+   Light Screens (Welcome, Player Select, Mode Select)
    =========================================== */
 
-.screen.welcome-screen {
+.screen.light-screen {
     background:
         /* Warm sunlight glow */
         radial-gradient(ellipse at 70% 15%, rgba(255, 220, 120, 0.5) 0%, transparent 45%),
@@ -183,7 +183,7 @@ html, body {
     filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.2));
 }
 
-.welcome-screen .company-logo {
+.light-screen .company-logo {
     filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.1));
 }
 
@@ -230,7 +230,7 @@ html, body {
     min-height: 30px;
 }
 
-.welcome-screen .welcome-message {
+.light-screen .welcome-message {
     color: #16a34a;
 }
 
@@ -242,7 +242,7 @@ html, body {
     border-radius: 16px;
 }
 
-.welcome-screen .garden-preview {
+.light-screen .garden-preview {
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -259,7 +259,7 @@ html, body {
     margin-top: var(--spacing-small);
 }
 
-.welcome-screen .garden-progress-text {
+.light-screen .garden-progress-text {
     color: #6b7280;
 }
 
@@ -270,7 +270,7 @@ html, body {
     line-height: 1.4;
 }
 
-.welcome-screen .instruction-text {
+.light-screen .instruction-text {
     color: #4b5563;
 }
 
@@ -295,24 +295,125 @@ html, body {
     margin-top: var(--spacing-medium);
 }
 
-.welcome-screen .camera-hint {
+.light-screen .camera-hint {
     color: #9ca3af;
 }
 
 /* Welcome screen button overrides for light background */
-.welcome-screen .big-button:not(.secondary) {
+.light-screen .big-button:not(.secondary) {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #ffffff;
     box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35);
 }
 
-.welcome-screen .border-progress-track {
+.light-screen .border-progress-track {
     border-color: rgba(0, 0, 0, 0.12);
 }
 
-.welcome-screen .border-progress-fill {
+.light-screen .border-progress-fill {
     border-color: #16a34a !important;
     box-shadow: 0 0 12px rgba(22, 163, 74, 0.6), 0 0 24px rgba(22, 163, 74, 0.3);
+}
+
+/* Light screen title overrides */
+.light-screen .player-select-title,
+.light-screen .mode-select-title {
+    color: #15803d;
+}
+
+.light-screen .mode-btn-desc {
+    color: #6b7280;
+}
+
+/* Entrance animation for light screens */
+.light-screen.active .screen-content {
+    animation: fadeSlideUp 0.6s ease-out both;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===========================================
+   Floating Particles (Leaves & Petals)
+   =========================================== */
+
+.floating-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.light-screen .screen-content {
+    position: relative;
+    z-index: 1;
+}
+
+.floating-particles::before,
+.floating-particles::after {
+    content: '';
+    position: absolute;
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    animation: particleDrift linear infinite;
+}
+
+/* Leaf 1 - green */
+.floating-particles::before {
+    width: 18px;
+    height: 12px;
+    background: rgba(74, 222, 128, 0.35);
+    left: 15%;
+    animation-duration: 12s;
+    animation-delay: 0s;
+}
+
+/* Leaf 2 - warm */
+.floating-particles::after {
+    width: 14px;
+    height: 10px;
+    background: rgba(255, 200, 120, 0.3);
+    left: 70%;
+    animation-duration: 15s;
+    animation-delay: 3s;
+}
+
+/* Generated particle elements */
+.particle {
+    position: absolute;
+    border-radius: 50% 0 50% 0;
+    pointer-events: none;
+    opacity: 0;
+    animation: particleDrift linear infinite;
+}
+
+@keyframes particleDrift {
+    0% {
+        opacity: 0;
+        transform: translate(0, -20px) rotate(0deg);
+    }
+    8% {
+        opacity: 0.6;
+    }
+    85% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(80px, 110vh) rotate(400deg);
+    }
 }
 
 /* ===========================================

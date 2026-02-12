@@ -26,7 +26,8 @@
         <!-- UI Overlay Container -->
         <div id="uiOverlay">
             <!-- Welcome Screen -->
-            <div id="welcomeScreen" class="screen welcome-screen active">
+            <div id="welcomeScreen" class="screen light-screen active">
+                <div class="floating-particles" aria-hidden="true"></div>
                 <div class="screen-content">
                     <img src="assets/images/logo.png" alt="re:Action Health Technologies" class="company-logo">
                     <h1 class="game-title garden-title">Garden Grow!</h1>
@@ -51,7 +52,8 @@
             </div>
 
             <!-- Player Select Screen -->
-            <div id="playerSelectScreen" class="screen">
+            <div id="playerSelectScreen" class="screen light-screen">
+                <div class="floating-particles" aria-hidden="true"></div>
                 <div class="screen-content">
                     <h2 class="player-select-title">How Many Gardeners?</h2>
                     <p class="instruction-text">Choose how many players</p>
@@ -77,7 +79,8 @@
             </div>
 
             <!-- Mode Select Screen (2P only) -->
-            <div id="modeSelectScreen" class="screen">
+            <div id="modeSelectScreen" class="screen light-screen">
+                <div class="floating-particles" aria-hidden="true"></div>
                 <div class="screen-content">
                     <h2 class="mode-select-title">Choose Your Garden</h2>
                     <p class="instruction-text">How would you like to play together?</p>
@@ -120,6 +123,9 @@
                         </div>
                     </div>
                     <p class="wave-instruction">Wave to start gardening!</p>
+                    <div class="calibration-progress-bar">
+                        <div class="calibration-progress-fill" id="calibrationProgressFill"></div>
+                    </div>
                 </div>
             </div>
 
@@ -141,6 +147,9 @@
                         </div>
                     </div>
                     <p class="wave-instruction">Both hands detected? Let's grow!</p>
+                    <div class="calibration-progress-bar">
+                        <div class="calibration-progress-fill" id="calibrationP2ProgressFill"></div>
+                    </div>
                 </div>
             </div>
 

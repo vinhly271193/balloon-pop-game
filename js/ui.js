@@ -177,6 +177,9 @@ class UIManager {
         // Collect all hoverable elements
         this.collectHoverableElements();
 
+        // Spawn particles on the initial welcome screen
+        this.spawnParticles(this.screens.welcome);
+
         // Load saved settings
         this.loadSettings();
 
@@ -663,6 +666,11 @@ class UIManager {
         // Show target screen
         if (this.screens[screenName]) {
             this.screens[screenName].classList.add('active');
+
+            // Spawn floating particles on light screens
+            if (this.screens[screenName].classList.contains('light-screen')) {
+                this.spawnParticles(this.screens[screenName]);
+            }
         }
 
         this.currentScreen = screenName;
@@ -990,6 +998,35 @@ class UIManager {
 
         // Re-collect hoverable elements
         setTimeout(() => this.collectHoverableElements(), 100);
+    }
+
+    /**
+     * Spawn floating particles in a light screen's particle container
+     */
+    spawnParticles(screenElement) {
+        const container = screenElement?.querySelector('.floating-particles');
+        if (!container || container.children.length > 0) return;
+
+        const colors = [
+            'rgba(74, 222, 128, 0.3)',   // green leaf
+            'rgba(255, 200, 120, 0.25)',  // warm petal
+            'rgba(255, 182, 193, 0.25)',  // pink blossom
+            'rgba(144, 238, 144, 0.3)',   // light green
+            'rgba(255, 223, 186, 0.2)',   // peach
+        ];
+
+        for (let i = 0; i < 8; i++) {
+            const el = document.createElement('div');
+            el.className = 'particle';
+            const size = 10 + Math.random() * 14;
+            el.style.width = `${size}px`;
+            el.style.height = `${size * 0.7}px`;
+            el.style.background = colors[i % colors.length];
+            el.style.left = `${5 + Math.random() * 90}%`;
+            el.style.animationDuration = `${10 + Math.random() * 10}s`;
+            el.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(el);
+        }
     }
 
     /**
