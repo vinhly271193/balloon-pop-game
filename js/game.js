@@ -122,7 +122,6 @@ class Game {
     updateWelcomeScreen() {
         const welcomeMessage = document.getElementById('welcomeMessage');
         const startBtnText = document.getElementById('startBtnText');
-        const gardenProgressText = document.getElementById('gardenProgressText');
 
         if (welcomeMessage) {
             welcomeMessage.textContent = storyManager.getWelcomeMessage();
@@ -132,67 +131,86 @@ class Game {
             startBtnText.textContent = storyManager.isReturningPlayer() ? 'Continue Growing' : 'Start Growing';
         }
 
-        if (gardenProgressText) {
-            const totalPlants = storyManager.totalPlantsGrown;
-            if (totalPlants > 0) {
-                gardenProgressText.textContent = `Your Garden: ${totalPlants} plants grown`;
-            } else {
-                gardenProgressText.textContent = 'Your garden is ready to bloom!';
-            }
-        }
-
-        // Draw garden preview if returning player
+        // Draw garden preview strip at bottom of welcome screen
         this.drawGardenPreview();
     }
 
     /**
-     * Draw mini garden preview on welcome screen
+     * Draw garden preview strip across bottom of welcome screen
      */
     drawGardenPreview() {
         const previewCanvas = document.getElementById('gardenPreviewCanvas');
         if (!previewCanvas) return;
 
+        // Size canvas to fill bottom strip at full width
+        const dpr = window.devicePixelRatio || 1;
+        const stripHeight = window.innerHeight * 0.2;
+        previewCanvas.width = window.innerWidth * dpr;
+        previewCanvas.height = stripHeight * dpr;
+        previewCanvas.style.width = window.innerWidth + 'px';
+        previewCanvas.style.height = stripHeight + 'px';
+
         const ctx = previewCanvas.getContext('2d');
-        const width = previewCanvas.width;
-        const height = previewCanvas.height;
+        ctx.scale(dpr, dpr);
+        const width = window.innerWidth;
+        const height = stripHeight;
 
         // Clear
         ctx.clearRect(0, 0, width, height);
 
-        // Draw sky
-        ctx.fillStyle = '#87CEEB';
-        ctx.fillRect(0, 0, width, height * 0.6);
+        // Draw sky gradient (top portion)
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.5);
+        skyGrad.addColorStop(0, 'rgba(135, 206, 235, 0.0)');
+        skyGrad.addColorStop(1, 'rgba(135, 206, 235, 0.4)');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height * 0.5);
 
-        // Draw grass/ground
-        ctx.fillStyle = '#228B22';
-        ctx.fillRect(0, height * 0.6, width, height * 0.2);
+        // Draw grass
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(0, height * 0.45, width, height * 0.15);
+
+        // Grass detail — wavy top edge
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.45);
+        for (let x = 0; x <= width; x += 40) {
+            ctx.quadraticCurveTo(x + 20, height * 0.40 + Math.sin(x * 0.03) * 6, x + 40, height * 0.45);
+        }
+        ctx.lineTo(width, height * 0.55);
+        ctx.lineTo(0, height * 0.55);
+        ctx.closePath();
+        ctx.fill();
 
         // Draw soil
         ctx.fillStyle = '#8B4513';
-        ctx.fillRect(0, height * 0.8, width, height * 0.2);
+        ctx.fillRect(0, height * 0.6, width, height * 0.4);
 
-        // Draw plants based on completed chapters
-        const plantIcons = ['🌱', '🍅', '🌻', '🥕', '🥬', '🫐'];
-        const completedCount = Math.min(storyManager.completedChapters.length * 2, 6);
+        // Darker soil bottom
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(0, height * 0.85, width, height * 0.15);
 
-        for (let i = 0; i < completedCount; i++) {
-            const x = 30 + (i % 3) * 90;
-            const y = height * 0.55 + Math.floor(i / 3) * 30;
+        // Draw plants spread across the width
+        const plantIcons = ['🌱', '🍅', '🌻', '🥕', '🥬', '🫐', '🌷', '🌿'];
+        const completedCount = Math.min(storyManager.completedChapters.length * 2, 8);
+        const totalSlots = 8;
+        const spacing = width / (totalSlots + 1);
 
-            ctx.font = '24px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(plantIcons[i % plantIcons.length], x, y);
-        }
+        ctx.textAlign = 'center';
 
-        // Add some empty soil spots
-        for (let i = completedCount; i < 6; i++) {
-            const x = 30 + (i % 3) * 90;
-            const y = height * 0.85;
+        for (let i = 0; i < totalSlots; i++) {
+            const x = spacing * (i + 1);
 
-            ctx.fillStyle = '#654321';
-            ctx.beginPath();
-            ctx.ellipse(x, y, 15, 8, 0, 0, Math.PI * 2);
-            ctx.fill();
+            if (i < completedCount) {
+                // Grown plant
+                ctx.font = `${Math.min(36, height * 0.25)}px Arial`;
+                ctx.fillText(plantIcons[i % plantIcons.length], x, height * 0.48);
+            } else {
+                // Empty soil mound
+                ctx.fillStyle = '#654321';
+                ctx.beginPath();
+                ctx.ellipse(x, height * 0.72, 20, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
