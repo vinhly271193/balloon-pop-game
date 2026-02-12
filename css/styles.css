@@ -155,8 +155,24 @@ html, body {
 }
 
 /* ===========================================
-   Welcome Screen
+   Welcome Screen — Light Garden Theme
    =========================================== */
+
+.screen.welcome-screen {
+    background:
+        /* Warm sunlight glow */
+        radial-gradient(ellipse at 70% 15%, rgba(255, 220, 120, 0.5) 0%, transparent 45%),
+        /* Soft green foliage accents */
+        radial-gradient(ellipse at 10% 85%, rgba(144, 238, 144, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 90% 80%, rgba(144, 238, 144, 0.2) 0%, transparent 35%),
+        /* Main warm cream-to-soft-green gradient */
+        linear-gradient(180deg,
+            #FFF8F0 0%,
+            #FFF5E6 20%,
+            #FEFCE8 45%,
+            #F0FDF4 70%,
+            #DCFCE7 100%);
+}
 
 /* Company Logo */
 .company-logo {
@@ -165,6 +181,10 @@ html, body {
     height: auto;
     margin-bottom: var(--spacing-large);
     filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.2));
+}
+
+.welcome-screen .company-logo {
+    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.1));
 }
 
 @media (max-width: 768px) {
@@ -210,12 +230,22 @@ html, body {
     min-height: 30px;
 }
 
+.welcome-screen .welcome-message {
+    color: #16a34a;
+}
+
 /* Garden preview on welcome screen */
 .garden-preview {
     margin-top: var(--spacing-medium);
     padding: var(--spacing-small);
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
+}
+
+.welcome-screen .garden-preview {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .garden-preview canvas {
@@ -229,11 +259,19 @@ html, body {
     margin-top: var(--spacing-small);
 }
 
+.welcome-screen .garden-progress-text {
+    color: #6b7280;
+}
+
 .instruction-text {
     font-size: var(--text-medium);
     color: var(--text-primary);
     margin-bottom: var(--spacing-large);
     line-height: 1.4;
+}
+
+.welcome-screen .instruction-text {
+    color: #4b5563;
 }
 
 .hand-demo {
@@ -255,6 +293,26 @@ html, body {
     font-size: var(--text-small);
     color: var(--text-secondary);
     margin-top: var(--spacing-medium);
+}
+
+.welcome-screen .camera-hint {
+    color: #9ca3af;
+}
+
+/* Welcome screen button overrides for light background */
+.welcome-screen .big-button:not(.secondary) {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.35);
+}
+
+.welcome-screen .border-progress-track {
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+.welcome-screen .border-progress-fill {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 12px rgba(22, 163, 74, 0.6), 0 0 24px rgba(22, 163, 74, 0.3);
 }
 
 /* ===========================================
