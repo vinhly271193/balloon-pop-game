@@ -50,6 +50,7 @@ class Game {
         // Calibration
         this.calibrationWaveDetected = false;
         this.calibrationStartTime = 0;
+        this.calibrationHandsDetectedTime = 0;
 
         // Animation frame ID
         this.animationFrameId = null;
@@ -231,6 +232,8 @@ class Game {
                 uiManager.showHUD(false);
                 this.calibrationWaveDetected = false;
                 this.calibrationStartTime = Date.now();
+                this.calibrationHandsDetectedTime = 0;
+                this.updateCalibrationProgress(0, 'calibrationProgressFill');
                 break;
 
             case GameState.CALIBRATION_P2:
@@ -238,6 +241,8 @@ class Game {
                 uiManager.showHUD(false);
                 this.calibrationWaveDetected = false;
                 this.calibrationStartTime = Date.now();
+                this.calibrationHandsDetectedTime = 0;
+                this.updateCalibrationProgress(0, 'calibrationP2ProgressFill');
                 break;
 
             case GameState.CHAPTER_INTRO:
@@ -339,39 +344,39 @@ class Game {
         if (this.state === GameState.CALIBRATION) {
             uiManager.updateHandIndicators(data.leftDetected, data.rightDetected);
 
-            // Check for wave gesture to proceed
             if (!this.calibrationWaveDetected) {
+                let handsReady = false;
                 if (this.playerCount === 1) {
-                    // Single player: wait for both hands
-                    if (data.leftDetected && data.rightDetected) {
-                        if (Date.now() - this.calibrationStartTime > 2000) {
-                            this.calibrationWaveDetected = true;
-                            setTimeout(() => {
-                                if (this.state === GameState.CALIBRATION) {
+                    handsReady = data.leftDetected && data.rightDetected;
+                } else if (this.playerCount === 2) {
+                    handsReady = data.rightDetected && data.positions.some(pos => pos.x > this.canvas.width / 2);
+                }
+
+                if (handsReady) {
+                    if (!this.calibrationHandsDetectedTime) {
+                        this.calibrationHandsDetectedTime = Date.now();
+                    }
+                    const elapsed = Date.now() - this.calibrationHandsDetectedTime;
+                    const progress = Math.min(elapsed / 2000, 1);
+                    this.updateCalibrationProgress(progress, 'calibrationProgressFill');
+
+                    if (progress >= 1) {
+                        this.calibrationWaveDetected = true;
+                        setTimeout(() => {
+                            if (this.state === GameState.CALIBRATION) {
+                                if (this.playerCount === 2) {
+                                    this.setState(GameState.CALIBRATION_P2);
+                                } else {
                                     const currentLevel = challengeManager.currentLevel;
                                     const newChapter = storyManager.isNewChapterStart(currentLevel);
-
-                                    if (newChapter) {
-                                        this.setState(GameState.CHAPTER_INTRO);
-                                    } else {
-                                        this.setState(GameState.CHALLENGE_INTRO);
-                                    }
+                                    this.setState(newChapter ? GameState.CHAPTER_INTRO : GameState.CHALLENGE_INTRO);
                                 }
-                            }, 500);
-                        }
+                            }
+                        }, 300);
                     }
-                } else if (this.playerCount === 2) {
-                    // Two players: wait for 1 hand on right side (P1)
-                    if (data.rightDetected && data.positions.some(pos => pos.x > this.canvas.width / 2)) {
-                        if (Date.now() - this.calibrationStartTime > 2000) {
-                            this.calibrationWaveDetected = true;
-                            setTimeout(() => {
-                                if (this.state === GameState.CALIBRATION) {
-                                    this.setState(GameState.CALIBRATION_P2);
-                                }
-                            }, 500);
-                        }
-                    }
+                } else {
+                    this.calibrationHandsDetectedTime = 0;
+                    this.updateCalibrationProgress(0, 'calibrationProgressFill');
                 }
             }
         }
@@ -380,27 +385,31 @@ class Game {
         if (this.state === GameState.CALIBRATION_P2) {
             uiManager.updateHandIndicators(data.leftDetected, data.rightDetected);
 
-            // Wait for second hand on left side (need 2 hands total, stable 2s)
             if (!this.calibrationWaveDetected) {
                 const hasLeftHand = data.positions.some(pos => pos.x <= this.canvas.width / 2);
                 const hasTwoHands = data.positions.length >= 2;
 
                 if (hasLeftHand && hasTwoHands) {
-                    if (Date.now() - this.calibrationStartTime > 2000) {
+                    if (!this.calibrationHandsDetectedTime) {
+                        this.calibrationHandsDetectedTime = Date.now();
+                    }
+                    const elapsed = Date.now() - this.calibrationHandsDetectedTime;
+                    const progress = Math.min(elapsed / 2000, 1);
+                    this.updateCalibrationProgress(progress, 'calibrationP2ProgressFill');
+
+                    if (progress >= 1) {
                         this.calibrationWaveDetected = true;
                         setTimeout(() => {
                             if (this.state === GameState.CALIBRATION_P2) {
                                 const currentLevel = challengeManager.currentLevel;
                                 const newChapter = storyManager.isNewChapterStart(currentLevel);
-
-                                if (newChapter) {
-                                    this.setState(GameState.CHAPTER_INTRO);
-                                } else {
-                                    this.setState(GameState.CHALLENGE_INTRO);
-                                }
+                                this.setState(newChapter ? GameState.CHAPTER_INTRO : GameState.CHALLENGE_INTRO);
                             }
-                        }, 500);
+                        }, 300);
                     }
+                } else {
+                    this.calibrationHandsDetectedTime = 0;
+                    this.updateCalibrationProgress(0, 'calibrationP2ProgressFill');
                 }
             }
         }
@@ -459,6 +468,14 @@ class Game {
                 ddaEngine.recordInteraction(playerId);
             });
         }
+    }
+
+    /**
+     * Update calibration progress bar
+     */
+    updateCalibrationProgress(progress, fillId) {
+        const fill = document.getElementById(fillId);
+        if (fill) fill.style.width = `${progress * 100}%`;
     }
 
     /**

@@ -221,6 +221,43 @@ class StoryManager {
     }
 
     /**
+     * Animate a screen with progress bar and auto-dismiss
+     * @param {HTMLElement} screen - The screen element
+     * @param {number} duration - Duration in ms
+     * @param {Function} onComplete - Callback when dismissed
+     */
+    _animateScreen(screen, duration, onComplete) {
+        screen.classList.add('active');
+
+        const progressFill = screen.querySelector('.chapter-progress-fill');
+        const startTime = performance.now();
+        let animFrameId = null;
+
+        const dismissHandler = () => {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            if (progressFill) progressFill.style.width = '0%';
+            screen.classList.remove('active');
+            screen.removeEventListener('click', dismissHandler);
+            if (onComplete) onComplete();
+        };
+
+        const animateProgress = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            if (progressFill) progressFill.style.width = `${progress * 100}%`;
+
+            if (progress >= 1) {
+                if (screen.classList.contains('active')) dismissHandler();
+                return;
+            }
+            animFrameId = requestAnimationFrame(animateProgress);
+        };
+        animFrameId = requestAnimationFrame(animateProgress);
+
+        screen.addEventListener('click', dismissHandler);
+    }
+
+    /**
      * Show chapter intro screen
      * @param {Object} chapter - Chapter data
      * @param {Function} onComplete - Callback when intro is dismissed
@@ -228,7 +265,6 @@ class StoryManager {
     showChapterIntro(chapter, onComplete) {
         const introScreen = document.getElementById('chapterIntroScreen');
         if (!introScreen) {
-            // If screen doesn't exist, just call callback
             if (onComplete) onComplete();
             return;
         }
@@ -246,38 +282,9 @@ class StoryManager {
         if (goalEl) goalEl.textContent = chapter.goal;
         if (iconEl) iconEl.textContent = chapter.icon;
 
-        // Show screen
-        introScreen.classList.add('active');
-
-        // Progress bar animation
-        const progressFill = introScreen.querySelector('.chapter-progress-fill');
-        const duration = 5000;
-        const startTime = performance.now();
-        let animFrameId = null;
-
-        const dismissHandler = () => {
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            if (progressFill) progressFill.style.width = '0%';
-            introScreen.classList.remove('active');
-            introScreen.removeEventListener('click', dismissHandler);
-            if (onComplete) onComplete();
-        };
-
-        const animateProgress = (now) => {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            if (progressFill) progressFill.style.width = `${progress * 100}%`;
-
-            if (progress >= 1) {
-                if (introScreen.classList.contains('active')) dismissHandler();
-                return;
-            }
-            animFrameId = requestAnimationFrame(animateProgress);
-        };
-        animFrameId = requestAnimationFrame(animateProgress);
-
-        // Allow click to dismiss
-        introScreen.addEventListener('click', dismissHandler);
+        // Returning players get shorter duration (they've seen the story)
+        const duration = this.isReturningPlayer() ? 4000 : 7000;
+        this._animateScreen(introScreen, duration, onComplete);
     }
 
     /**
@@ -288,7 +295,6 @@ class StoryManager {
     showChapterComplete(chapter, onComplete) {
         const completeScreen = document.getElementById('chapterCompleteScreen');
         if (!completeScreen) {
-            // If screen doesn't exist, just call callback
             if (onComplete) onComplete();
             return;
         }
@@ -302,6 +308,10 @@ class StoryManager {
         if (rewardEl) rewardEl.textContent = chapter.reward;
         if (iconEl) iconEl.textContent = chapter.icon;
 
+        // Update plants grown stat
+        const plantsEl = completeScreen.querySelector('#chapterPlantsGrown');
+        if (plantsEl) plantsEl.textContent = this.totalPlantsGrown;
+
         // Show unlock message if applicable
         const unlockEl = completeScreen.querySelector('.unlock-message');
         if (unlockEl) {
@@ -313,43 +323,14 @@ class StoryManager {
             }
         }
 
-        // Show screen
-        completeScreen.classList.add('active');
-
         // Play celebration sound
         if (typeof audioManager !== 'undefined') {
             audioManager.play('windChimes');
         }
 
-        // Progress bar animation
-        const progressFill = completeScreen.querySelector('.chapter-progress-fill');
-        const duration = 6000;
-        const startTime = performance.now();
-        let animFrameId = null;
-
-        const dismissHandler = () => {
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            if (progressFill) progressFill.style.width = '0%';
-            completeScreen.classList.remove('active');
-            completeScreen.removeEventListener('click', dismissHandler);
-            if (onComplete) onComplete();
-        };
-
-        const animateProgress = (now) => {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            if (progressFill) progressFill.style.width = `${progress * 100}%`;
-
-            if (progress >= 1) {
-                if (completeScreen.classList.contains('active')) dismissHandler();
-                return;
-            }
-            animFrameId = requestAnimationFrame(animateProgress);
-        };
-        animFrameId = requestAnimationFrame(animateProgress);
-
-        // Allow click to dismiss
-        completeScreen.addEventListener('click', dismissHandler);
+        // Returning players get shorter duration
+        const duration = this.isReturningPlayer() ? 5000 : 8000;
+        this._animateScreen(completeScreen, duration, onComplete);
     }
 
     /**

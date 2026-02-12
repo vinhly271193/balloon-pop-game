@@ -510,6 +510,24 @@ html, body {
     animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* Calibration progress bar (hand-detection wait) */
+.calibration-progress-bar {
+    width: 50%;
+    max-width: 300px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    margin: var(--spacing-medium) auto 0;
+    overflow: hidden;
+}
+
+.calibration-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 3px;
+}
+
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -713,6 +731,42 @@ html, body {
     color: var(--color-sunflower);
     font-weight: 700;
     margin-bottom: var(--spacing-large);
+}
+
+/* Chapter Complete Stats */
+.chapter-complete-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-medium);
+    margin-bottom: var(--spacing-medium);
+}
+
+.chapter-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-small) var(--spacing-medium);
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    min-width: 120px;
+}
+
+.chapter-stat-icon {
+    font-size: 32px;
+    margin-bottom: 4px;
+}
+
+.chapter-stat-value {
+    font-size: var(--text-large);
+    font-weight: 800;
+    color: var(--accent-primary);
+}
+
+.chapter-stat-label {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* ===========================================
