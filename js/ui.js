@@ -180,6 +180,9 @@ class UIManager {
         // Spawn particles on the initial welcome screen
         this.spawnParticles(this.screens.welcome);
 
+        // Apply chapter color theme to light screens
+        this.applyChapterTheme();
+
         // Load saved settings
         this.loadSettings();
 
@@ -203,8 +206,12 @@ class UIManager {
     checkHandHover(handPositions) {
         if (!handPositions || handPositions.length === 0) {
             this.clearHover();
+            this.updateParallax(null);
             return;
         }
+
+        // Update parallax on floating particles
+        this.updateParallax(handPositions);
 
         // Get canvas dimensions for coordinate conversion
         const canvas = document.getElementById('gameCanvas');
@@ -667,8 +674,9 @@ class UIManager {
         if (this.screens[screenName]) {
             this.screens[screenName].classList.add('active');
 
-            // Spawn floating particles on light screens
+            // Spawn floating particles and apply chapter theme on light screens
             if (this.screens[screenName].classList.contains('light-screen')) {
+                this.applyChapterTheme();
                 this.spawnParticles(this.screens[screenName]);
             }
         }
@@ -998,6 +1006,51 @@ class UIManager {
 
         // Re-collect hoverable elements
         setTimeout(() => this.collectHoverableElements(), 100);
+    }
+
+    /**
+     * Apply chapter-based color theme to all light screens
+     */
+    applyChapterTheme() {
+        const chapter = typeof storyManager !== 'undefined' ? storyManager.currentChapter : 1;
+        const lightScreens = document.querySelectorAll('.light-screen');
+        lightScreens.forEach(screen => {
+            screen.classList.remove('chapter-2', 'chapter-3');
+            if (chapter === 2) screen.classList.add('chapter-2');
+            if (chapter >= 3) screen.classList.add('chapter-3');
+        });
+    }
+
+    /**
+     * Update parallax offset on floating particles based on hand position
+     */
+    updateParallax(handPositions) {
+        const activeScreen = Object.values(this.screens).find(
+            s => s && s.classList.contains('light-screen') && s.classList.contains('active')
+        );
+        const container = activeScreen?.querySelector('.floating-particles');
+        if (!container) return;
+
+        if (!handPositions || handPositions.length === 0) {
+            container.style.transform = '';
+            return;
+        }
+
+        // Average all hand positions (normalized to -1..1 from center)
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) return;
+        let avgX = 0, avgY = 0;
+        for (const pos of handPositions) {
+            avgX += pos.x / canvas.width;
+            avgY += pos.y / canvas.height;
+        }
+        avgX = (avgX / handPositions.length - 0.5) * 2; // -1 to 1
+        avgY = (avgY / handPositions.length - 0.5) * 2;
+
+        // Subtle shift — max 15px in any direction
+        const shiftX = avgX * -15;
+        const shiftY = avgY * -10;
+        container.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
     }
 
     /**

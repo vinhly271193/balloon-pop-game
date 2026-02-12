@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-02-12 — Parallax particles, chapter color progression, light loading screen
+- **Parallax floating particles**: Leaves and petals now shift subtly in response to hand position detected via MediaPipe — a gentle parallax effect (max 15px) that makes the pre-game screens feel alive and responsive
+- **Chapter color progression**: Light screens gradually shift warmer as players progress through chapters — Chapter 1 is the default cool cream/green, Chapter 2 adds golden warmth, Chapter 3 leans into rich amber/peach tones
+- **Light loading screen**: Replaced the dark loading overlay with the same warm cream-to-green gradient used across all light screens — spinner and text updated for light background readability
+- **Unmirrored canvas text**: Hint text on the gameplay canvas now renders correctly on the CSS-mirrored canvas using a `drawUnmirroredText` helper
+- Files changed: `css/styles.css`, `js/ui.js`, `js/garden.js`
+
 ## 2026-02-12 — Visible hand gloves on light screens
 - **Garden green gloves**: Changed default 1-player glove from white to garden green (#2E8B57 outline, honeydew fill) so hands are clearly visible against the light pastel background on Welcome, Player Select, and Mode Select screens
 - **Stronger outlines**: Increased opacity on finger outlines (0.2→0.5), fingertip outlines (0.5→0.7), glow (0.25→0.4), wrist cuff (0.35→0.5), and thickened palm outline (2.5→3px)

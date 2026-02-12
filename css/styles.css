@@ -325,6 +325,33 @@ html, body {
     color: #6b7280;
 }
 
+/* Chapter color progression — warmer tones as chapters advance */
+.light-screen.chapter-2 {
+    background:
+        radial-gradient(ellipse at 70% 15%, rgba(255, 200, 80, 0.55) 0%, transparent 45%),
+        radial-gradient(ellipse at 10% 85%, rgba(180, 230, 130, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 90% 80%, rgba(255, 220, 160, 0.2) 0%, transparent 35%),
+        linear-gradient(180deg,
+            #FFF6E8 0%,
+            #FFF0D4 20%,
+            #FEFADC 45%,
+            #F5FCEC 70%,
+            #E2F9D8 100%);
+}
+
+.light-screen.chapter-3 {
+    background:
+        radial-gradient(ellipse at 70% 15%, rgba(255, 180, 60, 0.55) 0%, transparent 45%),
+        radial-gradient(ellipse at 10% 85%, rgba(200, 220, 100, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 90% 80%, rgba(255, 200, 120, 0.25) 0%, transparent 35%),
+        linear-gradient(180deg,
+            #FFF3E0 0%,
+            #FFECCC 20%,
+            #FFF5D6 45%,
+            #F8FAE4 70%,
+            #E8F5CC 100%);
+}
+
 /* Entrance animation for light screens */
 .light-screen.active .screen-content {
     animation: fadeSlideUp 0.6s ease-out both;
@@ -354,6 +381,7 @@ html, body {
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
+    transition: transform 0.3s ease-out;
 }
 
 .light-screen .screen-content {
@@ -808,8 +836,8 @@ html, body {
    =========================================== */
 
 .loading-spinner.garden-spinner {
-    border-color: var(--soil-brown);
-    border-top-color: var(--accent-primary);
+    border-color: rgba(139, 69, 19, 0.2);
+    border-top-color: #22c55e;
     position: relative;
 }
 
@@ -983,7 +1011,9 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: var(--bg-primary);
+    background:
+        radial-gradient(ellipse at 70% 15%, rgba(255, 220, 120, 0.4) 0%, transparent 45%),
+        linear-gradient(180deg, #FFF8F0 0%, #FEFCE8 45%, #F0FDF4 70%, #DCFCE7 100%);
     z-index: 100;
     transition: opacity var(--transition-medium);
 }
@@ -996,8 +1026,8 @@ html, body {
 .loading-spinner {
     width: 80px;
     height: 80px;
-    border: 6px solid var(--bg-secondary);
-    border-top-color: var(--accent-primary);
+    border: 6px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #22c55e;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: var(--spacing-medium);
@@ -1009,7 +1039,7 @@ html, body {
 
 .loading-text {
     font-size: var(--text-normal);
-    color: var(--text-secondary);
+    color: #6b7280;
 }
 
 /* ===========================================

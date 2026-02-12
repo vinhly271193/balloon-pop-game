@@ -3,6 +3,19 @@
  * Plant nurturing gameplay with needs management
  */
 
+/** Counter-mirror text so it reads correctly on the CSS-mirrored canvas */
+function drawUnmirroredText(ctx, text, x, y, stroke) {
+    ctx.save();
+    // Swap left/right alignment for the flipped context
+    if (ctx.textAlign === 'left') ctx.textAlign = 'right';
+    else if (ctx.textAlign === 'right') ctx.textAlign = 'left';
+    ctx.translate(x, 0);
+    ctx.scale(-1, 1);
+    if (stroke) ctx.strokeText(text, 0, y);
+    ctx.fillText(text, 0, y);
+    ctx.restore();
+}
+
 // Plant type definitions
 const PLANT_TYPES = {
     tomato: {
@@ -386,7 +399,7 @@ class PlantPot {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.globalAlpha = i <= currentIdx ? 1 : 0.4;
-            ctx.fillText(icons[i], iconX, iconY);
+            drawUnmirroredText(ctx, icons[i], iconX, iconY);
             ctx.globalAlpha = 1;
         }
         ctx.restore();
@@ -430,7 +443,7 @@ class PlantPot {
         ctx.font = '18px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('💧', iconX, iconY);
+        drawUnmirroredText(ctx, '💧', iconX, iconY);
 
         ctx.restore();
     }
@@ -699,12 +712,12 @@ class DraggableSeed {
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(this.plant.icon, this.x, this.y);
+        drawUnmirroredText(ctx, this.plant.icon, this.x, this.y);
 
         // Label
         ctx.font = 'bold 10px Arial';
         ctx.fillStyle = '#5D4037';
-        ctx.fillText(this.plant.name, this.x, this.y + this.size);
+        drawUnmirroredText(ctx, this.plant.name, this.x, this.y + this.size);
 
         ctx.restore();
     }
@@ -1064,7 +1077,7 @@ class PlantNeeds {
         ctx.font = 'bold 18px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
-        ctx.fillText('Plant Needs', x, y);
+        drawUnmirroredText(ctx, 'Plant Needs', x, y);
 
         // Water bar
         this.drawBar(ctx, x, y + spacing, barWidth, barHeight, this.displayWater, this.water, '💧', 'Water');
@@ -1087,7 +1100,7 @@ class PlantNeeds {
             if (e.type === 'water') effectY = y + spacing;
             else if (e.type === 'sun') effectY = y + spacing * 2;
             else if (e.type === 'food') effectY = y + spacing * 3;
-            ctx.fillText(e.icon, x + barWidth + 50, effectY + e.y);
+            drawUnmirroredText(ctx, e.icon, x + barWidth + 50, effectY + e.y);
             ctx.restore();
         });
 
@@ -1098,7 +1111,7 @@ class PlantNeeds {
         // Icon
         ctx.font = '22px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText(icon, x, y + height / 2 + 7);
+        drawUnmirroredText(ctx, icon, x, y + height / 2 + 7);
 
         // Bar background — pulse red if critical
         if (actualLevel < 0.3) {
@@ -2805,11 +2818,11 @@ class GardenBed {
         const anyPotHarvestable = this.plantPots.some(pot => pot.growthStage === GrowthStage.HARVESTABLE);
 
         if (anyPotEmpty) {
-            ctx.fillText('Pick up the seed and drop it in the pot!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Pick up the seed and drop it in the pot!', this.canvas.width / 2, 50);
         } else if (anyPotHarvestable) {
-            ctx.fillText('Your plant is ready! Touch it to harvest!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Your plant is ready! Touch it to harvest!', this.canvas.width / 2, 50);
         } else {
-            ctx.fillText('Keep your plant healthy - water it, give it sun and food!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Keep your plant healthy - water it, give it sun and food!', this.canvas.width / 2, 50);
         }
 
         ctx.restore();
