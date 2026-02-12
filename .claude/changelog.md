@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-02-12 — Fix crashes, merge loading screens, split garden.js
+
+### Phase 1: Fix 6 crash/freeze bugs
+- **Harvest loop break**: Replaced `forEach` with `for...of` loop + `roundEnded` flag so the game stops processing harvests immediately when a challenge completes, preventing double state transitions
+- **Guard setTimeout spawns**: Added `this.active` flag to GardenBed — seed spawn timers now check `if (this.active)` before spawning, preventing ghost seeds after round ends
+- **Double startChallenge guard**: `showChallengeIntro()` now checks if a challenge is already in progress before creating a new one
+- **Tab visibility resume**: Added missing `game.resume()` call when tab becomes visible again — game no longer stays frozen after tabbing away and back
+- **Fixed hardcoded deltaTime**: Garden animations now use actual frame delta instead of hardcoded `0.016`, preventing speed inconsistencies on different refresh rates
+
+### Phase 2: Merge loading screens (3 screens → 1)
+- **Removed CHAPTER_INTRO and CHAPTER_COMPLETE states**: Eliminated 2 non-interactive loading screens that added 7-10 seconds of dead time before gameplay — critical for dementia patients who may lose engagement
+- **Chapter header in Challenge Intro**: When starting a new chapter, the Challenge Intro screen now shows the chapter icon, number, and title as a header banner
+- **Chapter complete in Round End**: When completing a chapter's final level, the Round End screen shows a celebration section with the chapter icon, title, reward text, and any background unlock
+- **Simplified state machine**: WELCOME → PLAYER_SELECT → MODE_SELECT → CALIBRATION → CHALLENGE_INTRO → PLAYING → ROUND_END (no more chapter detours)
+
+### Phase 3: Split garden.js into 6 focused files
+- **Broke up 2980-line monolith**: `js/garden.js` (9 classes) split into `js/garden/` directory with 6 files:
+  - `constants.js` (75 lines) — `drawUnmirroredText()`, `PLANT_TYPES`, `GrowthStage`
+  - `plant-pot.js` (552 lines) — `PlantPot` class
+  - `tools.js` (426 lines) — `DraggableSeed`, `WateringCan`, `FertilizerBag`
+  - `plant-needs.js` (244 lines) — `PlantNeeds`, `SunArea`
+  - `effects.js` (499 lines) — `MagicPumpkin`, `HintArrow`, `ConfettiParticle`
+  - `garden-bed.js` (1215 lines) — `GardenBed` coordinator
+- **Removed dead code**: Deleted `_animateScreen()` from `story.js` (no longer called after Phase 2)
+- Files changed: `js/game.js`, `js/main.js`, `js/ui.js`, `js/story.js`, `index.html`, `css/styles.css`, `js/garden.js` → `js/garden/*.js` (6 files)
+
 ## 2026-02-12 — Fix seed planting freeze (all modes) + settings gear overlap in 2P
 - **Seed planting freeze fix**: `DraggableSeed` had a naming collision — the constructor set `this.plant = PLANT_TYPES[plantType]` which shadowed the prototype method `plant()`. When `seed.plant()` was called after dropping a seed into a pot, JavaScript tried to invoke the data object as a function, throwing `TypeError`. This crashed the hand tracking callback, freezing the game. Renamed the property to `this.plantInfo` to resolve the collision.
 - **Settings gear overlap fix**: In competitive (2P) mode, the Player 1 score panel in the top-right corner overlapped with the settings gear button. Added right margin to the P1 score panel to clear the gear.
