@@ -1811,6 +1811,7 @@ class GardenBed {
         // Currently held items (per player)
         this.heldItemsMap = new Map();
         this.heldItem = null; // Default for single player
+        this.heldItemHand = null; // Track which physical hand holds the item
 
         // Available seeds
         this.availableSeeds = [];
@@ -2349,11 +2350,38 @@ class GardenBed {
                 });
             });
         } else {
-            // Co-op mode - all hands interact with shared garden
-            handPositions.forEach(hand => {
+            // Solo/co-op - use one palm point per physical hand
+            const palmPoints = new Map();
+            handPositions.forEach(pos => {
+                const handKey = pos.isLeft ? 'left' : 'right';
+                if (!palmPoints.has(handKey)) {
+                    palmPoints.set(handKey, pos);
+                }
+            });
+
+            // Release held item if the holding hand disappeared
+            if (this.heldItem && this.heldItemHand && !palmPoints.has(this.heldItemHand)) {
+                this.releaseItem();
+            }
+
+            palmPoints.forEach((hand, handKey) => {
+                // If another hand is holding an item, only allow free-hand interactions
+                if (this.heldItem && this.heldItemHand && this.heldItemHand !== handKey) {
+                    const result = this.processFreeHandInteraction(hand);
+                    if (result) {
+                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                    }
+                    return;
+                }
+
                 const result = this.processHandInteraction(hand, 'shared');
                 if (result) {
                     harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1 });
+                }
+
+                // Track which hand grabbed the item
+                if (this.heldItem && !this.heldItemHand) {
+                    this.heldItemHand = handKey;
                 }
             });
 
@@ -2472,6 +2500,7 @@ class GardenBed {
                         this.heldItemsMap.set(zoneKey, null);
                     } else {
                         this.heldItem = null;
+                        this.heldItemHand = null;
                     }
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('plant');
@@ -2676,8 +2705,53 @@ class GardenBed {
                 this.heldItemsMap.set(zoneKey, null);
             } else {
                 this.heldItem = null;
+                this.heldItemHand = null;
             }
         }
+    }
+
+    /**
+     * Process free-hand interactions (sun hover + harvest only, no pickup/movement)
+     */
+    processFreeHandInteraction(handPos) {
+        // Sun interaction
+        const sunArea = this.sunAreasMap.get('shared') || this.sunArea;
+        if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
+            this.sunInteractionTime += 0.016;
+            if (this.sunInteractionTime > 0.2) {
+                const plantNeeds = this.plantNeedsMap.get('shared') || this.plantNeeds;
+                plantNeeds.addSun();
+                this.sunInteractionTime = 0;
+            }
+        }
+
+        // Harvest interaction
+        let targetPot = this.plantPot;
+        let minDist = Infinity;
+        this.plantPots.forEach(pot => {
+            const dist = Math.sqrt(
+                Math.pow(handPos.x - pot.x, 2) +
+                Math.pow(handPos.y - pot.y, 2)
+            );
+            if (dist < minDist) {
+                minDist = dist;
+                targetPot = pot;
+            }
+        });
+
+        if (targetPot && targetPot.growthStage === GrowthStage.HARVESTABLE &&
+            targetPot.isPointOver(handPos.x, handPos.y)) {
+            const harvestedPlant = targetPot.harvest();
+            if (harvestedPlant) {
+                if (typeof audioManager !== 'undefined') {
+                    audioManager.play('harvest');
+                }
+                setTimeout(() => this.spawnNewSeed('shared'), 500);
+                return harvestedPlant;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -2842,6 +2916,7 @@ class GardenBed {
 
         this.seed = null;
         this.heldItem = null;
+        this.heldItemHand = null;
         this.seedsMap.clear();
         this.heldItemsMap.clear();
 

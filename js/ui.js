@@ -829,6 +829,10 @@ class UIManager {
                 this.hud2P.container.classList.add('hidden');
             }
         }
+        // Move settings button below HUD when visible
+        if (this.settingsBtn) {
+            this.settingsBtn.classList.toggle('hud-active', visible);
+        }
     }
 
     /**
@@ -845,6 +849,10 @@ class UIManager {
             } else {
                 this.hud2P.container.classList.add('hidden');
             }
+        }
+        // Move settings button below HUD when visible
+        if (this.settingsBtn) {
+            this.settingsBtn.classList.toggle('hud-active', visible);
         }
     }
 

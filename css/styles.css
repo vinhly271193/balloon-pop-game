@@ -1322,7 +1322,11 @@ html, body {
     align-items: center;
     justify-content: center;
     z-index: 50;
-    transition: transform var(--transition-fast), background var(--transition-fast);
+    transition: transform var(--transition-fast), background var(--transition-fast), top 0.3s ease;
+}
+
+.settings-button.hud-active {
+    top: 140px;
 }
 
 .settings-button:hover {
