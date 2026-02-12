@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-02-12 — Return-to-home item drop mechanic
+
+### New feature
+- **Put items down by returning them home**: When holding a tool (watering can, seed packet, fertilizer bag), moving your hand back near where you picked it up automatically puts it down. This is the most intuitive "release" gesture for dementia patients — put things back where you found them.
+- **Pulsing return beacon**: When holding any item, a soft pulsing glow with a ↩ icon appears at the item's original position, guiding the player on where to move to put it down. The beacon has a dashed ring, radial glow, and gentle scale pulse for visibility.
+- **Drop sound feedback**: A gentle sound plays when an item is returned, confirming the action.
+
+### How it works
+- Pick up an item by touching it (unchanged)
+- Move it to a plant pot to use it (unchanged)
+- Move your hand back toward where the item was sitting → it auto-drops within 80px of home
+- The pulsing beacon disappears once the item is released
+
+### Files changed
+- `js/garden/garden-bed.js` — Return-to-home detection in processHandInteraction(), drawReturnBeacons() method, beacon pulse timer
+
+---
+
 ## 2026-02-12 — Stability fixes: camera release, null guards, leak prevention
 
 ### Critical fixes

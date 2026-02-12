@@ -101,6 +101,9 @@ class GardenBed {
         this.hintArrows.set(2, new HintArrow());
         this.hintIdleThreshold = 5; // seconds before showing tooltip hints
         this.hintPlayerIdleTime = new Map();
+
+        // Return-to-home drop beacon animation timer
+        this.returnBeaconPulse = 0;
     }
 
     // ── Zone abstraction helpers ──────────────────────────────────
@@ -572,6 +575,9 @@ class GardenBed {
 
         // Update hint arrows
         this.updateHints(deltaTime);
+
+        // Update return-to-home beacon pulse
+        this.returnBeaconPulse += deltaTime * 3;
     }
 
     /**
@@ -886,6 +892,19 @@ class GardenBed {
                 if (typeof audioManager !== 'undefined') {
                     audioManager.play('water');
                 }
+            } else if (heldItem.homeX != null && heldItem.homeY != null) {
+                // Return-to-home drop: move item back near its home position to put it down
+                const distToHome = Math.sqrt(
+                    Math.pow(handPos.x - heldItem.homeX, 2) +
+                    Math.pow(handPos.y - heldItem.homeY, 2)
+                );
+                if (distToHome < 80) {
+                    this.releaseItem(zoneKey);
+                    heldItem = null;
+                    if (typeof audioManager !== 'undefined') {
+                        audioManager.play('plant');
+                    }
+                }
             }
         }
 
@@ -1100,6 +1119,9 @@ class GardenBed {
             }
         }
 
+        // Draw return-to-home beacons when holding items
+        this.drawReturnBeacons(ctx);
+
         // Draw magic pumpkin (co-op only)
         if (this.magicPumpkin) {
             this.magicPumpkin.draw(ctx);
@@ -1181,6 +1203,55 @@ class GardenBed {
         }
 
         ctx.restore();
+    }
+
+    /**
+     * Draw pulsing return-to-home beacons when an item is held
+     * Shows the player where to move to put the item back down
+     */
+    drawReturnBeacons(ctx) {
+        const zones = this.getZoneKeys();
+
+        for (const zk of zones) {
+            const heldItem = this.gameMode === 'competitive'
+                ? this.heldItemsMap.get(zk)
+                : this.heldItem;
+
+            if (!heldItem || heldItem.homeX == null || heldItem.homeY == null) continue;
+
+            const hx = heldItem.homeX;
+            const hy = heldItem.homeY;
+            const pulse = 0.5 + 0.5 * Math.sin(this.returnBeaconPulse); // 0-1
+
+            ctx.save();
+
+            // Outer pulsing ring
+            ctx.beginPath();
+            ctx.arc(hx, hy, 40 + pulse * 10, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 200, ${0.2 + pulse * 0.3})`;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Inner soft glow
+            const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 35);
+            grad.addColorStop(0, `rgba(255, 255, 200, ${0.15 + pulse * 0.1})`);
+            grad.addColorStop(1, 'rgba(255, 255, 200, 0)');
+            ctx.beginPath();
+            ctx.arc(hx, hy, 35, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Down arrow icon
+            ctx.font = `${20 + pulse * 4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.globalAlpha = 0.5 + pulse * 0.4;
+            drawUnmirroredText(ctx, '↩', hx, hy);
+
+            ctx.restore();
+        }
     }
 
     /**
