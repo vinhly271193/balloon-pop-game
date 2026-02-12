@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-02-12 — Canvas above UI overlays (hands always visible)
+- **Canvas z-index raised**: Moved `#gameCanvas` from z-index 2 to 15 (above uiOverlay at 10, below settings button at 50) so hand gloves render on top of all screen backgrounds — the root fix for invisible hands on pre-game screens
+- **pointer-events: none on canvas**: Mouse clicks pass through the transparent canvas to reach buttons underneath — hand tracking hover detection is unaffected since it uses collision math, not DOM events
+- Files changed: `css/styles.css`
+
 ## 2026-02-12 — Parallax particles, chapter color progression, light loading screen
 - **Parallax floating particles**: Leaves and petals now shift subtly in response to hand position detected via MediaPipe — a gentle parallax effect (max 15px) that makes the pre-game screens feel alive and responsive
 - **Chapter color progression**: Light screens gradually shift warmer as players progress through chapters — Chapter 1 is the default cool cream/green, Chapter 2 adds golden warmth, Chapter 3 leans into rich amber/peach tones
