@@ -12,7 +12,11 @@ class UIManager {
             chapterIntro: document.getElementById('chapterIntroScreen'),
             challengeIntro: document.getElementById('challengeIntroScreen'),
             chapterComplete: document.getElementById('chapterCompleteScreen'),
-            roundEnd: document.getElementById('roundEndScreen')
+            roundEnd: document.getElementById('roundEndScreen'),
+            playerSelect: document.getElementById('playerSelectScreen'),
+            modeSelect: document.getElementById('modeSelectScreen'),
+            calibrationP2: document.getElementById('calibrationP2Screen'),
+            roundEnd2P: document.getElementById('roundEndScreen2P')
         };
 
         // HUD elements
@@ -23,6 +27,16 @@ class UIManager {
             challenge: document.getElementById('currentChallenge'),
             progressBar: document.getElementById('progressFill'),
             progressText: document.getElementById('progressText')
+        };
+
+        // 2P HUD elements
+        this.hud2P = {
+            container: document.getElementById('gameHUD2P'),
+            timer: document.getElementById('timerValue2P'),
+            p1Score: document.getElementById('p1ScoreValue'),
+            p2Score: document.getElementById('p2ScoreValue'),
+            p1ProgressBar: document.getElementById('p1ProgressFill'),
+            p2ProgressBar: document.getElementById('p2ProgressFill')
         };
 
         // Other elements
@@ -40,6 +54,15 @@ class UIManager {
         this.roundResult = document.getElementById('roundResult');
         this.finalScore = document.getElementById('finalScore');
         this.plantsGrown = document.getElementById('plantsGrown');
+
+        // 2P round end elements
+        this.ribbonP1Score = document.getElementById('ribbonP1Score');
+        this.ribbonP2Score = document.getElementById('ribbonP2Score');
+        this.ribbonP1Title = document.getElementById('ribbonP1Title');
+        this.ribbonP2Title = document.getElementById('ribbonP2Title');
+        this.encouragementText2P = document.getElementById('encouragementText2P');
+        this.nextLevelBtn2P = document.getElementById('nextLevelBtn2P');
+        this.playAgainBtn2P = document.getElementById('playAgainBtn2P');
 
         // Buttons
         this.startBtn = document.getElementById('startBtn');
@@ -119,6 +142,13 @@ class UIManager {
             if (this.callbacks.onPlayAgain) {
                 this.callbacks.onPlayAgain();
             }
+        });
+
+        this.nextLevelBtn2P?.addEventListener('click', () => {
+            if (this.callbacks.onNextLevel) this.callbacks.onNextLevel();
+        });
+        this.playAgainBtn2P?.addEventListener('click', () => {
+            if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
         });
 
         // Settings button click
@@ -336,6 +366,18 @@ class UIManager {
                 break;
             case 'playAgain':
                 if (this.callbacks.onPlayAgain) this.callbacks.onPlayAgain();
+                break;
+            case 'selectOnePlayer':
+                if (this.callbacks.onSelectOnePlayer) this.callbacks.onSelectOnePlayer();
+                break;
+            case 'selectTwoPlayers':
+                if (this.callbacks.onSelectTwoPlayers) this.callbacks.onSelectTwoPlayers();
+                break;
+            case 'selectCoop':
+                if (this.callbacks.onSelectCoop) this.callbacks.onSelectCoop();
+                break;
+            case 'selectCompetitive':
+                if (this.callbacks.onSelectCompetitive) this.callbacks.onSelectCompetitive();
                 break;
             case 'openSettings':
                 this.openSettings();
@@ -763,6 +805,31 @@ class UIManager {
                 this.hud.container.classList.add('hidden');
             }
         }
+        // Also hide 2P HUD when showing or hiding regular HUD
+        if (this.hud2P.container) {
+            if (visible) {
+                this.hud2P.container.classList.add('hidden');
+            } else {
+                this.hud2P.container.classList.add('hidden');
+            }
+        }
+    }
+
+    /**
+     * Show/hide 2-player HUD
+     */
+    showHUD2P(visible) {
+        // Hide regular HUD
+        if (this.hud.container) {
+            this.hud.container.classList.add('hidden');
+        }
+        if (this.hud2P.container) {
+            if (visible) {
+                this.hud2P.container.classList.remove('hidden');
+            } else {
+                this.hud2P.container.classList.add('hidden');
+            }
+        }
     }
 
     /**
@@ -784,11 +851,45 @@ class UIManager {
     }
 
     /**
+     * Update 2P timer display
+     */
+    updateTimer2P(seconds) {
+        if (this.hud2P.timer) {
+            this.hud2P.timer.textContent = Math.ceil(seconds);
+            if (seconds <= 10) {
+                this.hud2P.timer.style.color = '#FF3B30';
+                this.hud2P.timer.style.animation = 'pulse 0.5s ease-in-out infinite';
+            } else {
+                this.hud2P.timer.style.color = '';
+                this.hud2P.timer.style.animation = '';
+            }
+        }
+    }
+
+    /**
      * Update HUD score display
      */
     updateScore(score) {
         if (this.hud.score) {
             this.hud.score.textContent = score;
+        }
+    }
+
+    /**
+     * Update Player 1 score
+     */
+    updatePlayer1Score(score) {
+        if (this.hud2P.p1Score) {
+            this.hud2P.p1Score.textContent = score;
+        }
+    }
+
+    /**
+     * Update Player 2 score
+     */
+    updatePlayer2Score(score) {
+        if (this.hud2P.p2Score) {
+            this.hud2P.p2Score.textContent = score;
         }
     }
 
@@ -845,6 +946,46 @@ class UIManager {
         // Show/hide next level button based on completion
         if (this.nextLevelBtn) {
             this.nextLevelBtn.style.display = result.isComplete ? 'inline-flex' : 'none';
+        }
+
+        // Re-collect hoverable elements
+        setTimeout(() => this.collectHoverableElements(), 100);
+    }
+
+    /**
+     * Show competitive round end screen
+     */
+    showCompetitiveRoundEnd({ p1Score, p2Score, isComplete }) {
+        this.showScreen('roundEnd2P');
+
+        // Update scores
+        if (this.ribbonP1Score) this.ribbonP1Score.textContent = p1Score;
+        if (this.ribbonP2Score) this.ribbonP2Score.textContent = p2Score;
+
+        // Determine ribbons (celebrate both)
+        if (p1Score >= p2Score) {
+            if (this.ribbonP1Title) this.ribbonP1Title.textContent = 'Blue Ribbon!';
+            if (this.ribbonP2Title) this.ribbonP2Title.textContent = 'Red Ribbon!';
+        } else {
+            if (this.ribbonP1Title) this.ribbonP1Title.textContent = 'Red Ribbon!';
+            if (this.ribbonP2Title) this.ribbonP2Title.textContent = 'Blue Ribbon!';
+        }
+
+        // Encouragement
+        if (this.encouragementText2P) {
+            this.encouragementText2P.textContent = 'Both gardens are blooming beautifully!';
+        }
+
+        // Audio
+        if (isComplete) {
+            audioManager.play('levelUp');
+        } else {
+            audioManager.play('success');
+        }
+
+        // Show/hide next level button
+        if (this.nextLevelBtn2P) {
+            this.nextLevelBtn2P.style.display = isComplete ? 'inline-flex' : 'none';
         }
 
         // Re-collect hoverable elements

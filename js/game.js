@@ -7,7 +7,10 @@
 const GameState = {
     LOADING: 'loading',
     WELCOME: 'welcome',
+    PLAYER_SELECT: 'playerSelect',
+    MODE_SELECT: 'modeSelect',
     CALIBRATION: 'calibration',
+    CALIBRATION_P2: 'calibrationP2',
     CHAPTER_INTRO: 'chapterIntro',
     CHALLENGE_INTRO: 'challengeIntro',
     PLAYING: 'playing',
@@ -27,6 +30,12 @@ class Game {
         this.state = GameState.LOADING;
         this.isRunning = false;
         this.lastFrameTime = 0;
+
+        // Player configuration
+        this.playerCount = 1; // 1 or 2
+        this.gameMode = 'solo'; // 'solo', 'coop', or 'competitive'
+        this.player1Score = 0;
+        this.player2Score = 0;
 
         // Timer
         this.timeRemaining = 60;
@@ -74,7 +83,11 @@ class Game {
         uiManager.init({
             onStart: () => this.onStartClick(),
             onNextLevel: () => this.onNextLevel(),
-            onPlayAgain: () => this.onPlayAgain()
+            onPlayAgain: () => this.onPlayAgain(),
+            onSelectOnePlayer: () => this.onSelectOnePlayer(),
+            onSelectTwoPlayers: () => this.onSelectTwoPlayers(),
+            onSelectCoop: () => this.onSelectCoop(),
+            onSelectCompetitive: () => this.onSelectCompetitive()
         });
 
         // Initialize audio (will be activated on first user interaction)
@@ -203,8 +216,25 @@ class Game {
                 uiManager.showHUD(false);
                 break;
 
+            case GameState.PLAYER_SELECT:
+                uiManager.showScreen('playerSelect');
+                uiManager.showHUD(false);
+                break;
+
+            case GameState.MODE_SELECT:
+                uiManager.showScreen('modeSelect');
+                uiManager.showHUD(false);
+                break;
+
             case GameState.CALIBRATION:
                 uiManager.showScreen('calibration');
+                uiManager.showHUD(false);
+                this.calibrationWaveDetected = false;
+                this.calibrationStartTime = Date.now();
+                break;
+
+            case GameState.CALIBRATION_P2:
+                uiManager.showScreen('calibrationP2');
                 uiManager.showHUD(false);
                 this.calibrationWaveDetected = false;
                 this.calibrationStartTime = Date.now();
@@ -222,7 +252,11 @@ class Game {
 
             case GameState.PLAYING:
                 uiManager.hideAllScreens();
-                uiManager.showHUD(true);
+                if (this.playerCount === 2 && (this.gameMode === 'competitive' || this.gameMode === 'coop')) {
+                    uiManager.showHUD2P(true);
+                } else {
+                    uiManager.showHUD(true);
+                }
                 this.startRound();
                 break;
 
@@ -254,11 +288,44 @@ class Game {
         const started = await handTracker.start();
 
         if (started) {
-            this.setState(GameState.CALIBRATION);
+            this.setState(GameState.PLAYER_SELECT);
             this.startGameLoop();
         } else {
             alert('Could not access camera. Please allow camera access and try again.');
         }
+    }
+
+    /**
+     * Handle one player selection
+     */
+    onSelectOnePlayer() {
+        this.playerCount = 1;
+        this.gameMode = 'solo';
+        this.setState(GameState.CALIBRATION);
+    }
+
+    /**
+     * Handle two players selection
+     */
+    onSelectTwoPlayers() {
+        this.playerCount = 2;
+        this.setState(GameState.MODE_SELECT);
+    }
+
+    /**
+     * Handle cooperative mode selection
+     */
+    onSelectCoop() {
+        this.gameMode = 'coop';
+        this.setState(GameState.CALIBRATION);
+    }
+
+    /**
+     * Handle competitive mode selection
+     */
+    onSelectCompetitive() {
+        this.gameMode = 'competitive';
+        this.setState(GameState.CALIBRATION);
     }
 
     /**
@@ -273,50 +340,123 @@ class Game {
             uiManager.updateHandIndicators(data.leftDetected, data.rightDetected);
 
             // Check for wave gesture to proceed
-            if (!this.calibrationWaveDetected && data.leftDetected && data.rightDetected) {
-                // Wait a moment to ensure stable detection
-                if (Date.now() - this.calibrationStartTime > 2000) {
-                    this.calibrationWaveDetected = true;
-                    setTimeout(() => {
-                        if (this.state === GameState.CALIBRATION) {
-                            // Check if we need to show chapter intro
-                            const currentLevel = challengeManager.currentLevel;
-                            const newChapter = storyManager.isNewChapterStart(currentLevel);
+            if (!this.calibrationWaveDetected) {
+                if (this.playerCount === 1) {
+                    // Single player: wait for both hands
+                    if (data.leftDetected && data.rightDetected) {
+                        if (Date.now() - this.calibrationStartTime > 2000) {
+                            this.calibrationWaveDetected = true;
+                            setTimeout(() => {
+                                if (this.state === GameState.CALIBRATION) {
+                                    const currentLevel = challengeManager.currentLevel;
+                                    const newChapter = storyManager.isNewChapterStart(currentLevel);
 
-                            if (newChapter) {
-                                this.setState(GameState.CHAPTER_INTRO);
-                            } else {
-                                this.setState(GameState.CHALLENGE_INTRO);
-                            }
+                                    if (newChapter) {
+                                        this.setState(GameState.CHAPTER_INTRO);
+                                    } else {
+                                        this.setState(GameState.CHALLENGE_INTRO);
+                                    }
+                                }
+                            }, 500);
                         }
-                    }, 500);
+                    }
+                } else if (this.playerCount === 2) {
+                    // Two players: wait for 1 hand on right side (P1)
+                    if (data.rightDetected && data.positions.some(pos => pos.x > this.canvas.width / 2)) {
+                        if (Date.now() - this.calibrationStartTime > 2000) {
+                            this.calibrationWaveDetected = true;
+                            setTimeout(() => {
+                                if (this.state === GameState.CALIBRATION) {
+                                    this.setState(GameState.CALIBRATION_P2);
+                                }
+                            }, 500);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Update CALIBRATION_P2 screen indicators
+        if (this.state === GameState.CALIBRATION_P2) {
+            uiManager.updateHandIndicators(data.leftDetected, data.rightDetected);
+
+            // Wait for second hand on left side (need 2 hands total, stable 2s)
+            if (!this.calibrationWaveDetected) {
+                const hasLeftHand = data.positions.some(pos => pos.x <= this.canvas.width / 2);
+                const hasTwoHands = data.positions.length >= 2;
+
+                if (hasLeftHand && hasTwoHands) {
+                    if (Date.now() - this.calibrationStartTime > 2000) {
+                        this.calibrationWaveDetected = true;
+                        setTimeout(() => {
+                            if (this.state === GameState.CALIBRATION_P2) {
+                                const currentLevel = challengeManager.currentLevel;
+                                const newChapter = storyManager.isNewChapterStart(currentLevel);
+
+                                if (newChapter) {
+                                    this.setState(GameState.CHAPTER_INTRO);
+                                } else {
+                                    this.setState(GameState.CHALLENGE_INTRO);
+                                }
+                            }
+                        }, 500);
+                    }
                 }
             }
         }
 
         // During gameplay, check for seed collisions
         if (this.state === GameState.PLAYING && this.gardenBed) {
-            // Check collisions returns harvested plant keys
+            // Check collisions returns harvested plant data with playerId
             const harvestedPlants = this.gardenBed.checkCollisions(data.positions);
 
             // Record harvests to challenge
-            harvestedPlants.forEach(plantKey => {
+            harvestedPlants.forEach(harvestData => {
+                const { plantKey, playerId, isTargetPlant } = harvestData;
+
                 if (this.currentChallenge) {
                     this.currentChallenge.recordHarvest(plantKey);
                     storyManager.recordPlantGrown();
 
-                    // Update UI
-                    uiManager.updateScore(this.currentChallenge.score);
+                    // Track per-player scores
+                    if (this.gameMode === 'competitive') {
+                        if (playerId === 1) {
+                            this.player1Score += isTargetPlant ? 100 : 50;
+                        } else if (playerId === 2) {
+                            this.player2Score += isTargetPlant ? 100 : 50;
+                        }
+
+                        // Update 2P HUD
+                        uiManager.updatePlayer1Score(this.player1Score);
+                        uiManager.updatePlayer2Score(this.player2Score);
+                    } else if (this.gameMode === 'coop') {
+                        // Both players contribute to shared progress
+                        uiManager.updateScore(this.currentChallenge.score);
+                    } else {
+                        // Solo mode
+                        uiManager.updateScore(this.currentChallenge.score);
+                    }
+
+                    // Update progress
                     uiManager.updateProgress(
                         this.currentChallenge.getProgressPercent(),
                         this.currentChallenge.getProgressText()
                     );
+
+                    // DDA: Record harvest
+                    ddaEngine.recordHarvest(playerId, isTargetPlant);
+
+                    // Audio: Play for specific player
+                    audioManager.playForPlayer('harvest', playerId);
 
                     // Check if challenge complete
                     if (this.currentChallenge.isComplete) {
                         this.setState(GameState.ROUND_END);
                     }
                 }
+
+                // DDA: Record interaction on any collision
+                ddaEngine.recordInteraction(playerId);
             });
         }
     }
@@ -393,10 +533,33 @@ class Game {
         this.timeRemaining = this.currentChallenge.timeLimit;
         uiManager.updateTimer(this.timeRemaining);
 
+        // Reset per-player scores
+        this.player1Score = 0;
+        this.player2Score = 0;
+
+        // Reset DDA engine
+        ddaEngine.reset();
+
         // Update HUD
         uiManager.updateChallengeText(this.currentChallenge.getMiniDisplayText());
-        uiManager.updateScore(this.currentChallenge.score);
+        if (this.gameMode === 'competitive') {
+            uiManager.updatePlayer1Score(this.player1Score);
+            uiManager.updatePlayer2Score(this.player2Score);
+            uiManager.updateTimer2P(this.timeRemaining);
+        } else {
+            uiManager.updateScore(this.currentChallenge.score);
+        }
         uiManager.updateProgress(0, this.currentChallenge.getProgressText());
+
+        // Configure garden bed for multi-player
+        this.gardenBed.configure({
+            playerCount: this.playerCount,
+            gameMode: this.gameMode,
+            dividerX: handTracker.dividerX * this.canvas.width
+        });
+
+        // Update hand tracker player count
+        handTracker.setPlayerCount(this.playerCount);
 
         // Clear any existing seeds
         this.gardenBed.clear();
@@ -404,7 +567,12 @@ class Game {
         // Start timer
         this.timerInterval = setInterval(() => {
             this.timeRemaining -= 1;
-            uiManager.updateTimer(this.timeRemaining);
+
+            if (this.gameMode === 'competitive') {
+                uiManager.updateTimer2P(this.timeRemaining);
+            } else {
+                uiManager.updateTimer(this.timeRemaining);
+            }
 
             if (this.timeRemaining <= 0) {
                 this.setState(GameState.ROUND_END);
@@ -426,6 +594,14 @@ class Game {
             this.timerInterval = null;
         }
 
+        // Check rubber-band in competitive mode
+        if (this.gameMode === 'competitive') {
+            const rubberBandApplied = ddaEngine.checkRubberBand(this.player1Score, this.player2Score);
+            if (rubberBandApplied) {
+                console.log('Rubber-banding applied to balance competitive scores');
+            }
+        }
+
         // Record challenge completion
         challengeManager.completeChallenge();
 
@@ -443,34 +619,45 @@ class Game {
      */
     showRoundEnd() {
         const isComplete = this.currentChallenge?.isComplete || false;
-        const encouragementText = document.getElementById('encouragementText');
-        const plantsGrown = document.getElementById('plantsGrown');
 
-        // Update plants grown display (use garden terminology)
-        if (plantsGrown) {
-            plantsGrown.textContent = this.currentChallenge?.totalHarvested || 0;
-        }
+        if (this.gameMode === 'competitive') {
+            // Show competitive round end
+            uiManager.showCompetitiveRoundEnd({
+                p1Score: this.player1Score,
+                p2Score: this.player2Score,
+                isComplete: isComplete
+            });
+        } else {
+            // Show normal or coop round end
+            const encouragementText = document.getElementById('encouragementText');
+            const plantsGrown = document.getElementById('plantsGrown');
 
-        // Show encouragement message
-        if (encouragementText) {
-            encouragementText.textContent = storyManager.getProgressMessage();
-        }
+            // Update plants grown display (use garden terminology)
+            if (plantsGrown) {
+                plantsGrown.textContent = this.currentChallenge?.totalHarvested || 0;
+            }
 
-        uiManager.showRoundEnd({
-            isComplete: isComplete,
-            score: this.currentChallenge?.score || 0,
-            totalPopped: this.currentChallenge?.totalHarvested || 0
-        });
+            // Show encouragement message
+            if (encouragementText) {
+                encouragementText.textContent = storyManager.getProgressMessage();
+            }
 
-        // Update result title for garden theme
-        const roundResult = document.getElementById('roundResult');
-        if (roundResult) {
-            if (isComplete) {
-                roundResult.textContent = 'Beautiful Garden!';
-                roundResult.style.color = '#4ade80';
-            } else {
-                roundResult.textContent = 'Keep Growing!';
-                roundResult.style.color = '#FFD700';
+            uiManager.showRoundEnd({
+                isComplete: isComplete,
+                score: this.currentChallenge?.score || 0,
+                totalPopped: this.currentChallenge?.totalHarvested || 0
+            });
+
+            // Update result title for garden theme
+            const roundResult = document.getElementById('roundResult');
+            if (roundResult) {
+                if (isComplete) {
+                    roundResult.textContent = 'Beautiful Garden!';
+                    roundResult.style.color = '#4ade80';
+                } else {
+                    roundResult.textContent = 'Keep Growing!';
+                    roundResult.style.color = '#FFD700';
+                }
             }
         }
     }
@@ -564,6 +751,14 @@ class Game {
 
         // Update and render based on state
         if (this.state === GameState.PLAYING) {
+            // Update DDA engine
+            ddaEngine.update(deltaTime, this.gameMode);
+
+            // In competitive mode, check rubber-band
+            if (this.gameMode === 'competitive') {
+                ddaEngine.checkRubberBand(this.player1Score, this.player2Score);
+            }
+
             // Update garden (handles needs, growth, etc.)
             this.gardenBed.update(deltaTime);
 

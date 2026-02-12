@@ -1638,3 +1638,326 @@ body.theme-max-contrast .hud-item {
             rgba(175, 225, 255, 0.9) 50%,
             rgba(200, 235, 255, 0.85) 100%);
 }
+
+/* ===========================================
+   Player Select Screen
+   =========================================== */
+
+.player-select-title,
+.mode-select-title {
+    font-size: var(--text-large);
+    margin-bottom: var(--spacing-small);
+    color: var(--accent-primary);
+}
+
+.player-select-buttons,
+.mode-select-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-large);
+    margin-top: var(--spacing-large);
+    flex-wrap: wrap;
+}
+
+.player-select-btn,
+.mode-select-btn {
+    min-width: 240px;
+    flex-direction: column;
+    padding: var(--spacing-large) var(--spacing-medium);
+}
+
+.player-select-btn > span,
+.mode-select-btn > span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-small);
+    position: relative;
+    z-index: 1;
+}
+
+.player-btn-icon,
+.mode-btn-icon {
+    font-size: 56px;
+    display: block;
+}
+
+.player-btn-label,
+.mode-btn-label {
+    font-size: var(--text-medium);
+    font-weight: 700;
+}
+
+.mode-btn-desc {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* ===========================================
+   Calibration P2 Screen
+   =========================================== */
+
+.calibration-p2-title {
+    color: var(--accent-primary);
+}
+
+.calibration-players {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-large);
+    margin: var(--spacing-large) 0;
+}
+
+.calibration-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-medium);
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    min-width: 180px;
+    border: 4px solid var(--text-secondary);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.calibration-player.p1-ready {
+    border-color: #FF8C42;
+    background: rgba(255, 140, 66, 0.1);
+}
+
+.calibration-player.p2-waiting {
+    border-color: var(--text-secondary);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.cal-player-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: var(--spacing-small);
+}
+
+.cal-player-label {
+    font-size: var(--text-normal);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.cal-player-status {
+    font-size: var(--text-small);
+    color: var(--text-secondary);
+}
+
+.p1-ready .cal-player-status {
+    color: #FF8C42;
+}
+
+/* ===========================================
+   2-Player HUD
+   =========================================== */
+
+.hud-2p {
+    pointer-events: none;
+}
+
+.hud-top-2p {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-small);
+}
+
+.hud-player-score {
+    flex: 1;
+    max-width: 280px;
+}
+
+.hud-p1-score {
+    text-align: right;
+}
+
+.hud-p2-score {
+    text-align: left;
+}
+
+.hud-label-p1 {
+    color: #FF8C42;
+}
+
+.hud-label-p2 {
+    color: #4A90D9;
+}
+
+.hud-value-p1 {
+    color: #FF8C42;
+}
+
+.hud-value-p2 {
+    color: #4A90D9;
+}
+
+.timer-display-center {
+    flex-shrink: 0;
+}
+
+.hud-player-progress {
+    margin-top: 8px;
+}
+
+.progress-bar-p1 {
+    background: rgba(255, 140, 66, 0.2);
+}
+
+.progress-fill-p1 {
+    background: linear-gradient(90deg, #FF8C42, #FFB066);
+}
+
+.progress-bar-p2 {
+    background: rgba(74, 144, 217, 0.2);
+}
+
+.progress-fill-p2 {
+    background: linear-gradient(90deg, #4A90D9, #6AB0F0);
+}
+
+/* ===========================================
+   Competitive Round End (2P) - Ribbons
+   =========================================== */
+
+.result-title-2p {
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-medium);
+}
+
+.ribbon-results {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-large);
+    margin-bottom: var(--spacing-large);
+    flex-wrap: wrap;
+}
+
+.ribbon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-large) var(--spacing-medium);
+    background: var(--bg-secondary);
+    border-radius: 24px;
+    min-width: 200px;
+    border: 4px solid transparent;
+    transition: transform var(--transition-fast);
+}
+
+.ribbon-card:hover {
+    transform: scale(1.02);
+}
+
+.ribbon-p1 {
+    border-color: #FF8C42;
+    box-shadow: 0 4px 20px rgba(255, 140, 66, 0.3);
+}
+
+.ribbon-p2 {
+    border-color: #4A90D9;
+    box-shadow: 0 4px 20px rgba(74, 144, 217, 0.3);
+}
+
+.ribbon-icon {
+    font-size: 56px;
+    display: block;
+    margin-bottom: var(--spacing-small);
+}
+
+.ribbon-player-label {
+    font-size: var(--text-normal);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.ribbon-score {
+    font-size: var(--text-huge);
+    font-weight: 800;
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-small);
+}
+
+.ribbon-title {
+    font-size: var(--text-medium);
+    font-weight: 700;
+    color: var(--color-sunflower);
+}
+
+/* ===========================================
+   Player Color Variables
+   =========================================== */
+
+:root {
+    --color-player1: #FF8C42;
+    --color-player1-light: #FFF5E6;
+    --color-player2: #4A90D9;
+    --color-player2-light: #E6F0FF;
+}
+
+/* ===========================================
+   Responsive Adjustments for 2P
+   =========================================== */
+
+@media (max-width: 768px) {
+    .player-select-buttons,
+    .mode-select-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-medium);
+    }
+
+    .player-select-btn,
+    .mode-select-btn {
+        min-width: 200px;
+        padding: var(--spacing-medium);
+    }
+
+    .player-btn-icon,
+    .mode-btn-icon {
+        font-size: 40px;
+    }
+
+    .calibration-players {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-medium);
+    }
+
+    .calibration-player {
+        min-width: 160px;
+    }
+
+    .hud-top-2p {
+        flex-direction: row;
+        gap: 4px;
+    }
+
+    .hud-player-score {
+        max-width: 160px;
+    }
+
+    .hud-value-p1,
+    .hud-value-p2 {
+        font-size: var(--text-medium);
+    }
+
+    .ribbon-results {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-medium);
+    }
+
+    .ribbon-card {
+        min-width: 180px;
+        padding: var(--spacing-medium);
+    }
+
+    .ribbon-icon {
+        font-size: 40px;
+    }
+}

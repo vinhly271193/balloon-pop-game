@@ -14,6 +14,10 @@ class AudioManager {
         // Ambient sound state
         this.ambientNodes = [];
         this.isAmbientPlaying = false;
+
+        // Per-player audio tracking
+        this.lastPlayerSoundTime = { 1: 0, 2: 0 };
+        this.harmonizeWindow = 200; // ms window for harmonized co-op sounds
     }
 
     /**
@@ -455,6 +459,162 @@ class AudioManager {
         if (!enabled) {
             this.stopAmbient();
         }
+    }
+
+    /**
+     * Play a sound for a specific player with octave offset
+     * Player 1: slightly lower (warm), Player 2: slightly higher (bright)
+     */
+    playForPlayer(soundName, playerId) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const now = performance.now();
+        const otherPlayer = playerId === 1 ? 2 : 1;
+
+        // Check for harmonized sound (both players within window)
+        if (now - this.lastPlayerSoundTime[otherPlayer] < this.harmonizeWindow) {
+            this.playHarmonized(soundName);
+            this.lastPlayerSoundTime[playerId] = now;
+            return;
+        }
+
+        this.lastPlayerSoundTime[playerId] = now;
+
+        // Frequency multiplier per player
+        const freqMultiplier = playerId === 1 ? 0.8 : 1.25;
+
+        // Play the sound with adjusted frequency
+        this.playWithFreqShift(soundName, freqMultiplier);
+    }
+
+    /**
+     * Play a sound with frequency shift
+     */
+    playWithFreqShift(soundName, freqMultiplier) {
+        if (!this.enabled || !this.audioContext) return;
+
+        if (soundName === 'harvest') {
+            this.playHarvestShifted(freqMultiplier);
+        } else if (soundName === 'plant') {
+            this.playPlantShifted(freqMultiplier);
+        } else if (soundName === 'water') {
+            this.playWaterShifted(freqMultiplier);
+        } else {
+            // Fall back to normal play for other sounds
+            this.play(soundName);
+        }
+    }
+
+    /**
+     * Play harvest sound with frequency shift
+     */
+    playHarvestShifted(freqMult) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const osc1 = this.audioContext.createOscillator();
+        const gain1 = this.audioContext.createGain();
+
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(523.25 * freqMult, this.audioContext.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(261.63 * freqMult, this.audioContext.currentTime + 0.15);
+
+        gain1.gain.setValueAtTime(this.volume * 0.4, this.audioContext.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+
+        osc1.connect(gain1);
+        gain1.connect(this.audioContext.destination);
+        osc1.start();
+        osc1.stop(this.audioContext.currentTime + 0.3);
+
+        // Second harmonic for richness
+        const osc2 = this.audioContext.createOscillator();
+        const gain2 = this.audioContext.createGain();
+
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(784 * freqMult, this.audioContext.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(392 * freqMult, this.audioContext.currentTime + 0.1);
+
+        gain2.gain.setValueAtTime(this.volume * 0.2, this.audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+
+        osc2.connect(gain2);
+        gain2.connect(this.audioContext.destination);
+        osc2.start();
+        osc2.stop(this.audioContext.currentTime + 0.2);
+    }
+
+    /**
+     * Play plant sound with frequency shift
+     */
+    playPlantShifted(freqMult) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const osc1 = this.audioContext.createOscillator();
+        const gain1 = this.audioContext.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(200 * freqMult, this.audioContext.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(400 * freqMult, this.audioContext.currentTime + 0.3);
+
+        gain1.gain.setValueAtTime(0, this.audioContext.currentTime);
+        gain1.gain.linearRampToValueAtTime(this.volume * 0.3, this.audioContext.currentTime + 0.05);
+        gain1.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
+
+        osc1.connect(gain1);
+        gain1.connect(this.audioContext.destination);
+        osc1.start();
+        osc1.stop(this.audioContext.currentTime + 0.4);
+    }
+
+    /**
+     * Play water sound with frequency shift
+     */
+    playWaterShifted(freqMult) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime((800 + Math.random() * 200) * freqMult, this.audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(400 * freqMult, this.audioContext.currentTime + 0.1);
+
+        gain.gain.setValueAtTime(this.volume * 0.3, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        osc.start();
+        osc.stop(this.audioContext.currentTime + 0.15);
+    }
+
+    /**
+     * Play harmonized chord when both players trigger simultaneously
+     */
+    playHarmonized(soundName) {
+        if (!this.enabled || !this.audioContext) return;
+
+        // Play a pleasant harmonized chord (major third + fifth)
+        const baseFreq = soundName === 'harvest' ? 440 : 330;
+        const notes = [baseFreq, baseFreq * 1.25, baseFreq * 1.5]; // Root, major third, fifth
+
+        notes.forEach((freq, index) => {
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+
+            const startTime = this.audioContext.currentTime + index * 0.03;
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(this.volume * 0.3, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.6);
+
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+            osc.start(startTime);
+            osc.stop(startTime + 0.6);
+        });
     }
 }
 

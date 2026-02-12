@@ -50,6 +50,60 @@
                 </div>
             </div>
 
+            <!-- Player Select Screen -->
+            <div id="playerSelectScreen" class="screen">
+                <div class="screen-content">
+                    <h2 class="player-select-title">How Many Gardeners?</h2>
+                    <p class="instruction-text">Choose how many players</p>
+                    <div class="player-select-buttons">
+                        <button class="big-button player-select-btn hoverable has-border-progress" data-hover-action="selectOnePlayer">
+                            <span>
+                                <span class="player-btn-icon">🧑‍🌾</span>
+                                <span class="player-btn-label">1 Player</span>
+                            </span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                        <button class="big-button player-select-btn hoverable has-border-progress" data-hover-action="selectTwoPlayers">
+                            <span>
+                                <span class="player-btn-icon">🧑‍🌾🧑‍🌾</span>
+                                <span class="player-btn-label">2 Players</span>
+                            </span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Select Screen (2P only) -->
+            <div id="modeSelectScreen" class="screen">
+                <div class="screen-content">
+                    <h2 class="mode-select-title">Choose Your Garden</h2>
+                    <p class="instruction-text">How would you like to play together?</p>
+                    <div class="mode-select-buttons">
+                        <button class="big-button mode-select-btn hoverable has-border-progress" data-hover-action="selectCoop">
+                            <span>
+                                <span class="mode-btn-icon">🧺</span>
+                                <span class="mode-btn-label">Community Garden</span>
+                                <span class="mode-btn-desc">Work together, share the harvest</span>
+                            </span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                        <button class="big-button mode-select-btn hoverable has-border-progress" data-hover-action="selectCompetitive">
+                            <span>
+                                <span class="mode-btn-icon">🎀</span>
+                                <span class="mode-btn-label">Village Fair</span>
+                                <span class="mode-btn-desc">Friendly contest, earn ribbons</span>
+                            </span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Calibration Screen -->
             <div id="calibrationScreen" class="screen">
                 <div class="screen-content">
@@ -66,6 +120,27 @@
                         </div>
                     </div>
                     <p class="wave-instruction">Wave to start gardening!</p>
+                </div>
+            </div>
+
+            <!-- Calibration P2 Screen (2-player sequential calibration) -->
+            <div id="calibrationP2Screen" class="screen">
+                <div class="screen-content">
+                    <h2 class="calibration-title calibration-p2-title">Player 2, Join the Garden!</h2>
+                    <p class="instruction-text">Now show your hand on the <strong>left side</strong> of the screen</p>
+                    <div class="calibration-players">
+                        <div class="calibration-player p1-ready">
+                            <span class="cal-player-icon" style="color: #FF8C42;">✋</span>
+                            <span class="cal-player-label">Player 1</span>
+                            <span class="cal-player-status">Ready!</span>
+                        </div>
+                        <div class="calibration-player p2-waiting" id="p2CalStatus">
+                            <span class="cal-player-icon" style="color: #4A90D9;">✋</span>
+                            <span class="cal-player-label">Player 2</span>
+                            <span class="cal-player-status" id="p2CalStatusText">Waiting...</span>
+                        </div>
+                    </div>
+                    <p class="wave-instruction">Both hands detected? Let's grow!</p>
                 </div>
             </div>
 
@@ -108,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- In-Game HUD -->
+            <!-- In-Game HUD (1-player default) -->
             <div id="gameHUD" class="hud hidden">
                 <div class="hud-top">
                     <div class="hud-item timer-display">
@@ -131,7 +206,35 @@
                 </div>
             </div>
 
-            <!-- Round End Screen -->
+            <!-- 2-Player Competitive HUD -->
+            <div id="gameHUD2P" class="hud hud-2p hidden">
+                <div class="hud-top hud-top-2p">
+                    <div class="hud-item hud-player-score hud-p2-score">
+                        <span class="hud-label hud-label-p2">Player 2</span>
+                        <span id="p2ScoreValue" class="hud-value hud-value-p2">0</span>
+                        <div class="hud-player-progress">
+                            <div id="p2ProgressBar" class="progress-bar progress-bar-p2">
+                                <div id="p2ProgressFill" class="progress-fill progress-fill-p2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hud-item timer-display timer-display-center">
+                        <span class="hud-label">Time</span>
+                        <span id="timerValue2P" class="hud-value">60</span>
+                    </div>
+                    <div class="hud-item hud-player-score hud-p1-score">
+                        <span class="hud-label hud-label-p1">Player 1</span>
+                        <span id="p1ScoreValue" class="hud-value hud-value-p1">0</span>
+                        <div class="hud-player-progress">
+                            <div id="p1ProgressBar" class="progress-bar progress-bar-p1">
+                                <div id="p1ProgressFill" class="progress-fill progress-fill-p1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Round End Screen (1P and Co-op) -->
             <div id="roundEndScreen" class="screen">
                 <div class="screen-content">
                     <h2 id="roundResult" class="result-title">Beautiful Garden!</h2>
@@ -153,6 +256,40 @@
                             <div class="border-progress-fill"></div>
                         </button>
                         <button id="playAgainBtn" class="big-button secondary hoverable has-border-progress" data-hover-action="playAgain">
+                            <span>Start Over</span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competitive Round End Screen (2P) -->
+            <div id="roundEndScreen2P" class="screen">
+                <div class="screen-content">
+                    <h2 class="result-title result-title-2p">Village Fair Results!</h2>
+                    <div class="ribbon-results">
+                        <div class="ribbon-card ribbon-p1" id="ribbonP1">
+                            <span class="ribbon-icon">🎀</span>
+                            <span class="ribbon-player-label" style="color: #FF8C42;">Player 1</span>
+                            <span class="ribbon-score" id="ribbonP1Score">0</span>
+                            <span class="ribbon-title" id="ribbonP1Title">Blue Ribbon</span>
+                        </div>
+                        <div class="ribbon-card ribbon-p2" id="ribbonP2">
+                            <span class="ribbon-icon">🎀</span>
+                            <span class="ribbon-player-label" style="color: #4A90D9;">Player 2</span>
+                            <span class="ribbon-score" id="ribbonP2Score">0</span>
+                            <span class="ribbon-title" id="ribbonP2Title">Red Ribbon</span>
+                        </div>
+                    </div>
+                    <p id="encouragementText2P" class="encouragement-text">Both gardens are blooming beautifully!</p>
+                    <div class="end-buttons">
+                        <button id="nextLevelBtn2P" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
+                            <span>Keep Growing</span>
+                            <div class="border-progress-track"></div>
+                            <div class="border-progress-fill"></div>
+                        </button>
+                        <button id="playAgainBtn2P" class="big-button secondary hoverable has-border-progress" data-hover-action="playAgain">
                             <span>Start Over</span>
                             <div class="border-progress-track"></div>
                             <div class="border-progress-fill"></div>
@@ -269,6 +406,7 @@
 
     <!-- Game Scripts -->
     <script src="js/audio.js"></script>
+    <script src="js/dda.js"></script>
     <script src="js/garden.js"></script>
     <script src="js/challenges.js"></script>
     <script src="js/story.js"></script>

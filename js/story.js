@@ -198,16 +198,25 @@ class StoryManager {
     /**
      * Get welcome message based on progress
      */
-    getWelcomeMessage() {
+    getWelcomeMessage(playerCount) {
         if (!this.isReturningPlayer()) {
+            if (playerCount === 2) {
+                return "Welcome, gardeners! Let's grow together!";
+            }
             return "Welcome to your new garden!";
         }
 
         if (this.completedChapters.length >= STORY_CHAPTERS.length) {
+            if (playerCount === 2) {
+                return `Welcome back, master gardeners! You've grown ${this.totalPlantsGrown} plants together!`;
+            }
             return `Welcome back, master gardener! You've grown ${this.totalPlantsGrown} plants!`;
         }
 
         const chapter = this.getCurrentChapter();
+        if (playerCount === 2) {
+            return `Welcome back! Your garden awaits both of you in "${chapter.title}"`;
+        }
         return `Welcome back! Your garden awaits in "${chapter.title}"`;
     }
 

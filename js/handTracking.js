@@ -30,13 +30,25 @@ class HandTracker {
         // Visual feedback settings
         this.showHandIndicators = true;
         this.handIndicatorSize = 40;
-        // Cartoon glove colors - white with subtle shading
+
+        // Cartoon glove colors - white with subtle shading (1P mode)
         this.gloveColor = {
             main: '#FFFFFF',
             shadow: '#E8E8E8',
             outline: '#4ECDC4',
             highlight: '#FFFFFF'
         };
+
+        // Player configuration
+        this.playerCount = 1; // 1 or 2
+        this.dividerX = 0.5; // Normalized 0-1, divides left/right zones in 2P mode
+    }
+
+    /**
+     * Set player count (1 or 2)
+     */
+    setPlayerCount(count) {
+        this.playerCount = count;
     }
 
     /**
@@ -55,12 +67,12 @@ class HandTracker {
                 }
             });
 
-            // Configure hand tracking
+            // Configure hand tracking with Phase 9 optimizations
             this.hands.setOptions({
                 maxNumHands: 2,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.7,
-                minTrackingConfidence: 0.5
+                modelComplexity: 0, // Lower complexity for performance
+                minDetectionConfidence: 0.5, // Lower threshold for performance
+                minTrackingConfidence: 0.3 // Lower threshold for performance
             });
 
             // Set up results callback
@@ -90,11 +102,11 @@ class HandTracker {
         }
 
         try {
-            // Request camera access
+            // Request camera access with Phase 9 optimized resolution
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
+                    width: { ideal: 640 }, // Lower resolution for performance
+                    height: { ideal: 480 }, // Lower resolution for performance
                     facingMode: 'user'
                 }
             });
@@ -102,15 +114,15 @@ class HandTracker {
             this.videoElement.srcObject = stream;
             await this.videoElement.play();
 
-            // Set up camera feed to MediaPipe
+            // Set up camera feed to MediaPipe with optimized resolution
             this.camera = new Camera(this.videoElement, {
                 onFrame: async () => {
                     if (this.isRunning) {
                         await this.hands.send({ image: this.videoElement });
                     }
                 },
-                width: 1280,
-                height: 720
+                width: 640, // Lower resolution for performance
+                height: 480 // Lower resolution for performance
             });
 
             await this.camera.start();
@@ -144,9 +156,28 @@ class HandTracker {
         this.rightHandDetected = false;
 
         if (results.multiHandLandmarks && results.multiHandedness) {
+            // For 2-player mode, sort hands by x-position to assign players
+            let handData = [];
+
             for (let i = 0; i < results.multiHandLandmarks.length; i++) {
                 const landmarks = results.multiHandLandmarks[i];
                 const handedness = results.multiHandedness[i];
+                const wristX = landmarks[0].x; // Wrist x-position
+
+                handData.push({
+                    landmarks,
+                    handedness,
+                    wristX,
+                    index: i
+                });
+            }
+
+            // Sort by x-position (left to right in camera frame)
+            handData.sort((a, b) => a.wristX - b.wristX);
+
+            // Process each hand
+            for (let i = 0; i < handData.length; i++) {
+                const { landmarks, handedness } = handData[i];
 
                 // Swap handedness because video is mirrored
                 // MediaPipe's "Left" = User's RIGHT hand (from their perspective)
@@ -157,6 +188,14 @@ class HandTracker {
                     this.leftHandDetected = true;
                 } else {
                     this.rightHandDetected = true;
+                }
+
+                // Determine player ID based on mode and position
+                let playerId = 1; // Default to Player 1
+                if (this.playerCount === 2) {
+                    // Leftmost hand in camera → Player 1 (RIGHT side of mirrored screen)
+                    // Rightmost hand in camera → Player 2 (LEFT side of mirrored screen)
+                    playerId = (i === 0) ? 1 : 2;
                 }
 
                 // Extract key points for collision detection
@@ -179,9 +218,18 @@ class HandTracker {
                         x,
                         y,
                         isLeft: isUserLeftHand,
-                        landmark: point
+                        landmark: point,
+                        playerId // Add player ID to collision points
                     });
                 });
+            }
+
+            // Calculate divider position for 2-player calibration
+            if (this.playerCount === 2 && handData.length === 2) {
+                // Midpoint between both players' wrists
+                const player1WristX = handData[0].wristX;
+                const player2WristX = handData[1].wristX;
+                this.dividerX = (player1WristX + player2WristX) / 2;
             }
         }
 
@@ -208,9 +256,45 @@ class HandTracker {
         // Scale factor - 20% smaller
         const scale = 0.8;
 
+        // For 2-player mode, sort hands by x-position to assign colors
+        let handData = [];
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
-            const glove = this.gloveColor;
+            const wristX = landmarks[0].x;
+            handData.push({ landmarks, wristX, index: i });
+        }
+        handData.sort((a, b) => a.wristX - b.wristX);
+
+        for (let i = 0; i < handData.length; i++) {
+            const { landmarks } = handData[i];
+
+            // Determine glove color based on player
+            let glove;
+            if (this.playerCount === 1) {
+                // 1P mode: use original teal
+                glove = this.gloveColor;
+            } else {
+                // 2P mode: assign colors by zone
+                // Leftmost hand in camera → Player 1 (RIGHT side) → warm orange
+                // Rightmost hand in camera → Player 2 (LEFT side) → cool blue
+                if (i === 0) {
+                    // Player 1: warm orange glow
+                    glove = {
+                        main: '#FFF5E6',
+                        shadow: '#E8E8E8',
+                        outline: '#FF8C42',
+                        highlight: '#FFFFFF'
+                    };
+                } else {
+                    // Player 2: cool blue glow
+                    glove = {
+                        main: '#E6F0FF',
+                        shadow: '#E8E8E8',
+                        outline: '#4A90D9',
+                        highlight: '#FFFFFF'
+                    };
+                }
+            }
 
             // Convert landmarks to canvas coordinates
             const points = landmarks.map(lm => ({
@@ -249,7 +333,7 @@ class HandTracker {
         // Palm points - create a puffy rounded shape
         const palmPoints = [points[0], points[5], points[9], points[13], points[17]];
 
-        // Outer glow (teal)
+        // Outer glow (colored outline)
         ctx.beginPath();
         ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
         for (let i = 1; i < palmPoints.length; i++) {
@@ -272,7 +356,7 @@ class HandTracker {
         ctx.fillStyle = glove.main;
         ctx.fill();
 
-        // Teal outline
+        // Colored outline
         ctx.strokeStyle = glove.outline;
         ctx.lineWidth = 3;
         ctx.stroke();
@@ -313,7 +397,7 @@ class HandTracker {
                 ctx.lineWidth = 18;
                 ctx.stroke();
 
-                // Teal outline
+                // Colored outline
                 ctx.beginPath();
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
@@ -349,7 +433,7 @@ class HandTracker {
             ctx.fillStyle = glove.main;
             ctx.fill();
 
-            // Teal outline
+            // Colored outline
             ctx.beginPath();
             ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
             ctx.strokeStyle = glove.outline;
