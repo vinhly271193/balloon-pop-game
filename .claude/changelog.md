@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-02-12 — Light welcome screen
+- **Light garden theme**: Replaced the dark startup screen with a warm cream-to-soft-green gradient background with sunlight glow accents
+- **Readable on light**: Text, buttons, logo shadow, welcome message, garden preview, and camera hint all updated for light background contrast
+- **Scoped to welcome only**: Other gameplay screens remain dark so they work with the camera/canvas overlays
+- Files changed: `css/styles.css`, `index.html`
+
 ## 2026-02-12 — Chapter screen progress bar
 - **Progress bar on chapter intro**: A green progress bar fills smoothly over 5 seconds on the chapter intro screen ("The Forgotten Garden", etc.), showing players exactly how long before it auto-advances
 - **Progress bar on chapter complete**: Same treatment on the chapter complete celebration screen (6-second duration)
