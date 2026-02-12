@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-02-12 — Light pre-game flow, floating particles, entrance animation
+- **Light theme extended**: Player select ("How Many Gardeners?") and mode select ("Choose Your Garden") screens now share the same warm light garden theme as the welcome screen
+- **Floating particles**: Subtle animated leaves and petals drift gently across all light screens — green, warm, pink, and peach tones
+- **Entrance animation**: Content on all light screens fades in with a gentle upward slide when the screen appears
+- **Shared `.light-screen` class**: Refactored from `welcome-screen` to a reusable class applied to welcome, player select, and mode select
+- Files changed: `css/styles.css`, `index.html`, `js/ui.js`
+
 ## 2026-02-12 — Light welcome screen
 - **Light garden theme**: Replaced the dark startup screen with a warm cream-to-soft-green gradient background with sunlight glow accents
 - **Readable on light**: Text, buttons, logo shadow, welcome message, garden preview, and camera hint all updated for light background contrast
