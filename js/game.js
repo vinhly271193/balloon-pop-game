@@ -759,6 +759,12 @@ class Game {
                 ddaEngine.checkRubberBand(this.player1Score, this.player2Score);
             }
 
+            // Pass idle times to garden for hint arrows
+            this.gardenBed.setPlayerIdleTime(1, ddaEngine.players[1].idleTime);
+            if (this.playerCount === 2) {
+                this.gardenBed.setPlayerIdleTime(2, ddaEngine.players[2].idleTime);
+            }
+
             // Update garden (handles needs, growth, etc.)
             this.gardenBed.update(deltaTime);
 

@@ -1536,6 +1536,9 @@ class HintArrow {
             this._drawCurvedArrow(ctx, color);
         }
 
+        // Draw tooltip bubble
+        this._drawTooltip(ctx, color);
+
         ctx.restore();
     }
 
@@ -1625,6 +1628,67 @@ class HintArrow {
         ctx.shadowBlur = 10;
         ctx.fill();
         ctx.shadowBlur = 0;
+    }
+
+    _drawTooltip(ctx, color) {
+        const text = this.tooltips[this.hintType];
+        if (!text) return;
+
+        // Position tooltip above the source (for arrows) or above the pot (for harvest)
+        const tooltipX = this.hintType === 'harvest' ? this.toX : this.fromX;
+        const baseY = this.hintType === 'harvest' ? this.toY - 80 : this.fromY - 60;
+        const bounceOffset = Math.sin(this.tooltipBounce) * 4;
+        const tooltipY = baseY + bounceOffset;
+
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+
+        // Measure text
+        ctx.font = 'bold 20px Arial';
+        const metrics = ctx.measureText(text);
+        const padding = 14;
+        const boxWidth = metrics.width + padding * 2;
+        const boxHeight = 36;
+        const boxX = tooltipX - boxWidth / 2;
+        const boxY = tooltipY - boxHeight / 2;
+
+        // Background bubble with soft shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 3;
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 12);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fill();
+
+        // Colored border
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Pointer triangle pointing down toward the target
+        const triSize = 8;
+        ctx.beginPath();
+        ctx.moveTo(tooltipX - triSize, boxY + boxHeight);
+        ctx.lineTo(tooltipX, boxY + boxHeight + triSize);
+        ctx.lineTo(tooltipX + triSize, boxY + boxHeight);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, tooltipX, tooltipY);
+
+        ctx.restore();
     }
 }
 
@@ -1778,7 +1842,7 @@ class GardenBed {
         this.hintArrows.set('shared', new HintArrow());
         this.hintArrows.set(1, new HintArrow());
         this.hintArrows.set(2, new HintArrow());
-        this.hintIdleThreshold = 10; // seconds
+        this.hintIdleThreshold = 5; // seconds before showing tooltip hints
         this.hintPlayerIdleTime = new Map();
     }
 

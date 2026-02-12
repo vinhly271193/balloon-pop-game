@@ -201,15 +201,15 @@ class HandTracker {
                 // Extract key points for collision detection
                 // Using palm center (landmark 9) and fingertips (4, 8, 12, 16, 20)
                 const collisionPoints = [
-                    landmarks[9],  // Palm center
-                    landmarks[4],  // Thumb tip
-                    landmarks[8],  // Index tip
-                    landmarks[12], // Middle tip
-                    landmarks[16], // Ring tip
-                    landmarks[20]  // Pinky tip
+                    { point: landmarks[9],  landmarkIndex: 9 },  // Palm center
+                    { point: landmarks[4],  landmarkIndex: 4 },  // Thumb tip
+                    { point: landmarks[8],  landmarkIndex: 8 },  // Index tip
+                    { point: landmarks[12], landmarkIndex: 12 }, // Middle tip
+                    { point: landmarks[16], landmarkIndex: 16 }, // Ring tip
+                    { point: landmarks[20], landmarkIndex: 20 }  // Pinky tip
                 ];
 
-                collisionPoints.forEach(point => {
+                collisionPoints.forEach(({ point, landmarkIndex }) => {
                     // Convert normalized coordinates to canvas coordinates
                     const x = point.x * this.canvas.width;
                     const y = point.y * this.canvas.height;
@@ -219,6 +219,7 @@ class HandTracker {
                         y,
                         isLeft: isUserLeftHand,
                         landmark: point,
+                        landmarkIndex,
                         playerId // Add player ID to collision points
                     });
                 });
