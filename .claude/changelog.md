@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-02-12 — Full-width garden preview strip on welcome screen
+- **Garden strip**: Replaced the boxed "Your Garden: X plants grown" card with a full-width landscape strip spanning the bottom 20% of the welcome screen — grass with wavy edge, soil layers, planted emoji icons and empty soil mounds
+- **Card removed**: Removed the white card wrapper and text label; the garden visual now blends naturally into the screen background
+- **Retina-ready**: Canvas sized with `devicePixelRatio` for sharp rendering on high-DPI screens
+- Files changed: `index.html`, `css/styles.css`, `js/game.js`
+
+## 2026-02-12 — Fix hand-switching, mirrored text, settings overlap
+- **Hand-switching fix**: Items picked up in one hand no longer jump to the other hand — solo/co-op mode now tracks which physical hand holds the item, and only that hand can move it. The free hand can still harvest plants and provide sunlight.
+- **Mirrored text fix**: All canvas text (FOOD label, seed names, Plant Needs panel, instruction text, player labels) now reads correctly on the CSS-mirrored canvas via a `drawUnmirroredText` helper that counter-flips text and handles textAlign swapping.
+- **Settings button repositioning**: Settings gear slides below the HUD during gameplay so it no longer overlaps the Plants score counter. Smooth CSS transition between positions.
+- Files changed: `js/garden.js`, `js/ui.js`, `css/styles.css`
+
 ## 2026-02-12 — Canvas above UI overlays (hands always visible)
 - **Canvas z-index raised**: Moved `#gameCanvas` from z-index 2 to 15 (above uiOverlay at 10, below settings button at 50) so hand gloves render on top of all screen backgrounds — the root fix for invisible hands on pre-game screens
 - **pointer-events: none on canvas**: Mouse clicks pass through the transparent canvas to reach buttons underneath — hand tracking hover detection is unaffected since it uses collision math, not DOM events
