@@ -1420,8 +1420,7 @@ class MagicPumpkin {
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
             ctx.textAlign = 'center';
-            ctx.strokeText('Both players touch!', this.x, this.y - 80);
-            ctx.fillText('Both players touch!', this.x, this.y - 80);
+            drawUnmirroredText(ctx, 'Both players touch!', this.x, this.y - 80, true);
         }
 
         ctx.restore();
@@ -1699,7 +1698,7 @@ class HintArrow {
         ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, tooltipX, tooltipY);
+        drawUnmirroredText(ctx, text, tooltipX, tooltipY);
 
         ctx.restore();
     }
@@ -2729,20 +2728,20 @@ class GardenBed {
             const p1Needs = this.plantNeedsMap.get(1);
             const p1Pot = this.plantPots[0];
             if (p1Pot && p1Pot.growthStage !== GrowthStage.EMPTY && p1Needs) {
-                p1Needs.draw(ctx, this.canvas.width - 250, 100);
+                p1Needs.draw(ctx, this.canvas.width - 250, 160);
             }
 
             // Player 2 needs (left side)
             const p2Needs = this.plantNeedsMap.get(2);
             const p2Pot = this.plantPots[1];
             if (p2Pot && p2Pot.growthStage !== GrowthStage.EMPTY && p2Needs) {
-                p2Needs.draw(ctx, 30, 100);
+                p2Needs.draw(ctx, 30, 160);
             }
         } else {
             // Shared needs
             const anyPotGrowing = this.plantPots.some(pot => pot.growthStage !== GrowthStage.EMPTY);
             if (anyPotGrowing) {
-                this.plantNeeds.draw(ctx, 30, 100);
+                this.plantNeeds.draw(ctx, 30, 160);
             }
         }
 
@@ -2793,14 +2792,12 @@ class GardenBed {
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 3;
         const p1X = this.dividerX + (this.canvas.width - this.dividerX) / 2;
-        ctx.strokeText('Player 1', p1X, 40);
-        ctx.fillText('Player 1', p1X, 40);
+        drawUnmirroredText(ctx, 'Player 1', p1X, 40, true);
 
         // Player 2 (left, cool blue)
         ctx.fillStyle = '#4A90E2';
         const p2X = this.dividerX / 2;
-        ctx.strokeText('Player 2', p2X, 40);
-        ctx.fillText('Player 2', p2X, 40);
+        drawUnmirroredText(ctx, 'Player 2', p2X, 40, true);
 
         ctx.restore();
     }
