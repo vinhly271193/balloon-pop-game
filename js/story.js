@@ -221,49 +221,6 @@ class StoryManager {
     }
 
     /**
-     * Animate a screen with progress bar and auto-dismiss
-     * @param {HTMLElement} screen - The screen element
-     * @param {number} duration - Duration in ms
-     * @param {Function} onComplete - Callback when dismissed
-     */
-    _animateScreen(screen, duration, onComplete) {
-        screen.classList.add('active');
-
-        const progressFill = screen.querySelector('.chapter-progress-fill');
-        let dismissed = false;
-        let timerId = null;
-
-        // Use CSS transition for progress bar instead of RAF loop
-        if (progressFill) {
-            progressFill.style.transition = 'none';
-            progressFill.style.width = '0%';
-            // Force reflow then animate
-            progressFill.offsetWidth;
-            progressFill.style.transition = `width ${duration}ms linear`;
-            progressFill.style.width = '100%';
-        }
-
-        const dismissHandler = () => {
-            if (dismissed) return;
-            dismissed = true;
-            if (timerId) clearTimeout(timerId);
-            if (progressFill) {
-                progressFill.style.transition = 'none';
-                progressFill.style.width = '0%';
-            }
-            screen.classList.remove('active');
-            screen.removeEventListener('click', dismissHandler);
-            if (onComplete) onComplete();
-        };
-
-        // Auto-dismiss after duration
-        timerId = setTimeout(dismissHandler, duration);
-
-        // Allow tap/click to skip
-        screen.addEventListener('click', dismissHandler);
-    }
-
-    /**
      * Save progress to localStorage
      */
     saveProgress() {
