@@ -24,7 +24,7 @@ class GardenBed {
 
         // Position elements (default single player / co-op layout)
         const centerX = canvas.width / 2;
-        const centerY = canvas.height * 0.65;
+        const centerY = canvas.height - 150; // Bottom toolbar row
 
         // Plant pots (will be configured based on mode)
         this.plantPots = [];
@@ -46,7 +46,7 @@ class GardenBed {
         this.seed = null;
         this.wateringCan = new WateringCan(canvas.width - 150, canvas.height - 150, canvas);
         this.fertilizerBag = new FertilizerBag(150, canvas.height - 150, canvas);
-        this.sunArea = new SunArea(canvas.width - 150, 150);
+        this.sunArea = new SunArea(canvas.width - 150, 200); // Just below progress bar
 
         this.wateringCansMap.set('shared', this.wateringCan);
         this.fertilizerBagsMap.set('shared', this.fertilizerBag);
@@ -146,14 +146,15 @@ class GardenBed {
         const canvasWidth = this.canvas.width;
         const canvasHeight = this.canvas.height;
 
-        // 2-3 plant pots spread across width
+        // 2-3 plant pots spread across width, on bottom toolbar row
         const potCount = this.playerCount === 2 ? 2 : 3;
         const spacing = canvasWidth / (potCount + 1);
+        const potY = canvasHeight - 150;
 
         for (let i = 0; i < potCount; i++) {
             const pot = new PlantPot(
                 spacing * (i + 1),
-                canvasHeight * 0.65,
+                potY,
                 this.canvas
             );
             this.plantPots.push(pot);
@@ -169,7 +170,7 @@ class GardenBed {
         // Shared tools
         this.wateringCan = new WateringCan(canvasWidth - 150, canvasHeight - 150, this.canvas);
         this.fertilizerBag = new FertilizerBag(150, canvasHeight - 150, this.canvas);
-        this.sunArea = new SunArea(canvasWidth - 150, 150);
+        this.sunArea = new SunArea(canvasWidth - 150, 200); // Just below progress bar
 
         this.wateringCansMap.set('shared', this.wateringCan);
         this.fertilizerBagsMap.set('shared', this.fertilizerBag);
@@ -192,7 +193,7 @@ class GardenBed {
 
         // Player 1 zone (right side, mirrored)
         const p1CenterX = this.dividerX + (this.canvas.width - this.dividerX) / 2;
-        const p1Pot = new PlantPot(p1CenterX, canvasHeight * 0.65, this.canvas);
+        const p1Pot = new PlantPot(p1CenterX, canvasHeight - 150, this.canvas);
         this.plantPots.push(p1Pot);
 
         const p1Needs = new PlantNeeds();
@@ -208,7 +209,7 @@ class GardenBed {
             canvasHeight - 150,
             this.canvas
         );
-        const p1Sun = new SunArea(this.canvas.width - 100, 150);
+        const p1Sun = new SunArea(this.canvas.width - 100, 200);
 
         this.wateringCansMap.set(1, p1WateringCan);
         this.fertilizerBagsMap.set(1, p1Fertilizer);
@@ -216,7 +217,7 @@ class GardenBed {
 
         // Player 2 zone (left side, mirrored)
         const p2CenterX = this.dividerX / 2;
-        const p2Pot = new PlantPot(p2CenterX, canvasHeight * 0.65, this.canvas);
+        const p2Pot = new PlantPot(p2CenterX, canvasHeight - 150, this.canvas);
         this.plantPots.push(p2Pot);
 
         const p2Needs = new PlantNeeds();
@@ -232,7 +233,7 @@ class GardenBed {
             canvasHeight - 150,
             this.canvas
         );
-        const p2Sun = new SunArea(100, 150);
+        const p2Sun = new SunArea(100, 200);
 
         this.wateringCansMap.set(2, p2WateringCan);
         this.fertilizerBagsMap.set(2, p2Fertilizer);
@@ -306,7 +307,7 @@ class GardenBed {
 
             const sunArea = this.sunAreasMap.get(playerId);
             if (sunArea) {
-                sunArea.radius = 60 * hitBoxMultiplier;
+                sunArea.radius = 120 * hitBoxMultiplier;
             }
 
             const seed = this.seedsMap.get(playerId);
@@ -1049,7 +1050,7 @@ class GardenBed {
         this.goldenWateringCans.forEach(can => can.draw(ctx));
 
         // Draw needs panels (vertically centered)
-        const needsPanelHeight = 170; // spacing(45) * 3 + 35
+        const needsPanelHeight = 150; // spacing(40) * 3 + 30
         const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
         if (this.gameMode === 'competitive') {
             // Player 1 needs (right side)
@@ -1142,12 +1143,15 @@ class GardenBed {
         const anyPotEmpty = this.plantPots.some(pot => pot.growthStage === GrowthStage.EMPTY);
         const anyPotHarvestable = this.plantPots.some(pot => pot.growthStage === GrowthStage.HARVESTABLE);
 
+        // Position at bottom of screen, inline with toolbar row
+        const instructionY = this.canvas.height - 60;
+
         if (anyPotEmpty) {
-            drawUnmirroredText(ctx, 'Pick up the seed and drop it in the pot!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Pick up the seed and drop it in the pot!', this.canvas.width / 2, instructionY);
         } else if (anyPotHarvestable) {
-            drawUnmirroredText(ctx, 'Your plant is ready! Touch it to harvest!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Your plant is ready! Touch it to harvest!', this.canvas.width / 2, instructionY);
         } else {
-            drawUnmirroredText(ctx, 'Keep your plant healthy - water it, give it sun and food!', this.canvas.width / 2, 50);
+            drawUnmirroredText(ctx, 'Keep your plant healthy - water it, give it sun and food!', this.canvas.width / 2, instructionY);
         }
 
         ctx.restore();
@@ -1159,7 +1163,7 @@ class GardenBed {
     clear() {
         this.active = false;
         const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height * 0.65;
+        const centerY = this.canvas.height - 150; // Bottom toolbar row
 
         this.plantPots = [];
         this.plantPot = new PlantPot(centerX, centerY, this.canvas);

@@ -1235,7 +1235,9 @@ html, body {
 }
 
 .settings-button.hud-active {
-    top: 140px;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
 }
 
 .settings-button:hover {

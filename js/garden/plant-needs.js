@@ -109,23 +109,25 @@ class PlantNeeds {
      * Draw needs bars
      */
     draw(ctx, x, y) {
-        const barWidth = 180;
-        const barHeight = 30;
-        const spacing = 45;
+        const barWidth = 150;
+        const barHeight = 25;
+        const spacing = 40;
 
         ctx.save();
 
-        // Background panel
+        // Background panel — sized to contain icon (35px) + bar + padding
+        const panelWidth = 35 + barWidth + 40; // icon offset + bar + right padding
+        const panelHeight = spacing * 3 + 30;
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.beginPath();
-        ctx.roundRect(x - 20, y - 20, barWidth + 80, spacing * 3 + 35, 15);
+        ctx.roundRect(x - 15, y - 15, panelWidth, panelHeight, 15);
         ctx.fill();
 
         // Title
-        ctx.font = 'bold 18px Arial';
+        ctx.font = 'bold 16px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
-        drawUnmirroredText(ctx, 'Plant Needs', x, y);
+        drawUnmirroredText(ctx, 'Plant Needs', x + 5, y + 5);
 
         // Water bar
         this.drawBar(ctx, x, y + spacing, barWidth, barHeight, this.displayWater, this.water, '💧', 'Water');
@@ -148,7 +150,7 @@ class PlantNeeds {
             if (e.type === 'water') effectY = y + spacing;
             else if (e.type === 'sun') effectY = y + spacing * 2;
             else if (e.type === 'food') effectY = y + spacing * 3;
-            drawUnmirroredText(ctx, e.icon, x + barWidth + 50, effectY + e.y);
+            drawUnmirroredText(ctx, e.icon, x + barWidth + 40, effectY + e.y);
             ctx.restore();
         });
 
@@ -157,9 +159,9 @@ class PlantNeeds {
 
     drawBar(ctx, x, y, width, height, displayLevel, actualLevel, icon, label) {
         // Icon
-        ctx.font = '22px Arial';
+        ctx.font = '18px Arial';
         ctx.textAlign = 'left';
-        drawUnmirroredText(ctx, icon, x, y + height / 2 + 7);
+        drawUnmirroredText(ctx, icon, x, y + height / 2 + 6);
 
         // Bar background — pulse red if critical
         if (actualLevel < 0.3) {
@@ -169,7 +171,7 @@ class PlantNeeds {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         }
         ctx.beginPath();
-        ctx.roundRect(x + 35, y, width, height, 5);
+        ctx.roundRect(x + 30, y, width, height, 5);
         ctx.fill();
 
         // Bar fill (smooth)
@@ -177,7 +179,7 @@ class PlantNeeds {
         if (fillWidth > 0) {
             ctx.fillStyle = this.getBarColor(actualLevel);
             ctx.beginPath();
-            ctx.roundRect(x + 35, y, fillWidth, height, 5);
+            ctx.roundRect(x + 30, y, fillWidth, height, 5);
             ctx.fill();
         }
 
@@ -185,14 +187,14 @@ class PlantNeeds {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(x + 35, y, width, height, 5);
+        ctx.roundRect(x + 30, y, width, height, 5);
         ctx.stroke();
 
         // Label
-        ctx.font = 'bold 13px Arial';
+        ctx.font = 'bold 12px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        drawUnmirroredText(ctx, label, x + 35 + width / 2, y + height / 2 + 5);
+        drawUnmirroredText(ctx, label, x + 30 + width / 2, y + height / 2 + 4);
     }
 }
 
@@ -203,7 +205,7 @@ class SunArea {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.radius = 60;
+        this.radius = 120;
         this.pulsePhase = 0;
     }
 
@@ -233,8 +235,8 @@ class SunArea {
         ctx.fillStyle = gradient;
         ctx.fill();
 
-        // Sun icon
-        ctx.font = '50px Arial';
+        // Sun icon (doubled size)
+        ctx.font = '100px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         drawUnmirroredText(ctx, '☀️', this.x, this.y);
