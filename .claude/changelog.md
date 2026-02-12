@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-02-12 — Index finger item tracking + cartoon glove hand
+- **Item follows index finger**: Held items (seed packets, watering can, fertilizer) now track the index fingertip instead of the pinky — each collision point now carries a `landmarkIndex` so garden.js can distinguish which finger is which
+- **Cartoon glove hand**: Replaced the skeletal bone-style hand rendering with a playful filled cartoon glove — smooth rounded palm blob, thick tapered finger capsules, puffy fingertips with shine highlights, and a cute wrist cuff
+- **Interaction precision**: Pickup detection still works from any fingertip/palm contact, but drop/pour/feed interactions are gated to the index finger only, preventing flickering from multiple collision points
+- Files changed: `js/handTracking.js`, `js/garden.js`
+
 ## 2026-02-12 — Calibration progress bar, adaptive durations, chapter stats
 - **Calibration progress bar**: A green bar fills over 2 seconds while hands are detected on the calibration screen — resets if hands are lost, giving clear "keep holding" feedback to patients
 - **Adaptive chapter durations**: First-time players get longer reading time (7s intro, 8s complete); returning players get shorter durations (4s/5s) since they've already seen the story
