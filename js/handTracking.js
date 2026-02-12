@@ -254,10 +254,7 @@ class HandTracker {
 
         if (!results.multiHandLandmarks) return;
 
-        // Scale factor - 20% smaller
-        const scale = 0.8;
-
-        // For 2-player mode, sort hands by x-position to assign colors
+        // Sort hands by x-position for consistent player assignment
         let handData = [];
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
             const landmarks = results.multiHandLandmarks[i];
@@ -272,28 +269,12 @@ class HandTracker {
             // Determine glove color based on player
             let glove;
             if (this.playerCount === 1) {
-                // 1P mode: use original teal
                 glove = this.gloveColor;
             } else {
-                // 2P mode: assign colors by zone
-                // Leftmost hand in camera → Player 1 (RIGHT side) → warm orange
-                // Rightmost hand in camera → Player 2 (LEFT side) → cool blue
                 if (i === 0) {
-                    // Player 1: warm orange glow
-                    glove = {
-                        main: '#FFF5E6',
-                        shadow: '#E8E8E8',
-                        outline: '#FF8C42',
-                        highlight: '#FFFFFF'
-                    };
+                    glove = { main: '#FFF5E6', shadow: '#F0D9B5', outline: '#FF8C42', highlight: '#FFFFFF' };
                 } else {
-                    // Player 2: cool blue glow
-                    glove = {
-                        main: '#E6F0FF',
-                        shadow: '#E8E8E8',
-                        outline: '#4A90D9',
-                        highlight: '#FFFFFF'
-                    };
+                    glove = { main: '#E6F0FF', shadow: '#B5C9E6', outline: '#4A90D9', highlight: '#FFFFFF' };
                 }
             }
 
@@ -303,150 +284,243 @@ class HandTracker {
                 y: lm.y * this.canvas.height
             }));
 
-            // Calculate center for scaling
+            // Scale 20% smaller around center
             const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
             const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
-
-            // Scale points around center
-            const scaledPoints = points.map(p => ({
+            const scale = 0.8;
+            const sp = points.map(p => ({
                 x: centerX + (p.x - centerX) * scale,
                 y: centerY + (p.y - centerY) * scale
             }));
 
+            ctx.save();
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Draw glove palm (puffy white shape)
-            this.drawGlovePalm(ctx, scaledPoints, glove);
+            // Draw order: palm shadow → palm → fingers → fingertips → wrist cuff
+            this.drawCartoonPalm(ctx, sp, glove);
+            this.drawCartoonFingers(ctx, sp, glove);
+            this.drawCartoonFingertips(ctx, sp, glove);
+            this.drawWristCuff(ctx, sp, glove);
 
-            // Draw glove fingers (puffy cartoon style)
-            this.drawGloveFingers(ctx, scaledPoints, glove);
-
-            // Draw fingertip circles (cartoon puff)
-            this.drawGloveFingertips(ctx, scaledPoints, glove);
+            ctx.restore();
         }
     }
 
     /**
-     * Draw cartoon glove palm
+     * Draw filled cartoon palm — smooth rounded blob
      */
-    drawGlovePalm(ctx, points, glove) {
-        // Palm points - create a puffy rounded shape
-        const palmPoints = [points[0], points[5], points[9], points[13], points[17]];
+    drawCartoonPalm(ctx, p, glove) {
+        // Build a smooth palm shape using finger bases and wrist
+        // Points: 0=wrist, 1=thumb_cmc, 5=index_mcp, 9=middle_mcp, 13=ring_mcp, 17=pinky_mcp
+        const palmAnchors = [p[0], p[1], p[5], p[9], p[13], p[17]];
 
-        // Outer glow (colored outline)
-        ctx.beginPath();
-        ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
-        for (let i = 1; i < palmPoints.length; i++) {
-            ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
-        }
-        ctx.closePath();
-        ctx.shadowColor = glove.outline;
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = glove.main;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        // Soft shadow under palm
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 4;
+        this._fillSmoothShape(ctx, palmAnchors, glove.main);
+        ctx.restore();
 
-        // White fill
-        ctx.beginPath();
-        ctx.moveTo(palmPoints[0].x, palmPoints[0].y);
-        for (let i = 1; i < palmPoints.length; i++) {
-            ctx.lineTo(palmPoints[i].x, palmPoints[i].y);
-        }
-        ctx.closePath();
-        ctx.fillStyle = glove.main;
-        ctx.fill();
+        // Filled palm
+        this._fillSmoothShape(ctx, palmAnchors, glove.main);
 
         // Colored outline
-        ctx.strokeStyle = glove.outline;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        this._strokeSmoothShape(ctx, palmAnchors, glove.outline, 2.5);
     }
 
     /**
-     * Draw cartoon glove fingers
+     * Draw filled cartoon fingers — thick rounded capsules
      */
-    drawGloveFingers(ctx, points, glove) {
+    drawCartoonFingers(ctx, p, glove) {
         const fingers = [
-            [1, 2, 3, 4],     // Thumb
-            [5, 6, 7, 8],     // Index
-            [9, 10, 11, 12],  // Middle
-            [13, 14, 15, 16], // Ring
-            [17, 18, 19, 20]  // Pinky
+            { joints: [1, 2, 3, 4],     width: 16 }, // Thumb (wider)
+            { joints: [5, 6, 7, 8],     width: 14 }, // Index
+            { joints: [9, 10, 11, 12],  width: 14 }, // Middle
+            { joints: [13, 14, 15, 16], width: 13 }, // Ring
+            { joints: [17, 18, 19, 20], width: 12 }  // Pinky (narrower)
         ];
 
         fingers.forEach(finger => {
-            for (let j = 0; j < finger.length - 1; j++) {
-                const start = points[finger[j]];
-                const end = points[finger[j + 1]];
+            const pts = finger.joints.map(j => p[j]);
+            const w = finger.width;
 
-                // Outer glow
-                ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.strokeStyle = glove.outline;
-                ctx.lineWidth = 22;
-                ctx.globalAlpha = 0.3;
-                ctx.stroke();
-                ctx.globalAlpha = 1;
+            // Build a filled capsule path along the finger joints
+            ctx.save();
 
-                // White glove finger (thick)
+            // Soft shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetY = 2;
+
+            // Fill: draw thick rounded line segments
+            for (let j = 0; j < pts.length - 1; j++) {
+                const a = pts[j];
+                const b = pts[j + 1];
+                // Taper toward tip
+                const segWidth = w - (j * 1.5);
+
+                // White/colored fill
                 ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
                 ctx.strokeStyle = glove.main;
-                ctx.lineWidth = 18;
+                ctx.lineWidth = segWidth * 2;
                 ctx.stroke();
+            }
 
-                // Colored outline
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            // Outline
+            for (let j = 0; j < pts.length - 1; j++) {
+                const a = pts[j];
+                const b = pts[j + 1];
+                const segWidth = w - (j * 1.5);
+
                 ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
                 ctx.strokeStyle = glove.outline;
-                ctx.lineWidth = 20;
-                ctx.globalAlpha = 0.15;
+                ctx.lineWidth = segWidth * 2 + 3;
+                ctx.globalAlpha = 0.2;
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
+
+            ctx.restore();
         });
     }
 
     /**
-     * Draw cartoon glove fingertips
+     * Draw cartoon puffy fingertips with shine highlights
      */
-    drawGloveFingertips(ctx, points, glove) {
-        const fingertips = [4, 8, 12, 16, 20];
+    drawCartoonFingertips(ctx, p, glove) {
+        const tips = [
+            { idx: 4,  r: 12 }, // Thumb
+            { idx: 8,  r: 11 }, // Index
+            { idx: 12, r: 11 }, // Middle
+            { idx: 16, r: 10 }, // Ring
+            { idx: 20, r: 9 }   // Pinky
+        ];
 
-        fingertips.forEach(idx => {
-            const point = points[idx];
+        tips.forEach(({ idx, r }) => {
+            const pt = p[idx];
 
-            // Outer glow
+            // Colored glow behind
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 14, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, r + 4, 0, Math.PI * 2);
             ctx.fillStyle = glove.outline;
-            ctx.globalAlpha = 0.4;
+            ctx.globalAlpha = 0.25;
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            // White puffy circle
+            // Main filled circle
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
             ctx.fillStyle = glove.main;
             ctx.fill();
 
-            // Colored outline
+            // Outline
             ctx.beginPath();
-            ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
             ctx.strokeStyle = glove.outline;
             ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.5;
             ctx.stroke();
+            ctx.globalAlpha = 1;
 
-            // Highlight shine
+            // Shine highlight (top-left)
             ctx.beginPath();
-            ctx.arc(point.x - 3, point.y - 3, 4, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.arc(pt.x - r * 0.25, pt.y - r * 0.3, r * 0.35, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.fill();
         });
+    }
+
+    /**
+     * Draw a cute wrist cuff at the base of the glove
+     */
+    drawWristCuff(ctx, p, glove) {
+        const wrist = p[0];
+        const thumbBase = p[1];
+        const pinkyBase = p[17];
+
+        // Cuff is a rounded rectangle area around the wrist
+        const cuffWidth = Math.sqrt(
+            Math.pow(thumbBase.x - pinkyBase.x, 2) +
+            Math.pow(thumbBase.y - pinkyBase.y, 2)
+        ) * 0.8;
+
+        const angle = Math.atan2(
+            pinkyBase.y - thumbBase.y,
+            pinkyBase.x - thumbBase.x
+        );
+
+        ctx.save();
+        ctx.translate(wrist.x, wrist.y);
+        ctx.rotate(angle);
+
+        // Cuff band
+        const cuffH = 10;
+        ctx.beginPath();
+        ctx.roundRect(-cuffWidth / 2, -cuffH / 2, cuffWidth, cuffH, 5);
+        ctx.fillStyle = glove.outline;
+        ctx.globalAlpha = 0.35;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Cuff highlight
+        ctx.beginPath();
+        ctx.roundRect(-cuffWidth / 2 + 4, -cuffH / 2 + 2, cuffWidth - 8, cuffH * 0.4, 3);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    /**
+     * Helper: fill a smooth closed shape through anchor points using quadratic curves
+     */
+    _fillSmoothShape(ctx, anchors, color) {
+        if (anchors.length < 3) return;
+        ctx.beginPath();
+        ctx.moveTo(
+            (anchors[0].x + anchors[1].x) / 2,
+            (anchors[0].y + anchors[1].y) / 2
+        );
+        for (let i = 1; i < anchors.length; i++) {
+            const next = anchors[(i + 1) % anchors.length];
+            const midX = (anchors[i].x + next.x) / 2;
+            const midY = (anchors[i].y + next.y) / 2;
+            ctx.quadraticCurveTo(anchors[i].x, anchors[i].y, midX, midY);
+        }
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    /**
+     * Helper: stroke a smooth closed shape through anchor points
+     */
+    _strokeSmoothShape(ctx, anchors, color, width) {
+        if (anchors.length < 3) return;
+        ctx.beginPath();
+        ctx.moveTo(
+            (anchors[0].x + anchors[1].x) / 2,
+            (anchors[0].y + anchors[1].y) / 2
+        );
+        for (let i = 1; i < anchors.length; i++) {
+            const next = anchors[(i + 1) % anchors.length];
+            const midX = (anchors[i].x + next.x) / 2;
+            const midY = (anchors[i].y + next.y) / 2;
+            ctx.quadraticCurveTo(anchors[i].x, anchors[i].y, midX, midY);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
     }
 
     /**

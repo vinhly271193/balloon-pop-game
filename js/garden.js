@@ -2425,8 +2425,11 @@ class GardenBed {
             }
         }
 
-        // If holding something, move it
-        if (heldItem) {
+        // Held items track the index fingertip only (landmark 8)
+        // Other collision points still detect pickups below
+        const isIndexFinger = handPos.landmarkIndex === 8;
+
+        if (heldItem && isIndexFinger) {
             heldItem.moveTo(handPos.x, handPos.y);
 
             // Reset watering can state if held but not yet confirmed over pot
@@ -2436,12 +2439,10 @@ class GardenBed {
                     wateringCan.isOverPot = false;
                     wateringCan.pourProgress = 0;
                     wateringCan.targetPotRef = null;
-                    // Clear pot watering state
                     if (targetPot) {
                         targetPot.isBeingWatered = false;
                         targetPot.waterPourProgress = 0;
                     }
-                    // Reset water interaction timer
                     if (this.gameMode === 'competitive') {
                         this.waterInteractionTimeMap.set(zoneKey, 0);
                     } else {
@@ -2551,8 +2552,10 @@ class GardenBed {
                     audioManager.play('water');
                 }
             }
-        } else {
-            // Try to pick something up
+        }
+
+        if (!heldItem) {
+            // Try to pick something up (any collision point can trigger pickup)
             if (seed && !seed.isPlanted && seed.isPointOver(handPos.x, handPos.y)) {
                 seed.pickup();
                 heldItem = seed;
