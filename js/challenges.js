@@ -244,12 +244,14 @@ class ChallengeManager {
         // Decide type: single or multi
         const isMulti = level > 12 && Math.random() > 0.5;
 
-        if (isMulti) {
+        if (isMulti && plants.length >= 2) {
             // Two plant challenge
             const plant1 = plants[Math.floor(Math.random() * plants.length)];
             let plant2 = plants[Math.floor(Math.random() * plants.length)];
-            while (plant2 === plant1) {
+            let attempts = 0;
+            while (plant2 === plant1 && attempts < 20) {
                 plant2 = plants[Math.floor(Math.random() * plants.length)];
+                attempts++;
             }
 
             const count1 = 3 + Math.floor(difficulty / 2);

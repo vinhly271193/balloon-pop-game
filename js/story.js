@@ -57,6 +57,7 @@ class StoryManager {
         this.completedChapters = [];
         this.totalPlantsGrown = 0;
         this.unlockedBackgrounds = ['sky']; // Default unlocked
+        this._saveTimeout = null; // Debounced save timer ID
 
         this.loadProgress();
     }
@@ -268,6 +269,11 @@ class StoryManager {
      * Reset all story progress
      */
     reset() {
+        // Clear pending debounced save before resetting state
+        if (this._saveTimeout) {
+            clearTimeout(this._saveTimeout);
+            this._saveTimeout = null;
+        }
         this.currentChapter = 1;
         this.completedChapters = [];
         this.totalPlantsGrown = 0;
