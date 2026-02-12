@@ -150,46 +150,15 @@
                 </div>
             </div>
 
-            <!-- Chapter Intro Screen -->
-            <div id="chapterIntroScreen" class="screen chapter-screen">
-                <div class="screen-content chapter-content">
-                    <span class="chapter-icon">🌱</span>
-                    <p class="chapter-number">Chapter 1</p>
-                    <h2 class="chapter-title">The Forgotten Garden</h2>
-                    <p class="chapter-intro-text">An old garden has been waiting for someone special...</p>
-                    <p class="chapter-goal-label">Your Goal:</p>
-                    <p class="chapter-goal">Plant your first seeds</p>
-                    <div class="chapter-progress-bar">
-                        <div class="chapter-progress-fill"></div>
-                    </div>
-                    <p class="tap-to-continue">Tap to skip</p>
-                </div>
-            </div>
-
-            <!-- Chapter Complete Screen -->
-            <div id="chapterCompleteScreen" class="screen chapter-screen celebration">
-                <div class="screen-content chapter-content">
-                    <span class="complete-icon">🎉</span>
-                    <h2 class="complete-title">Chapter Complete!</h2>
-                    <p class="chapter-reward">The garden is waking up!</p>
-                    <div class="chapter-complete-stats">
-                        <div class="chapter-stat">
-                            <span class="chapter-stat-icon">🌱</span>
-                            <span class="chapter-stat-value" id="chapterPlantsGrown">0</span>
-                            <span class="chapter-stat-label">Plants Grown</span>
-                        </div>
-                    </div>
-                    <p class="unlock-message"></p>
-                    <div class="chapter-progress-bar">
-                        <div class="chapter-progress-fill"></div>
-                    </div>
-                    <p class="tap-to-continue">Tap to skip</p>
-                </div>
-            </div>
-
             <!-- Challenge Intro Screen -->
             <div id="challengeIntroScreen" class="screen">
                 <div class="screen-content">
+                    <!-- Chapter header (shown on first level of each chapter) -->
+                    <div id="chapterHeader" class="chapter-header" style="display: none;">
+                        <span class="chapter-header-icon">🌱</span>
+                        <p class="chapter-header-number">Chapter 1</p>
+                        <h3 class="chapter-header-title">The Forgotten Garden</h3>
+                    </div>
                     <h2 class="level-label">Level <span id="levelNumber">1</span></h2>
                     <div id="challengeDisplay" class="challenge-text">
                         <!-- Challenge text will be inserted here -->
@@ -268,6 +237,15 @@
                         </div>
                     </div>
                     <p id="encouragementText" class="encouragement-text"></p>
+                    <!-- Chapter complete section (shown when a chapter finishes) -->
+                    <div id="chapterCompleteSection" class="chapter-complete-section" style="display: none;">
+                        <div class="chapter-complete-banner">
+                            <span class="chapter-complete-icon">🎉</span>
+                            <h3 class="chapter-complete-title">Chapter Complete!</h3>
+                            <p class="chapter-complete-reward"></p>
+                            <p class="chapter-complete-unlock"></p>
+                        </div>
+                    </div>
                     <div class="end-buttons">
                         <button id="nextLevelBtn" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
                             <span>Keep Growing</span>

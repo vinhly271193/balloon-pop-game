@@ -230,107 +230,37 @@ class StoryManager {
         screen.classList.add('active');
 
         const progressFill = screen.querySelector('.chapter-progress-fill');
-        const startTime = performance.now();
-        let animFrameId = null;
+        let dismissed = false;
+        let timerId = null;
+
+        // Use CSS transition for progress bar instead of RAF loop
+        if (progressFill) {
+            progressFill.style.transition = 'none';
+            progressFill.style.width = '0%';
+            // Force reflow then animate
+            progressFill.offsetWidth;
+            progressFill.style.transition = `width ${duration}ms linear`;
+            progressFill.style.width = '100%';
+        }
 
         const dismissHandler = () => {
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            if (progressFill) progressFill.style.width = '0%';
+            if (dismissed) return;
+            dismissed = true;
+            if (timerId) clearTimeout(timerId);
+            if (progressFill) {
+                progressFill.style.transition = 'none';
+                progressFill.style.width = '0%';
+            }
             screen.classList.remove('active');
             screen.removeEventListener('click', dismissHandler);
             if (onComplete) onComplete();
         };
 
-        const animateProgress = (now) => {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            if (progressFill) progressFill.style.width = `${progress * 100}%`;
+        // Auto-dismiss after duration
+        timerId = setTimeout(dismissHandler, duration);
 
-            if (progress >= 1) {
-                if (screen.classList.contains('active')) dismissHandler();
-                return;
-            }
-            animFrameId = requestAnimationFrame(animateProgress);
-        };
-        animFrameId = requestAnimationFrame(animateProgress);
-
+        // Allow tap/click to skip
         screen.addEventListener('click', dismissHandler);
-    }
-
-    /**
-     * Show chapter intro screen
-     * @param {Object} chapter - Chapter data
-     * @param {Function} onComplete - Callback when intro is dismissed
-     */
-    showChapterIntro(chapter, onComplete) {
-        const introScreen = document.getElementById('chapterIntroScreen');
-        if (!introScreen) {
-            if (onComplete) onComplete();
-            return;
-        }
-
-        // Update content
-        const titleEl = introScreen.querySelector('.chapter-title');
-        const numberEl = introScreen.querySelector('.chapter-number');
-        const introEl = introScreen.querySelector('.chapter-intro-text');
-        const goalEl = introScreen.querySelector('.chapter-goal');
-        const iconEl = introScreen.querySelector('.chapter-icon');
-
-        if (titleEl) titleEl.textContent = chapter.title;
-        if (numberEl) numberEl.textContent = `Chapter ${chapter.chapter}`;
-        if (introEl) introEl.textContent = chapter.intro;
-        if (goalEl) goalEl.textContent = chapter.goal;
-        if (iconEl) iconEl.textContent = chapter.icon;
-
-        // Returning players get shorter duration (they've seen the story)
-        const duration = this.isReturningPlayer() ? 4000 : 7000;
-        this._animateScreen(introScreen, duration, onComplete);
-    }
-
-    /**
-     * Show chapter complete celebration
-     * @param {Object} chapter - Chapter data
-     * @param {Function} onComplete - Callback when celebration is dismissed
-     */
-    showChapterComplete(chapter, onComplete) {
-        const completeScreen = document.getElementById('chapterCompleteScreen');
-        if (!completeScreen) {
-            if (onComplete) onComplete();
-            return;
-        }
-
-        // Update content
-        const titleEl = completeScreen.querySelector('.complete-title');
-        const rewardEl = completeScreen.querySelector('.chapter-reward');
-        const iconEl = completeScreen.querySelector('.complete-icon');
-
-        if (titleEl) titleEl.textContent = `${chapter.title} Complete!`;
-        if (rewardEl) rewardEl.textContent = chapter.reward;
-        if (iconEl) iconEl.textContent = chapter.icon;
-
-        // Update plants grown stat
-        const plantsEl = completeScreen.querySelector('#chapterPlantsGrown');
-        if (plantsEl) plantsEl.textContent = this.totalPlantsGrown;
-
-        // Show unlock message if applicable
-        const unlockEl = completeScreen.querySelector('.unlock-message');
-        if (unlockEl) {
-            if (chapter.backgroundUnlock) {
-                unlockEl.textContent = `New background unlocked: ${chapter.backgroundUnlock}!`;
-                unlockEl.style.display = 'block';
-            } else {
-                unlockEl.style.display = 'none';
-            }
-        }
-
-        // Play celebration sound
-        if (typeof audioManager !== 'undefined') {
-            audioManager.play('windChimes');
-        }
-
-        // Returning players get shorter duration
-        const duration = this.isReturningPlayer() ? 5000 : 8000;
-        this._animateScreen(completeScreen, duration, onComplete);
     }
 
     /**

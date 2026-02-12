@@ -623,7 +623,7 @@ class DraggableSeed {
         this.homeX = x;
         this.homeY = y;
         this.plantType = plantType;
-        this.plant = PLANT_TYPES[plantType];
+        this.plantInfo = PLANT_TYPES[plantType];
         this.canvas = canvas;
 
         this.size = 30;
@@ -712,12 +712,12 @@ class DraggableSeed {
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        drawUnmirroredText(ctx, this.plant.icon, this.x, this.y);
+        drawUnmirroredText(ctx, this.plantInfo.icon, this.x, this.y);
 
         // Label
         ctx.font = 'bold 10px Arial';
         ctx.fillStyle = '#5D4037';
-        drawUnmirroredText(ctx, this.plant.name, this.x, this.y + this.size);
+        drawUnmirroredText(ctx, this.plantInfo.name, this.x, this.y + this.size);
 
         ctx.restore();
     }
@@ -1773,6 +1773,12 @@ class GardenBed {
     constructor(canvas) {
         this.canvas = canvas;
 
+        // Active flag — prevents setTimeout callbacks after round ends
+        this.active = false;
+
+        // Cached deltaTime for use in collision handlers (which don't receive deltaTime)
+        this.lastDeltaTime = 0.016;
+
         // Multi-player configuration
         this.playerCount = 1;
         this.gameMode = 'coop'; // 'coop' or 'competitive'
@@ -1863,6 +1869,7 @@ class GardenBed {
      * Configure garden for multi-player
      */
     configure({ playerCount, gameMode, dividerX }) {
+        this.active = true;
         this.playerCount = playerCount || 1;
         this.gameMode = gameMode || 'coop';
         this.dividerX = dividerX || null;
@@ -2214,6 +2221,8 @@ class GardenBed {
      * Update all garden elements
      */
     update(deltaTime) {
+        this.lastDeltaTime = deltaTime;
+
         // Timer pause logic
         if (this.timerPaused) {
             this.timerPauseDuration -= deltaTime;
@@ -2519,8 +2528,8 @@ class GardenBed {
                         this.plantNeedsMap.set('shared', this.plantNeeds);
                     }
 
-                    // Spawn new seed after delay
-                    setTimeout(() => this.spawnNewSeed(zoneKey), 1000);
+                    // Spawn new seed after delay (guarded)
+                    setTimeout(() => { if (this.active) this.spawnNewSeed(zoneKey); }, 1000);
                 }
             } else if (heldItem === wateringCan && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 // Water the plant — set tilt state
@@ -2531,7 +2540,7 @@ class GardenBed {
                     ? (this.waterInteractionTimeMap.get(zoneKey) || 0)
                     : this.waterInteractionTime;
 
-                const newWaterTime = waterTime + 0.016;
+                const newWaterTime = waterTime + this.lastDeltaTime;
 
                 // Update pour progress on both can and pot
                 const progress = Math.min(1, newWaterTime / 0.3);
@@ -2567,7 +2576,7 @@ class GardenBed {
                     ? (this.foodInteractionTimeMap.get(zoneKey) || 0)
                     : this.foodInteractionTime;
 
-                const newFoodTime = foodTime + 0.016;
+                const newFoodTime = foodTime + this.lastDeltaTime;
 
                 if (newFoodTime > 0.5) {
                     plantNeeds.addFood();
@@ -2634,7 +2643,7 @@ class GardenBed {
                     ? (this.sunInteractionTimeMap.get(zoneKey) || 0)
                     : this.sunInteractionTime;
 
-                const newSunTime = sunTime + 0.016;
+                const newSunTime = sunTime + this.lastDeltaTime;
 
                 if (newSunTime > 0.2) {
                     plantNeeds.addSun();
@@ -2663,8 +2672,8 @@ class GardenBed {
                         audioManager.play('harvest');
                     }
 
-                    // Spawn new seed
-                    setTimeout(() => this.spawnNewSeed(zoneKey), 500);
+                    // Spawn new seed (guarded)
+                    setTimeout(() => { if (this.active) this.spawnNewSeed(zoneKey); }, 500);
                 }
             }
         }
@@ -2722,7 +2731,7 @@ class GardenBed {
         // Sun interaction
         const sunArea = this.sunAreasMap.get('shared') || this.sunArea;
         if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
-            this.sunInteractionTime += 0.016;
+            this.sunInteractionTime += this.lastDeltaTime;
             if (this.sunInteractionTime > 0.2) {
                 const plantNeeds = this.plantNeedsMap.get('shared') || this.plantNeeds;
                 plantNeeds.addSun();
@@ -2751,7 +2760,7 @@ class GardenBed {
                 if (typeof audioManager !== 'undefined') {
                     audioManager.play('harvest');
                 }
-                setTimeout(() => this.spawnNewSeed('shared'), 500);
+                setTimeout(() => { if (this.active) this.spawnNewSeed('shared'); }, 500);
                 return harvestedPlant;
             }
         }
@@ -2910,6 +2919,7 @@ class GardenBed {
      * Clear the garden (for reset)
      */
     clear() {
+        this.active = false;
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height * 0.65;
 

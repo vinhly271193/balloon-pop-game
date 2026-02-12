@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-02-12 — Fix seed planting freeze (all modes) + settings gear overlap in 2P
+- **Seed planting freeze fix**: `DraggableSeed` had a naming collision — the constructor set `this.plant = PLANT_TYPES[plantType]` which shadowed the prototype method `plant()`. When `seed.plant()` was called after dropping a seed into a pot, JavaScript tried to invoke the data object as a function, throwing `TypeError`. This crashed the hand tracking callback, freezing the game. Renamed the property to `this.plantInfo` to resolve the collision.
+- **Settings gear overlap fix**: In competitive (2P) mode, the Player 1 score panel in the top-right corner overlapped with the settings gear button. Added right margin to the P1 score panel to clear the gear.
+- Files changed: `js/garden.js`, `css/styles.css`
+
 ## 2026-02-12 — Fix gameplay freeze in solo/co-op mode + center Plant Needs panel
 - **Gameplay freeze fix**: Solo/co-op mode was only passing the palm center point (landmark 9) to collision detection, but held-item movement requires the index finger point (landmark 8). All collision points per hand are now processed, matching how competitive mode already worked. Items can now be picked up, moved, and dropped on pots correctly.
 - **Plant Needs panel centered**: Moved the Plant Needs panel from a fixed y=160 position to vertically centered on screen, making it easier to read during gameplay.

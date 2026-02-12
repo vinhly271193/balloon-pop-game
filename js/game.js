@@ -11,11 +11,9 @@ const GameState = {
     MODE_SELECT: 'modeSelect',
     CALIBRATION: 'calibration',
     CALIBRATION_P2: 'calibrationP2',
-    CHAPTER_INTRO: 'chapterIntro',
     CHALLENGE_INTRO: 'challengeIntro',
     PLAYING: 'playing',
     ROUND_END: 'roundEnd',
-    CHAPTER_COMPLETE: 'chapterComplete',
     PAUSED: 'paused'
 };
 
@@ -263,11 +261,6 @@ class Game {
                 this.updateCalibrationProgress(0, 'calibrationP2ProgressFill');
                 break;
 
-            case GameState.CHAPTER_INTRO:
-                uiManager.showHUD(false);
-                this.showChapterIntro();
-                break;
-
             case GameState.CHALLENGE_INTRO:
                 uiManager.showHUD(false);
                 this.showChallengeIntro();
@@ -287,11 +280,6 @@ class Game {
                 this.stopRound();
                 uiManager.showHUD(false);
                 this.showRoundEnd();
-                break;
-
-            case GameState.CHAPTER_COMPLETE:
-                uiManager.showHUD(false);
-                this.showChapterComplete();
                 break;
 
             case GameState.PAUSED:
@@ -385,9 +373,7 @@ class Game {
                                 if (this.playerCount === 2) {
                                     this.setState(GameState.CALIBRATION_P2);
                                 } else {
-                                    const currentLevel = challengeManager.currentLevel;
-                                    const newChapter = storyManager.isNewChapterStart(currentLevel);
-                                    this.setState(newChapter ? GameState.CHAPTER_INTRO : GameState.CHALLENGE_INTRO);
+                                    this.setState(GameState.CHALLENGE_INTRO);
                                 }
                             }
                         }, 300);
@@ -419,9 +405,7 @@ class Game {
                         this.calibrationWaveDetected = true;
                         setTimeout(() => {
                             if (this.state === GameState.CALIBRATION_P2) {
-                                const currentLevel = challengeManager.currentLevel;
-                                const newChapter = storyManager.isNewChapterStart(currentLevel);
-                                this.setState(newChapter ? GameState.CHAPTER_INTRO : GameState.CHALLENGE_INTRO);
+                                this.setState(GameState.CHALLENGE_INTRO);
                             }
                         }, 300);
                     }
@@ -438,10 +422,14 @@ class Game {
             const harvestedPlants = this.gardenBed.checkCollisions(data.positions);
 
             // Record harvests to challenge
-            harvestedPlants.forEach(harvestData => {
+            let roundEnded = false;
+            for (const harvestData of harvestedPlants) {
                 const { plantKey, playerId, isTargetPlant } = harvestData;
 
-                if (this.currentChallenge) {
+                // DDA: Record interaction on any collision
+                ddaEngine.recordInteraction(playerId);
+
+                if (this.currentChallenge && !roundEnded) {
                     this.currentChallenge.recordHarvest(plantKey);
                     storyManager.recordPlantGrown();
 
@@ -476,15 +464,17 @@ class Game {
                     // Audio: Play for specific player
                     audioManager.playForPlayer('harvest', playerId);
 
-                    // Check if challenge complete
+                    // Check if challenge complete — break to avoid processing more harvests
                     if (this.currentChallenge.isComplete) {
-                        this.setState(GameState.ROUND_END);
+                        roundEnded = true;
                     }
                 }
+            }
 
-                // DDA: Record interaction on any collision
-                ddaEngine.recordInteraction(playerId);
-            });
+            // Transition to ROUND_END after the loop to avoid mid-iteration state change
+            if (roundEnded) {
+                this.setState(GameState.ROUND_END);
+            }
         }
     }
 
@@ -497,28 +487,36 @@ class Game {
     }
 
     /**
-     * Show chapter intro screen
-     */
-    showChapterIntro() {
-        const chapter = storyManager.getCurrentChapter();
-
-        storyManager.showChapterIntro(chapter, () => {
-            this.setState(GameState.CHALLENGE_INTRO);
-        });
-    }
-
-    /**
      * Show challenge intro with countdown
      */
     showChallengeIntro() {
-        // Get or create challenge
-        this.currentChallenge = challengeManager.startChallenge();
+        // Guard against double-entry (e.g. rapid state transitions)
+        if (this.currentChallenge && !this.currentChallenge.isComplete) {
+            // Challenge already in progress — skip re-creation
+        } else {
+            this.currentChallenge = challengeManager.startChallenge();
+        }
 
         // Set garden bed difficulty
         this.gardenBed.setDifficulty(this.currentChallenge.level);
 
         // Calculate spawn weights (favor target plants)
         this.calculateSpawnWeights();
+
+        // Populate chapter header if this is the first level of a new chapter
+        const chapterHeader = document.getElementById('chapterHeader');
+        if (chapterHeader) {
+            const currentLevel = challengeManager.currentLevel;
+            const newChapter = storyManager.isNewChapterStart(currentLevel);
+            if (newChapter) {
+                chapterHeader.style.display = 'block';
+                chapterHeader.querySelector('.chapter-header-icon').textContent = newChapter.icon;
+                chapterHeader.querySelector('.chapter-header-number').textContent = `Chapter ${newChapter.chapter}`;
+                chapterHeader.querySelector('.chapter-header-title').textContent = newChapter.title;
+            } else {
+                chapterHeader.style.display = 'none';
+            }
+        }
 
         // Show intro screen
         uiManager.showChallengeIntro(this.currentChallenge, () => {
@@ -694,20 +692,33 @@ class Game {
                     roundResult.style.color = '#FFD700';
                 }
             }
-        }
-    }
 
-    /**
-     * Show chapter complete celebration
-     */
-    showChapterComplete() {
-        if (this.pendingChapterComplete) {
-            storyManager.completeChapter(this.pendingChapterComplete.chapter);
+            // Populate chapter complete section if a chapter was finished
+            const chapterCompleteSection = document.getElementById('chapterCompleteSection');
+            if (chapterCompleteSection) {
+                if (this.pendingChapterComplete) {
+                    const chapter = this.pendingChapterComplete;
+                    storyManager.completeChapter(chapter.chapter);
 
-            storyManager.showChapterComplete(this.pendingChapterComplete, () => {
-                this.pendingChapterComplete = null;
-                this.setState(GameState.CHALLENGE_INTRO);
-            });
+                    chapterCompleteSection.style.display = 'block';
+                    chapterCompleteSection.querySelector('.chapter-complete-icon').textContent = chapter.icon;
+                    chapterCompleteSection.querySelector('.chapter-complete-title').textContent = `${chapter.title} Complete!`;
+                    chapterCompleteSection.querySelector('.chapter-complete-reward').textContent = chapter.reward;
+
+                    const unlockEl = chapterCompleteSection.querySelector('.chapter-complete-unlock');
+                    if (chapter.backgroundUnlock) {
+                        unlockEl.textContent = `New background unlocked: ${chapter.backgroundUnlock}!`;
+                        unlockEl.style.display = 'block';
+                    } else {
+                        unlockEl.style.display = 'none';
+                    }
+
+                    // Play celebration sound
+                    audioManager.play('windChimes');
+                } else {
+                    chapterCompleteSection.style.display = 'none';
+                }
+            }
         }
     }
 
@@ -715,22 +726,9 @@ class Game {
      * Handle next level button
      */
     onNextLevel() {
-        // Check if we have a pending chapter complete
-        if (this.pendingChapterComplete) {
-            this.setState(GameState.CHAPTER_COMPLETE);
-        } else {
-            challengeManager.nextLevel();
-
-            // Check if next level starts a new chapter
-            const currentLevel = challengeManager.currentLevel;
-            const newChapter = storyManager.isNewChapterStart(currentLevel);
-
-            if (newChapter) {
-                this.setState(GameState.CHAPTER_INTRO);
-            } else {
-                this.setState(GameState.CHALLENGE_INTRO);
-            }
-        }
+        this.pendingChapterComplete = null;
+        challengeManager.nextLevel();
+        this.setState(GameState.CHALLENGE_INTRO);
     }
 
     /**
@@ -739,14 +737,7 @@ class Game {
     onPlayAgain() {
         challengeManager.restart();
         this.pendingChapterComplete = null;
-
-        // Check if we should show chapter intro for level 1
-        const newChapter = storyManager.isNewChapterStart(1);
-        if (newChapter) {
-            this.setState(GameState.CHAPTER_INTRO);
-        } else {
-            this.setState(GameState.CHALLENGE_INTRO);
-        }
+        this.setState(GameState.CHALLENGE_INTRO);
     }
 
     /**

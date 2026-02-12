@@ -9,9 +9,7 @@ class UIManager {
         this.screens = {
             welcome: document.getElementById('welcomeScreen'),
             calibration: document.getElementById('calibrationScreen'),
-            chapterIntro: document.getElementById('chapterIntroScreen'),
             challengeIntro: document.getElementById('challengeIntroScreen'),
-            chapterComplete: document.getElementById('chapterCompleteScreen'),
             roundEnd: document.getElementById('roundEndScreen'),
             playerSelect: document.getElementById('playerSelectScreen'),
             modeSelect: document.getElementById('modeSelectScreen'),
