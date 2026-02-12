@@ -73,6 +73,17 @@ class PlantPot {
 
         // Hit detection
         this.hitRadius = 80;
+
+        // Water level visual
+        this.waterLevel = 0;
+        this.waterLevelTarget = 0;
+        this.overflowParticles = [];
+        this.overflowTimer = 0;
+        this.wavePhase = 0;
+
+        // Watering progress (0-1, set by GardenManager when can is held over pot)
+        this.waterPourProgress = 0;
+        this.isBeingWatered = false;
     }
 
     /**
@@ -157,6 +168,41 @@ class PlantPot {
     }
 
     /**
+     * Update water level and overflow particles
+     */
+    update(deltaTime) {
+        // Lerp water level toward target
+        this.waterLevel += (this.waterLevelTarget - this.waterLevel) * Math.min(1, 4 * deltaTime);
+        this.wavePhase += deltaTime * 3;
+
+        // Spawn overflow particles when full
+        if (this.waterLevel > 0.95) {
+            this.overflowTimer -= deltaTime;
+            if (this.overflowTimer <= 0) {
+                this.overflowTimer = 0.15;
+                const side = Math.random() > 0.5 ? 1 : -1;
+                this.overflowParticles.push({
+                    x: this.x + side * (this.potWidth / 2 - 10),
+                    y: this.y - this.potHeight,
+                    vx: side * (1 + Math.random() * 2),
+                    vy: -(2 + Math.random() * 3),
+                    alpha: 0.8,
+                    size: 3 + Math.random() * 3
+                });
+            }
+        }
+
+        // Update overflow particles
+        this.overflowParticles.forEach(p => {
+            p.vy += 6 * deltaTime; // gravity
+            p.x += p.vx * deltaTime * 60;
+            p.y += p.vy * deltaTime * 60;
+            p.alpha -= deltaTime * 1.5;
+        });
+        this.overflowParticles = this.overflowParticles.filter(p => p.alpha > 0);
+    }
+
+    /**
      * Draw the plant pot and any plant inside
      */
     draw(ctx) {
@@ -165,9 +211,32 @@ class PlantPot {
         // Draw pot
         this.drawPot(ctx);
 
+        // Draw water fill inside pot
+        if (this.waterLevel > 0.01 && this.growthStage !== GrowthStage.EMPTY) {
+            this.drawWaterFill(ctx);
+        }
+
         // Draw plant based on growth stage
         if (this.growthStage !== GrowthStage.EMPTY) {
             this.drawPlant(ctx);
+        }
+
+        // Draw overflow particles
+        this.overflowParticles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100, 180, 255, ${p.alpha})`;
+            ctx.fill();
+        });
+
+        // Draw growth stage progress ring
+        if (this.growthStage !== GrowthStage.EMPTY) {
+            this.drawGrowthRing(ctx);
+        }
+
+        // Draw watering progress ring when can is held over this pot
+        if (this.isBeingWatered && this.waterPourProgress > 0) {
+            this.drawWaterProgressRing(ctx);
         }
 
         ctx.restore();
@@ -218,6 +287,152 @@ class PlantPot {
         ctx.ellipse(x, y - this.potHeight + 5, this.potWidth / 2 - 5, 15, 0, 0, Math.PI * 2);
         ctx.fillStyle = '#5D4037';
         ctx.fill();
+    }
+
+    /**
+     * Draw water level inside the pot
+     */
+    drawWaterFill(ctx) {
+        const x = this.x;
+        const y = this.y;
+        const fillHeight = this.waterLevel * this.potHeight * 0.6;
+        const soilY = y - this.potHeight + 5;
+
+        // Clip to pot interior
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x - this.potWidth / 2 + 3, y - this.potHeight);
+        ctx.lineTo(x - this.potWidth / 2 + 18, y);
+        ctx.lineTo(x + this.potWidth / 2 - 18, y);
+        ctx.lineTo(x + this.potWidth / 2 - 3, y - this.potHeight);
+        ctx.closePath();
+        ctx.clip();
+
+        // Draw water with wavy surface
+        ctx.beginPath();
+        const waterTop = soilY + 15 - fillHeight;
+        const waveSegments = 8;
+        const waveWidth = this.potWidth - 10;
+        for (let i = 0; i <= waveSegments; i++) {
+            const wx = (x - waveWidth / 2) + (waveWidth / waveSegments) * i;
+            const wy = waterTop + Math.sin(this.wavePhase + i * 0.8) * 2;
+            if (i === 0) ctx.moveTo(wx, wy);
+            else ctx.lineTo(wx, wy);
+        }
+        ctx.lineTo(x + waveWidth / 2, y);
+        ctx.lineTo(x - waveWidth / 2, y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(100, 180, 255, 0.35)';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    /**
+     * Draw growth stage progress ring below pot
+     */
+    drawGrowthRing(ctx) {
+        const cx = this.x;
+        const cy = this.y + 20;
+        const radius = 50;
+        const stages = [
+            GrowthStage.SEED_PLANTED,
+            GrowthStage.SPROUTING,
+            GrowthStage.GROWING,
+            GrowthStage.MATURE,
+            GrowthStage.HARVESTABLE
+        ];
+        const icons = ['🌱', '🌿', '🌳', '🌸', '✨'];
+        const segmentCount = stages.length;
+        const totalArc = Math.PI; // semicircle below pot
+        const segmentArc = totalArc / segmentCount;
+        const startAngle = 0; // top of semicircle (pointing down)
+
+        const currentIdx = stages.indexOf(this.growthStage);
+
+        ctx.save();
+        for (let i = 0; i < segmentCount; i++) {
+            const aStart = startAngle + i * segmentArc;
+            const aEnd = startAngle + (i + 1) * segmentArc;
+            const gap = 0.04;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, aStart + gap, aEnd - gap);
+            ctx.lineWidth = 6;
+
+            if (i < currentIdx) {
+                // Completed stage
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.8)';
+            } else if (i === currentIdx) {
+                // Current stage - partially filled
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.3)';
+                ctx.stroke();
+
+                // Draw filled portion
+                const fillEnd = aStart + gap + (aEnd - aStart - 2 * gap) * this.growthProgress;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, aStart + gap, fillEnd);
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.8)';
+            } else {
+                // Future stage
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            }
+            ctx.stroke();
+
+            // Stage icon at segment boundary
+            const iconAngle = aStart + segmentArc / 2;
+            const iconX = cx + Math.cos(iconAngle) * (radius + 14);
+            const iconY = cy + Math.sin(iconAngle) * (radius + 14);
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.globalAlpha = i <= currentIdx ? 1 : 0.4;
+            ctx.fillText(icons[i], iconX, iconY);
+            ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+    }
+
+    /**
+     * Draw water progress ring around pot when being watered
+     */
+    drawWaterProgressRing(ctx) {
+        const cx = this.x;
+        const cy = this.y - this.potHeight / 2;
+        const radius = this.potWidth / 2 + 25;
+        const progress = this.waterPourProgress;
+
+        ctx.save();
+
+        // Background track
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, -Math.PI / 2, Math.PI * 1.5);
+        ctx.strokeStyle = 'rgba(100, 180, 255, 0.15)';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Progress arc
+        const endAngle = -Math.PI / 2 + Math.PI * 2 * progress;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, -Math.PI / 2, endAngle);
+        ctx.strokeStyle = 'rgba(100, 180, 255, 0.85)';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = 'rgba(100, 180, 255, 0.6)';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Water drop icon at the leading edge of the progress
+        const iconAngle = endAngle;
+        const iconX = cx + Math.cos(iconAngle) * radius;
+        const iconY = cy + Math.sin(iconAngle) * radius;
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💧', iconX, iconY);
+
+        ctx.restore();
     }
 
     /**
@@ -513,6 +728,16 @@ class WateringCan {
         this.isBeingHeld = false;
         this.isWatering = false;
         this.waterDrops = [];
+
+        // Tilt animation
+        this.tiltAngle = 0;
+        this.tiltSpeed = 4;
+        this.isOverPot = false;
+        this.pourParticles = [];
+
+        // Dwell progress ring
+        this.pourProgress = 0; // 0-1
+        this.targetPotRef = null; // Reference to the pot being watered
     }
 
     /**
@@ -538,6 +763,9 @@ class WateringCan {
     drop() {
         this.isBeingHeld = false;
         this.isWatering = false;
+        this.isOverPot = false;
+        this.pourProgress = 0;
+        this.targetPotRef = null;
     }
 
     returnHome() {
@@ -545,6 +773,9 @@ class WateringCan {
         this.y = this.homeY;
         this.isBeingHeld = false;
         this.isWatering = false;
+        this.isOverPot = false;
+        this.pourProgress = 0;
+        this.targetPotRef = null;
     }
 
     /**
@@ -564,9 +795,47 @@ class WateringCan {
     }
 
     /**
-     * Update water drops
+     * Update tilt, water drops, and pour particles
      */
     update(deltaTime) {
+        // Lerp tilt angle toward target — more dramatic tilt for clear pouring visual
+        const targetTilt = this.isOverPot ? -0.85 : 0;
+        this.tiltAngle += (targetTilt - this.tiltAngle) * Math.min(1, this.tiltSpeed * deltaTime);
+
+        // Spawn pour particles when tilted enough and over pot
+        if (this.isOverPot && this.tiltAngle < -0.3) {
+            // Calculate rotated spout tip position
+            const spoutLocalX = 55;
+            const spoutLocalY = -17;
+            const cos = Math.cos(this.tiltAngle);
+            const sin = Math.sin(this.tiltAngle);
+            const spoutWorldX = this.x + spoutLocalX * cos - spoutLocalY * sin;
+            const spoutWorldY = this.y + spoutLocalX * sin + spoutLocalY * cos;
+
+            for (let i = 0; i < 3; i++) {
+                this.pourParticles.push({
+                    x: spoutWorldX + (Math.random() - 0.5) * 6,
+                    y: spoutWorldY,
+                    vx: (Math.random() - 0.5) * 0.8,
+                    vy: 1 + Math.random() * 1.5,
+                    alpha: 0.8 + Math.random() * 0.2,
+                    size: 2 + Math.random() * 3,
+                    life: 0
+                });
+            }
+        }
+
+        // Update pour particles
+        this.pourParticles.forEach(p => {
+            p.vy += 8 * deltaTime; // gravity
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life += deltaTime;
+            p.alpha = Math.max(0, p.alpha - deltaTime * 1.2);
+        });
+        this.pourParticles = this.pourParticles.filter(p => p.alpha > 0 && p.life < 0.8);
+
+        // Update old water drops
         this.waterDrops.forEach(drop => {
             drop.y += drop.vy;
             drop.alpha -= 0.02;
@@ -589,34 +858,50 @@ class WateringCan {
             ctx.fill();
         }
 
-        const x = this.x;
-        const y = this.y;
+        // Dwell progress ring
+        if (this.pourProgress > 0) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 45, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * this.pourProgress);
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = 'rgba(100, 200, 255, 0.6)';
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
 
-        // Can body
-        ctx.beginPath();
-        ctx.ellipse(x, y, 35, 25, 0, 0, Math.PI * 2);
+        // Draw can body with rotation
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.tiltAngle);
+
         const canColor = this.isGolden ? '#FFD700' : '#4A90D9';
+        const strokeColor = this.isGolden ? '#DAA520' : '#2E5A87';
+
+        // Can body (at origin)
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 35, 25, 0, 0, Math.PI * 2);
         ctx.fillStyle = canColor;
         ctx.fill();
-        const strokeColor = this.isGolden ? '#DAA520' : '#2E5A87';
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Spout
+        // Spout (relative to origin)
         ctx.beginPath();
-        ctx.moveTo(x + 25, y - 5);
-        ctx.lineTo(x + 50, y - 20);
-        ctx.lineTo(x + 55, y - 15);
-        ctx.lineTo(x + 30, y + 5);
+        ctx.moveTo(25, -5);
+        ctx.lineTo(50, -20);
+        ctx.lineTo(55, -15);
+        ctx.lineTo(30, 5);
         ctx.closePath();
         ctx.fillStyle = canColor;
         ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         // Handle
         ctx.beginPath();
-        ctx.arc(x - 10, y - 30, 20, 0.5, Math.PI - 0.5);
+        ctx.arc(-10, -30, 20, 0.5, Math.PI - 0.5);
         ctx.strokeStyle = strokeColor;
         ctx.lineWidth = 8;
         ctx.stroke();
@@ -626,8 +911,8 @@ class WateringCan {
             const sparkleTime = Date.now() / 200;
             for (let i = 0; i < 3; i++) {
                 const angle = (sparkleTime + i * Math.PI * 2 / 3) % (Math.PI * 2);
-                const sparkleX = x + Math.cos(angle) * 40;
-                const sparkleY = y + Math.sin(angle) * 30;
+                const sparkleX = Math.cos(angle) * 40;
+                const sparkleY = Math.sin(angle) * 30;
                 ctx.beginPath();
                 ctx.arc(sparkleX, sparkleY, 3, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(255, 255, 200, 0.8)';
@@ -635,14 +920,24 @@ class WateringCan {
             }
         }
 
-        // Water drops
+        ctx.restore();
+
+        // Draw pour particles in world space (outside rotation)
+        ctx.save();
+        this.pourParticles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(100, 180, 255, ${p.alpha})`;
+            ctx.fill();
+        });
+
+        // Old water drops (world space)
         this.waterDrops.forEach(drop => {
             ctx.beginPath();
             ctx.ellipse(drop.x, drop.y, 4, 6, 0, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(100, 180, 255, ${drop.alpha})`;
             ctx.fill();
         });
-
         ctx.restore();
     }
 }
@@ -657,10 +952,21 @@ class PlantNeeds {
         this.sun = 0.8;
         this.food = 0.6;
 
+        // Display values for smooth lerp
+        this.displayWater = 0.7;
+        this.displaySun = 0.8;
+        this.displayFood = 0.6;
+
         // Depletion rates per second
         this.waterDepleteRate = 0.03;
         this.sunDepleteRate = 0.02;
         this.foodDepleteRate = 0.025;
+
+        // Pulse phase for critical needs
+        this.pulsePhase = 0;
+
+        // Feedback effects (floating +💧 etc.)
+        this.feedbackEffects = [];
     }
 
     /**
@@ -670,6 +976,23 @@ class PlantNeeds {
         this.water = Math.max(0, this.water - this.waterDepleteRate * deltaTime);
         this.sun = Math.max(0, this.sun - this.sunDepleteRate * deltaTime);
         this.food = Math.max(0, this.food - this.foodDepleteRate * deltaTime);
+
+        // Smooth lerp display values
+        const lerpSpeed = 5;
+        this.displayWater += (this.water - this.displayWater) * Math.min(1, lerpSpeed * deltaTime);
+        this.displaySun += (this.sun - this.displaySun) * Math.min(1, lerpSpeed * deltaTime);
+        this.displayFood += (this.food - this.displayFood) * Math.min(1, lerpSpeed * deltaTime);
+
+        // Pulse phase for critical needs
+        this.pulsePhase += deltaTime * 4;
+
+        // Update feedback effects
+        this.feedbackEffects.forEach(e => {
+            e.y -= 30 * deltaTime;
+            e.alpha -= deltaTime * 1.5;
+            e.life += deltaTime;
+        });
+        this.feedbackEffects = this.feedbackEffects.filter(e => e.alpha > 0);
     }
 
     /**
@@ -677,6 +1000,7 @@ class PlantNeeds {
      */
     addWater(amount = 0.15) {
         this.water = Math.min(1, this.water + amount);
+        this.feedbackEffects.push({ icon: '+💧', x: 0, y: 0, alpha: 1, life: 0, type: 'water' });
     }
 
     /**
@@ -684,6 +1008,7 @@ class PlantNeeds {
      */
     addSun(amount = 0.1) {
         this.sun = Math.min(1, this.sun + amount);
+        this.feedbackEffects.push({ icon: '+☀️', x: 0, y: 0, alpha: 1, life: 0, type: 'sun' });
     }
 
     /**
@@ -691,6 +1016,7 @@ class PlantNeeds {
      */
     addFood(amount = 0.12) {
         this.food = Math.min(1, this.food + amount);
+        this.feedbackEffects.push({ icon: '+🌱', x: 0, y: 0, alpha: 1, life: 0, type: 'food' });
     }
 
     /**
@@ -722,15 +1048,16 @@ class PlantNeeds {
      * Draw needs bars
      */
     draw(ctx, x, y) {
-        const barWidth = 150;
-        const barHeight = 25;
-        const spacing = 40;
+        const barWidth = 180;
+        const barHeight = 30;
+        const spacing = 45;
 
         ctx.save();
 
         // Background panel
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.roundRect(x - 20, y - 20, barWidth + 80, spacing * 3 + 30, 15);
+        ctx.beginPath();
+        ctx.roundRect(x - 20, y - 20, barWidth + 80, spacing * 3 + 35, 15);
         ctx.fill();
 
         // Title
@@ -740,43 +1067,71 @@ class PlantNeeds {
         ctx.fillText('Plant Needs', x, y);
 
         // Water bar
-        this.drawBar(ctx, x, y + spacing, barWidth, barHeight, this.water, '💧', 'Water');
+        this.drawBar(ctx, x, y + spacing, barWidth, barHeight, this.displayWater, this.water, '💧', 'Water');
 
         // Sun bar
-        this.drawBar(ctx, x, y + spacing * 2, barWidth, barHeight, this.sun, '☀️', 'Sun');
+        this.drawBar(ctx, x, y + spacing * 2, barWidth, barHeight, this.displaySun, this.sun, '☀️', 'Sun');
 
         // Food bar
-        this.drawBar(ctx, x, y + spacing * 3, barWidth, barHeight, this.food, '🌱', 'Food');
+        this.drawBar(ctx, x, y + spacing * 3, barWidth, barHeight, this.displayFood, this.food, '🌱', 'Food');
+
+        // Feedback effects
+        this.feedbackEffects.forEach(e => {
+            ctx.save();
+            ctx.globalAlpha = e.alpha;
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#fff';
+            // Position relative to the bar it belongs to
+            let effectY = y;
+            if (e.type === 'water') effectY = y + spacing;
+            else if (e.type === 'sun') effectY = y + spacing * 2;
+            else if (e.type === 'food') effectY = y + spacing * 3;
+            ctx.fillText(e.icon, x + barWidth + 50, effectY + e.y);
+            ctx.restore();
+        });
 
         ctx.restore();
     }
 
-    drawBar(ctx, x, y, width, height, level, icon, label) {
+    drawBar(ctx, x, y, width, height, displayLevel, actualLevel, icon, label) {
         // Icon
-        ctx.font = '20px Arial';
-        ctx.fillText(icon, x, y + height / 2 + 6);
+        ctx.font = '22px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(icon, x, y + height / 2 + 7);
 
-        // Bar background
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.roundRect(x + 30, y, width, height, 5);
+        // Bar background — pulse red if critical
+        if (actualLevel < 0.3) {
+            const pulseAlpha = 0.2 + 0.15 * Math.sin(this.pulsePhase);
+            ctx.fillStyle = `rgba(239, 68, 68, ${pulseAlpha})`;
+        } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        }
+        ctx.beginPath();
+        ctx.roundRect(x + 35, y, width, height, 5);
         ctx.fill();
 
-        // Bar fill
-        ctx.fillStyle = this.getBarColor(level);
-        ctx.roundRect(x + 30, y, width * level, height, 5);
-        ctx.fill();
+        // Bar fill (smooth)
+        const fillWidth = Math.max(0, width * displayLevel);
+        if (fillWidth > 0) {
+            ctx.fillStyle = this.getBarColor(actualLevel);
+            ctx.beginPath();
+            ctx.roundRect(x + 35, y, fillWidth, height, 5);
+            ctx.fill();
+        }
 
         // Bar border
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 2;
-        ctx.roundRect(x + 30, y, width, height, 5);
+        ctx.beginPath();
+        ctx.roundRect(x + 35, y, width, height, 5);
         ctx.stroke();
 
         // Label
-        ctx.font = '12px Arial';
+        ctx.font = 'bold 13px Arial';
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        ctx.fillText(label, x + 30 + width / 2, y + height / 2 + 4);
+        ctx.fillText(label, x + 35 + width / 2, y + height / 2 + 5);
     }
 }
 
@@ -1061,6 +1416,219 @@ class MagicPumpkin {
 }
 
 /**
+ * Animated hint arrow for idle players
+ * Shows contextual guidance (e.g. seed→pot, water→plant)
+ */
+class HintArrow {
+    constructor() {
+        this.fromX = 0;
+        this.fromY = 0;
+        this.toX = 0;
+        this.toY = 0;
+        this.hintType = null;
+        this.alpha = 0;
+        this.pulsePhase = 0;
+        this.dashOffset = 0;
+        this.state = 'hidden'; // hidden, fading_in, visible, fading_out
+
+        this.fadeInDuration = 1.0;
+        this.fadeOutDuration = 0.5;
+        this.fadeProgress = 0;
+
+        // Colors by hint type
+        this.colors = {
+            seed_to_pot: '#F5DEB3',   // warm wheat
+            water_to_pot: '#87CEEB',  // light blue
+            sun_to_pot: '#FFD700',    // soft gold
+            food_to_pot: '#90EE90',   // light green
+            harvest: '#FFDAB9'        // soft peach
+        };
+
+        // Tooltip messages by hint type
+        this.tooltips = {
+            seed_to_pot: 'Grab the seed and place it in the pot!',
+            water_to_pot: 'Your plant is thirsty! Use the watering can!',
+            sun_to_pot: 'Your plant needs sunlight! Touch the sun!',
+            food_to_pot: 'Feed your plant! Grab the fertilizer!',
+            harvest: 'Your plant is ready! Touch it to harvest!'
+        };
+
+        // Tooltip bounce phase
+        this.tooltipBounce = 0;
+    }
+
+    show(fromX, fromY, toX, toY, hintType) {
+        this.fromX = fromX;
+        this.fromY = fromY;
+        this.toX = toX;
+        this.toY = toY;
+        this.hintType = hintType;
+
+        if (this.state === 'hidden') {
+            this.state = 'fading_in';
+            this.fadeProgress = 0;
+            this.alpha = 0;
+        } else if (this.state === 'fading_out') {
+            // Reverse fade-out into fade-in
+            this.state = 'fading_in';
+            this.fadeProgress = this.alpha / 1.0; // Continue from current alpha
+        }
+    }
+
+    hide() {
+        if (this.state === 'visible' || this.state === 'fading_in') {
+            this.state = 'fading_out';
+            this.fadeProgress = 0;
+        }
+    }
+
+    reset() {
+        this.state = 'hidden';
+        this.alpha = 0;
+        this.fadeProgress = 0;
+        this.hintType = null;
+    }
+
+    update(deltaTime) {
+        if (this.state === 'hidden') return;
+
+        // Advance pulse and dash animations
+        this.pulsePhase += deltaTime * 2.5;
+        this.dashOffset -= deltaTime * 40;
+
+        if (this.state === 'fading_in') {
+            this.fadeProgress += deltaTime / this.fadeInDuration;
+            if (this.fadeProgress >= 1) {
+                this.fadeProgress = 1;
+                this.state = 'visible';
+            }
+            this.alpha = this.fadeProgress;
+        } else if (this.state === 'fading_out') {
+            this.fadeProgress += deltaTime / this.fadeOutDuration;
+            if (this.fadeProgress >= 1) {
+                this.fadeProgress = 1;
+                this.state = 'hidden';
+                this.alpha = 0;
+                return;
+            }
+            this.alpha = 1 - this.fadeProgress;
+        }
+
+        // Sine-wave pulse on alpha (0.4 – 1.0)
+        if (this.state === 'visible') {
+            this.alpha = 0.7 + 0.3 * Math.sin(this.pulsePhase);
+        }
+
+        // Tooltip gentle bounce
+        this.tooltipBounce += deltaTime * 2;
+    }
+
+    draw(ctx) {
+        if (this.state === 'hidden' || this.alpha <= 0) return;
+
+        const color = this.colors[this.hintType] || '#FFFFFF';
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+
+        if (this.hintType === 'harvest') {
+            this._drawHarvestRing(ctx, color);
+        } else {
+            this._drawCurvedArrow(ctx, color);
+        }
+
+        ctx.restore();
+    }
+
+    _drawHarvestRing(ctx, color) {
+        const pulse = 1 + 0.15 * Math.sin(this.pulsePhase);
+        const radius = 50 * pulse;
+
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(this.toX, this.toY, radius + 5, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 20;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Inner ring
+        ctx.beginPath();
+        ctx.arc(this.toX, this.toY, radius, 0, Math.PI * 2);
+        ctx.setLineDash([10, 6]);
+        ctx.lineDashOffset = this.dashOffset;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    _drawCurvedArrow(ctx, color) {
+        // Compute control point for quadratic bezier (curve upward)
+        const midX = (this.fromX + this.toX) / 2;
+        const midY = (this.fromY + this.toY) / 2;
+        const dx = this.toX - this.fromX;
+        const dy = this.toY - this.fromY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Perpendicular offset for curve (30% of distance, biased upward)
+        const cpX = midX - dy * 0.3;
+        const cpY = midY + dx * 0.3 - dist * 0.15;
+
+        // Dashed curved line with glow
+        ctx.beginPath();
+        ctx.moveTo(this.fromX, this.fromY);
+        ctx.quadraticCurveTo(cpX, cpY, this.toX, this.toY);
+        ctx.setLineDash([12, 8]);
+        ctx.lineDashOffset = this.dashOffset;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.setLineDash([]);
+
+        // Pulsing circle at source
+        const sourcePulse = 1 + 0.2 * Math.sin(this.pulsePhase);
+        ctx.beginPath();
+        ctx.arc(this.fromX, this.fromY, 12 * sourcePulse, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = this.alpha * 0.4;
+        ctx.fill();
+        ctx.globalAlpha = this.alpha;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Arrowhead at target
+        // Get tangent direction at end of bezier: derivative at t=1
+        // For quadratic bezier: tangent = 2*(1-t)*(cp-from) + 2*t*(to-cp) at t=1 = 2*(to-cp)
+        const tangentX = this.toX - cpX;
+        const tangentY = this.toY - cpY;
+        const angle = Math.atan2(tangentY, tangentX);
+        const headLen = 14;
+
+        ctx.beginPath();
+        ctx.moveTo(this.toX, this.toY);
+        ctx.lineTo(
+            this.toX - headLen * Math.cos(angle - Math.PI / 6),
+            this.toY - headLen * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+            this.toX - headLen * Math.cos(angle + Math.PI / 6),
+            this.toY - headLen * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+/**
  * Confetti particle system
  */
 class ConfettiParticle {
@@ -1204,6 +1772,14 @@ class GardenBed {
         // Timer pause state
         this.timerPaused = false;
         this.timerPauseDuration = 0;
+
+        // Hint arrow system
+        this.hintArrows = new Map();
+        this.hintArrows.set('shared', new HintArrow());
+        this.hintArrows.set(1, new HintArrow());
+        this.hintArrows.set(2, new HintArrow());
+        this.hintIdleThreshold = 10; // seconds
+        this.hintPlayerIdleTime = new Map();
     }
 
     /**
@@ -1427,6 +2003,108 @@ class GardenBed {
     }
 
     /**
+     * Set player idle time (called from game loop with DDA data)
+     */
+    setPlayerIdleTime(playerId, idleTime) {
+        this.hintPlayerIdleTime.set(playerId, idleTime);
+    }
+
+    /**
+     * Determine what hint to show for a given zone
+     * Returns { fromX, fromY, toX, toY, hintType } or null
+     */
+    determineHintForZone(zoneKey) {
+        const isCompetitive = this.gameMode === 'competitive';
+        const pot = isCompetitive ? this.plantPots[zoneKey - 1] : this.plantPots[0];
+        if (!pot) return null;
+
+        const seed = isCompetitive ? this.seedsMap.get(zoneKey) : this.seed;
+        const wateringCan = isCompetitive ? this.wateringCansMap.get(zoneKey) : this.wateringCan;
+        const fertilizerBag = isCompetitive ? this.fertilizerBagsMap.get(zoneKey) : this.fertilizerBag;
+        const sunArea = isCompetitive ? this.sunAreasMap.get(zoneKey) : this.sunArea;
+        const needs = isCompetitive ? this.plantNeedsMap.get(zoneKey) : this.plantNeeds;
+
+        // Phase 1: Empty pot + seed exists → arrow from seed to pot
+        if (pot.growthStage === GrowthStage.EMPTY && seed && !seed.isPlanted) {
+            return {
+                fromX: seed.homeX, fromY: seed.homeY,
+                toX: pot.x, toY: pot.y,
+                hintType: 'seed_to_pot'
+            };
+        }
+
+        // Phase 2: Harvestable → pulsing ring on pot
+        if (pot.growthStage === GrowthStage.HARVESTABLE) {
+            return {
+                fromX: pot.x, fromY: pot.y,
+                toX: pot.x, toY: pot.y,
+                hintType: 'harvest'
+            };
+        }
+
+        // Phase 3: Growing plant with needs → arrow from lowest-need tool to pot
+        if (pot.growthStage !== GrowthStage.EMPTY && needs) {
+            const needLevels = [
+                { type: 'water_to_pot', value: needs.water, tool: wateringCan },
+                { type: 'food_to_pot', value: needs.food, tool: fertilizerBag },
+                { type: 'sun_to_pot', value: needs.sun, tool: sunArea }
+            ];
+
+            // Find lowest need below 50%
+            const critical = needLevels
+                .filter(n => n.value < 0.5 && n.tool)
+                .sort((a, b) => a.value - b.value)[0];
+
+            if (critical) {
+                const toolX = critical.tool.homeX != null ? critical.tool.homeX : critical.tool.x;
+                const toolY = critical.tool.homeY != null ? critical.tool.homeY : critical.tool.y;
+                return {
+                    fromX: toolX, fromY: toolY,
+                    toX: pot.x, toY: pot.y,
+                    hintType: critical.type
+                };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Update hint arrows based on player idle times
+     */
+    updateHints(deltaTime) {
+        const zones = this.gameMode === 'competitive' ? [1, 2] : ['shared'];
+
+        for (const zone of zones) {
+            const arrow = this.hintArrows.get(zone);
+            if (!arrow) continue;
+
+            // Determine idle time for this zone
+            let idleTime;
+            if (this.gameMode === 'competitive') {
+                idleTime = this.hintPlayerIdleTime.get(zone) || 0;
+            } else {
+                // Coop/solo: hint only if ALL tracked players are idle
+                const times = [...this.hintPlayerIdleTime.values()];
+                idleTime = times.length > 0 ? Math.min(...times) : 0;
+            }
+
+            if (idleTime >= this.hintIdleThreshold) {
+                const hint = this.determineHintForZone(zone);
+                if (hint) {
+                    arrow.show(hint.fromX, hint.fromY, hint.toX, hint.toY, hint.hintType);
+                } else {
+                    arrow.hide();
+                }
+            } else {
+                arrow.hide();
+            }
+
+            arrow.update(deltaTime);
+        }
+    }
+
+    /**
      * Show golden watering can for a player
      */
     showGoldenWateringCan(playerId) {
@@ -1480,17 +2158,26 @@ class GardenBed {
                     needs.update(deltaTime);
                     const satisfaction = needs.getAverageSatisfaction();
                     pot.updateGrowth(satisfaction, deltaTime);
+                    // Sync water level to pot
+                    pot.waterLevelTarget = needs.water;
                 }
+                pot.update(deltaTime);
             }
         } else {
-            // Co-op/single player
+            // Co-op/single player — update needs once, then apply to all pots
+            let needsUpdated = false;
             for (const pot of this.plantPots) {
                 if (pot.growthStage !== GrowthStage.EMPTY) {
-                    this.plantNeeds.update(deltaTime);
+                    if (!needsUpdated) {
+                        this.plantNeeds.update(deltaTime);
+                        needsUpdated = true;
+                    }
                     const satisfaction = this.plantNeeds.getAverageSatisfaction();
                     pot.updateGrowth(satisfaction, deltaTime);
-                    break; // All pots share same needs
+                    // Sync water level to pot
+                    pot.waterLevelTarget = this.plantNeeds.water;
                 }
+                pot.update(deltaTime);
             }
         }
 
@@ -1529,6 +2216,9 @@ class GardenBed {
         // Update confetti particles
         this.confettiParticles.forEach(particle => particle.update(deltaTime));
         this.confettiParticles = this.confettiParticles.filter(p => !p.isDead());
+
+        // Update hint arrows
+        this.updateHints(deltaTime);
     }
 
     /**
@@ -1675,6 +2365,27 @@ class GardenBed {
         if (heldItem) {
             heldItem.moveTo(handPos.x, handPos.y);
 
+            // Reset watering can state if held but not yet confirmed over pot
+            if (heldItem === wateringCan) {
+                const overPot = targetPot && targetPot.isPointOver(handPos.x, handPos.y);
+                if (!overPot) {
+                    wateringCan.isOverPot = false;
+                    wateringCan.pourProgress = 0;
+                    wateringCan.targetPotRef = null;
+                    // Clear pot watering state
+                    if (targetPot) {
+                        targetPot.isBeingWatered = false;
+                        targetPot.waterPourProgress = 0;
+                    }
+                    // Reset water interaction timer
+                    if (this.gameMode === 'competitive') {
+                        this.waterInteractionTimeMap.set(zoneKey, 0);
+                    } else {
+                        this.waterInteractionTime = 0;
+                    }
+                }
+            }
+
             // Check for drop interactions
             if (heldItem === seed && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 // Drop seed in pot
@@ -1701,16 +2412,27 @@ class GardenBed {
                     setTimeout(() => this.spawnNewSeed(zoneKey), 1000);
                 }
             } else if (heldItem === wateringCan && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                // Water the plant
+                // Water the plant — set tilt state
+                wateringCan.isOverPot = true;
+                wateringCan.targetPotRef = targetPot;
+
                 const waterTime = this.gameMode === 'competitive'
                     ? (this.waterInteractionTimeMap.get(zoneKey) || 0)
                     : this.waterInteractionTime;
 
                 const newWaterTime = waterTime + 0.016;
 
+                // Update pour progress on both can and pot
+                const progress = Math.min(1, newWaterTime / 0.3);
+                wateringCan.pourProgress = progress;
+                targetPot.isBeingWatered = true;
+                targetPot.waterPourProgress = progress;
+
                 if (newWaterTime > 0.3) {
                     plantNeeds.addWater();
                     wateringCan.water();
+                    wateringCan.pourProgress = 0;
+                    targetPot.waterPourProgress = 0;
 
                     if (this.gameMode === 'competitive') {
                         this.waterInteractionTimeMap.set(zoneKey, 0);
@@ -1846,6 +2568,13 @@ class GardenBed {
             : this.heldItem;
 
         if (heldItem) {
+            // Clear pot watering state if dropping a watering can
+            if (heldItem.targetPotRef) {
+                heldItem.targetPotRef.isBeingWatered = false;
+                heldItem.targetPotRef.waterPourProgress = 0;
+                heldItem.targetPotRef = null;
+            }
+
             heldItem.drop();
 
             // Return tools to home position
@@ -1944,6 +2673,9 @@ class GardenBed {
 
         // Draw confetti
         this.confettiParticles.forEach(particle => particle.draw(ctx));
+
+        // Draw hint arrows
+        this.hintArrows.forEach(arrow => arrow.draw(ctx));
 
         // Draw instructions
         this.drawInstructions(ctx);
@@ -2047,6 +2779,9 @@ class GardenBed {
             this.magicPumpkin.hide();
             this.pumpkinSpawnTimer = 0;
         }
+
+        this.hintArrows.forEach(arrow => arrow.reset());
+        this.hintPlayerIdleTime.clear();
     }
 
     // Compatibility methods
