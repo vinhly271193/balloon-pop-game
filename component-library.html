@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Grow — Component Library | re:Action Health Technologies</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ========== PAGE CHROME ========== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:#FAFBFC;color:#1e293b;line-height:1.6;}
+
+/* Header */
+.page-header{background:linear-gradient(135deg,#E91E8C,#7B2D8E,#5B1D6E);padding:48px 32px;text-align:center;color:#fff;}
+.page-header h1{font-size:40px;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}
+.page-header p{opacity:0.85;font-size:15px;font-weight:300;max-width:500px;margin:0 auto;}
+
+/* Layout */
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:220px;position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid #e2e8f0;padding:20px 0;flex-shrink:0;z-index:40;}
+.sidebar a{display:block;padding:8px 20px;font-size:13px;font-weight:500;color:#64748b;text-decoration:none;border-left:3px solid transparent;transition:all 0.15s;}
+.sidebar a:hover,.sidebar a.active{color:#7B2D8E;border-left-color:#E91E8C;background:rgba(233,30,140,0.04);}
+.sidebar .nav-label{padding:12px 20px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;}
+.main{flex:1;padding:40px;max-width:1200px;}
+
+/* Dark/Light Toggle */
+.theme-toggle{position:fixed;top:16px;right:24px;z-index:100;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:6px 14px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all 0.2s;}
+.theme-toggle:hover{box-shadow:0 4px 12px rgba(0,0,0,0.12);}
+.theme-toggle .dot{width:14px;height:14px;border-radius:50%;transition:background 0.2s;}
+.theme-toggle .dot.light{background:linear-gradient(135deg,#fbbf24,#f59e0b);}
+.theme-toggle .dot.dark{background:linear-gradient(135deg,#1e293b,#334155);}
+
+/* Sections */
+section{margin-bottom:56px;}
+section h2{font-size:28px;font-weight:800;margin-bottom:6px;color:#1e293b;letter-spacing:-0.5px;}
+section .section-desc{font-size:14px;color:#64748b;margin-bottom:24px;}
+.subsection{margin-bottom:32px;}
+.subsection h3{font-size:16px;font-weight:700;color:#475569;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* Cards */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.card.dark-bg{background:#1a2e1a;border-color:#2d4a2d;}
+
+/* Swatch Grid */
+.swatch-grid{display:flex;flex-wrap:wrap;gap:12px;}
+.swatch{text-align:center;}
+.swatch .color-box{width:80px;height:60px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);margin-bottom:6px;}
+.swatch .hex{font-size:11px;font-weight:600;font-family:'SF Mono','Fira Code',monospace;color:#475569;}
+.swatch .name{font-size:10px;color:#94a3b8;margin-top:1px;}
+
+/* Type Scale */
+.type-sample{margin-bottom:16px;padding:12px 0;border-bottom:1px solid #f1f5f9;}
+.type-sample .token{font-size:11px;font-weight:600;font-family:'SF Mono','Fira Code',monospace;color:#7B2D8E;margin-bottom:4px;}
+.type-sample.on-dark{background:#1a2e1a;border-radius:12px;padding:16px;border:none;margin-bottom:12px;}
+.type-sample.on-dark .token{color:#a8d5a8;}
+
+/* Component previews */
+.component-row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;}
+.component-item{text-align:center;}
+.component-item .label{font-size:11px;font-weight:600;color:#94a3b8;margin-top:8px;}
+.component-item .css-ref{font-size:10px;font-family:'SF Mono','Fira Code',monospace;color:#7B2D8E;margin-top:2px;}
+
+/* Spacing boxes */
+.spacing-demo{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+.spacing-box{background:linear-gradient(135deg,#E91E8C33,#7B2D8E33);border:2px dashed #7B2D8E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#7B2D8E;}
+
+/* Radius demos */
+.radius-demo{display:flex;flex-wrap:wrap;gap:16px;}
+.radius-box{width:80px;height:60px;background:#e2e8f0;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#475569;}
+
+/* Dual preview (light+dark) */
+.dual-preview{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.preview-pane{border-radius:12px;padding:24px;}
+.preview-pane.light{background:#FAFBFC;border:1px solid #e2e8f0;}
+.preview-pane.dark{background:#1a2e1a;border:1px solid #2d4a2d;}
+.preview-pane .pane-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.preview-pane.light .pane-label{color:#94a3b8;}
+.preview-pane.dark .pane-label{color:#a8d5a8;}
+
+/* ========== GAME COMPONENT STYLES ========== */
+/* System font for game components */
+.game-font{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;}
+
+/* Big Button */
+.btn-big{display:inline-flex;align-items:center;justify-content:center;min-width:280px;padding:24px 40px;font-size:32px;font-weight:700;border:none;border-radius:20px;cursor:pointer;transition:all 0.2s ease;position:relative;}
+.btn-big.primary{background:linear-gradient(135deg,#4ade80,#22c55e);color:#1a2e1a;box-shadow:0 8px 30px rgba(74,222,128,0.4);}
+.btn-big.primary:hover{transform:scale(1.05);}
+.btn-big.primary:active{transform:scale(0.98);}
+.btn-big.primary.disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-big.primary-light{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 6px 24px rgba(34,197,94,0.35);}
+.btn-big.secondary{background:#213e21;color:#fff;border:3px solid #a8d5a8;box-shadow:none;}
+.btn-big.secondary:hover{transform:scale(1.05);border-color:#fff;}
+
+/* Dwell ring */
+.dwell-ring-wrapper{position:relative;display:inline-block;}
+.dwell-ring{position:absolute;inset:-9px;border-radius:32px;pointer-events:none;opacity:0;transition:opacity 0.3s;}
+.dwell-ring-track{position:absolute;inset:0;border-radius:32px;border:9px solid rgba(255,255,255,0.3);}
+.dwell-ring-fill{position:absolute;inset:0;border-radius:32px;border:12px solid transparent;border-top-color:#fff;border-right-color:#fff;animation:dwell-spin 3s linear forwards;box-shadow:0 0 15px rgba(255,255,255,0.8),0 0 30px rgba(255,255,255,0.5);}
+.dwell-ring-wrapper:hover .dwell-ring{opacity:1;}
+@keyframes dwell-spin{0%{transform:rotate(0deg);clip-path:polygon(50% 0%,50% 50%,50% 0%);}100%{transform:rotate(360deg);}}
+
+/* Card Buttons */
+.btn-card{display:inline-flex;flex-direction:column;align-items:center;gap:8px;min-width:240px;padding:40px 24px;font-weight:700;border:none;border-radius:20px;cursor:pointer;transition:all 0.2s ease;background:linear-gradient(135deg,#4ade80,#22c55e);color:#1a2e1a;box-shadow:0 8px 30px rgba(74,222,128,0.4);}
+.btn-card .icon{font-size:56px;line-height:1;}
+.btn-card .btn-label{font-size:32px;}
+.btn-card .btn-desc{font-size:18px;font-weight:400;color:rgba(26,46,26,0.7);}
+.btn-card:hover{transform:scale(1.05);}
+
+/* Toggle Switch */
+.toggle-switch{display:inline-flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.toggle-track{width:52px;height:28px;border-radius:14px;background:#4b5563;position:relative;transition:background 0.2s;}
+.toggle-track.on{background:#4ade80;}
+.toggle-knob{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.toggle-track.on .toggle-knob{transform:translateX(24px);}
+.toggle-label{font-size:14px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.toggle-label.on{color:#4ade80;}
+.toggle-label.off{color:#a8d5a8;}
+
+/* Text Toggle */
+.text-toggle{min-width:70px;padding:8px 16px;font-size:14px;font-weight:700;border-radius:8px;background:transparent;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.text-toggle.on{border:2px solid #4ade80;color:#4ade80;}
+.text-toggle.off{border:2px solid #a8d5a8;color:#a8d5a8;}
+
+/* Volume Control */
+.volume-control{display:flex;align-items:center;gap:8px;}
+.vol-btn{width:32px;height:32px;border-radius:50%;border:2px solid #a8d5a8;background:transparent;color:#a8d5a8;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.vol-btn:hover{border-color:#fff;color:#fff;}
+.vol-bar{width:120px;height:16px;background:rgba(255,255,255,0.2);border-radius:8px;position:relative;overflow:visible;}
+.vol-fill{height:100%;background:#4ade80;border-radius:8px;transition:width 0.2s;}
+.vol-handle{width:24px;height:24px;border-radius:50%;background:#4ade80;border:3px solid #fff;position:absolute;top:50%;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer;}
+
+/* Contrast Buttons */
+.contrast-btn{padding:6px 12px;font-size:12px;font-weight:700;border-radius:8px;background:transparent;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.contrast-btn.inactive{border:2px solid #a8d5a8;color:#a8d5a8;}
+.contrast-btn.inactive:hover{border-color:#fff;color:#fff;}
+.contrast-btn.active{border:2px solid #4ade80;background:#4ade80;color:#1a2e1a;}
+
+/* Background Preview */
+.bg-preview{display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border:2px solid #a8d5a8;border-radius:8px;background:rgba(0,0,0,0.3);cursor:pointer;transition:all 0.2s;min-width:60px;}
+.bg-preview.active{border-color:#4ade80;background:rgba(74,222,128,0.2);}
+.bg-preview .preview-box{width:50px;height:35px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);}
+.bg-preview .preview-label{font-size:10px;font-weight:600;color:#a8d5a8;}
+.bg-preview.active .preview-label{color:#4ade80;}
+
+/* Score Box */
+.score-box{background:#213e21;padding:24px 40px;border-radius:20px;min-width:180px;text-align:center;display:inline-block;}
+.score-box .score-label{font-size:18px;text-transform:uppercase;color:#a8d5a8;margin-bottom:12px;letter-spacing:1px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.score-box .score-value{font-size:72px;font-weight:800;color:#4ade80;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+
+/* Ribbon Card */
+.ribbon-card{background:#213e21;padding:40px 24px;border-radius:24px;min-width:200px;text-align:center;display:inline-block;border:4px solid;}
+.ribbon-card.p1{border-color:#FF8C42;box-shadow:0 4px 20px rgba(255,140,66,0.3);}
+.ribbon-card.p2{border-color:#4A90D9;box-shadow:0 4px 20px rgba(74,144,217,0.3);}
+.ribbon-card .ribbon-icon{font-size:56px;margin-bottom:8px;}
+.ribbon-card .ribbon-name{font-size:24px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.ribbon-card.p1 .ribbon-name{color:#FF8C42;}
+.ribbon-card.p2 .ribbon-name{color:#4A90D9;}
+.ribbon-card .ribbon-score{font-size:72px;font-weight:800;color:#4ade80;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:8px 0;}
+.ribbon-card .ribbon-title{font-size:32px;font-weight:700;color:#FFD700;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+
+/* Hand Indicator */
+.hand-indicator{display:inline-flex;flex-direction:column;align-items:center;padding:24px;background:#213e21;border:4px solid #a8d5a8;border-radius:20px;min-width:200px;text-align:center;transition:all 0.3s;}
+.hand-indicator.detected{border-color:#4ade80;background:rgba(74,222,128,0.1);}
+.hand-indicator .hand-label{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.hand-indicator .hand-status{font-size:18px;color:#a8d5a8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.hand-indicator.detected .hand-status{color:#4ade80;}
+
+/* HUD Item */
+.hud-item{display:inline-flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.7);padding:12px 24px;border-radius:16px;text-align:center;}
+.hud-item .hud-label{font-size:18px;text-transform:uppercase;letter-spacing:1px;color:#a8d5a8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.hud-item .hud-value{font-size:48px;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.hud-item .hud-value.timer{color:#FFD700;}
+.hud-item .hud-value.score{color:#4ade80;}
+.hud-item .hud-value.timer-warn{color:#FF3B30;animation:timer-pulse 0.5s ease-in-out infinite alternate;}
+.hud-item .hud-value.p1{color:#FF8C42;}
+.hud-item .hud-value.p2{color:#4A90D9;}
+@keyframes timer-pulse{0%{transform:scale(1);}100%{transform:scale(1.1);}}
+
+/* Progress Bar */
+.progress-bar{height:20px;background:rgba(0,0,0,0.7);border-radius:10px;overflow:hidden;position:relative;}
+.progress-fill{height:100%;border-radius:10px;transition:width 0.4s ease;}
+.progress-fill.green{background:linear-gradient(90deg,#4ade80,#22c55e);}
+.progress-fill.p1{background:linear-gradient(90deg,#FF8C42,#FFB066);}
+.progress-fill.p2{background:linear-gradient(90deg,#4A90D9,#6AB0F0);}
+.progress-bar.p1-track{background:rgba(255,140,66,0.2);}
+.progress-bar.p2-track{background:rgba(74,144,217,0.2);}
+
+/* Countdown */
+.countdown-num{font-size:120px;font-weight:800;color:#4ade80;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;animation:countdownPulse 1s ease-in-out infinite;}
+@keyframes countdownPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+
+/* Challenge Text */
+.challenge-mini{display:inline-block;background:rgba(0,0,0,0.7);padding:8px 16px;border-radius:12px;color:#fff;font-size:18px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+
+/* Settings Panel */
+.settings-panel-demo{background:#213e21;border-radius:24px;padding:40px;max-width:400px;position:relative;}
+.settings-panel-demo .settings-title{font-size:32px;font-weight:800;color:#fff;margin-bottom:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.settings-panel-demo .settings-section-title{font-size:18px;text-transform:uppercase;letter-spacing:1px;color:#a8d5a8;margin-bottom:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+.settings-panel-demo .settings-divider{border-bottom:2px solid rgba(255,255,255,0.1);padding-bottom:16px;margin-bottom:16px;}
+.settings-close-x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;color:#a8d5a8;font-size:18px;}
+.settings-close-x:hover{background:rgba(255,255,255,0.2);color:#fff;transform:scale(1.1);}
+.settings-close-btn{width:100%;padding:12px 24px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#4ade80,#22c55e);color:#1a2e1a;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 15px rgba(74,222,128,0.3);margin-top:20px;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+
+/* Plant Pot CSS */
+.css-pot{position:relative;width:120px;height:100px;}
+.css-pot .pot-body{width:120px;height:85px;background:linear-gradient(90deg,#C4A484,#E07A5F 30%,#E07A5F 70%,#B8860B);clip-path:polygon(0% 0%,100% 0%,87.5% 100%,12.5% 100%);border:3px solid #8B4513;box-sizing:border-box;}
+.css-pot .pot-rim{width:130px;height:15px;background:#D2691E;border:3px solid #8B4513;border-radius:3px;position:absolute;top:0;left:-5px;}
+.css-pot .pot-soil{width:110px;height:30px;background:#5D4037;border-radius:50%;position:absolute;top:8px;left:5px;}
+
+/* Leaf particles */
+.leaf-particle{border-radius:50% 0 50% 0;animation:particleDrift 4s linear infinite;}
+@keyframes particleDrift{0%{transform:translateX(0) translateY(0) rotate(0deg);opacity:0;}10%{opacity:0.6;}90%{opacity:0.6;}100%{transform:translateX(60px) translateY(80px) rotate(360deg);opacity:0;}}
+
+/* Seed dots */
+.seed-dot{width:24px;height:24px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,0.15);}
+
+/* Confetti dots */
+.confetti-dot{width:20px;height:20px;border-radius:50%;display:inline-block;}
+
+/* Background preview cards */
+.bg-card{width:240px;height:135px;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;}
+
+/* Need bar */
+.need-bar-demo{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.need-bar-demo .need-icon{font-size:18px;width:24px;text-align:center;}
+.need-bar-demo .need-track{width:150px;height:25px;background:rgba(255,255,255,0.2);border-radius:5px;border:2px solid rgba(255,255,255,0.5);overflow:hidden;position:relative;}
+.need-bar-demo .need-fill{height:100%;border-radius:3px;transition:width 0.3s;}
+.need-bar-demo .need-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:Arial,sans-serif;}
+.need-bar-demo .need-track.critical{animation:critical-pulse 0.5s ease-in-out infinite alternate;}
+@keyframes critical-pulse{0%{background:rgba(239,68,68,0.2);}100%{background:rgba(239,68,68,0.35);}}
+
+/* Glove CSS */
+.css-glove{width:60px;height:70px;border-radius:40% 40% 30% 30%;display:inline-flex;align-items:center;justify-content:center;font-size:32px;position:relative;border:3px solid;}
+
+/* Growth stage grid */
+.growth-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;text-align:center;font-size:12px;}
+.growth-grid .gh{font-weight:700;color:#475569;padding:4px;font-size:11px;}
+.growth-grid .gc{padding:8px 4px;background:#f8fafc;border-radius:8px;font-size:24px;line-height:1.2;}
+.growth-grid .gc .stage-name{font-size:9px;color:#94a3b8;margin-top:2px;}
+
+/* Responsive */
+@media(max-width:900px){.sidebar{display:none;}.main{padding:20px;}.dual-preview{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="page-header">
+  <h1>Garden Grow — Component Library</h1>
+  <p>Every UI element at a glance. All states, all variants.</p>
+</div>
+
+<!-- Dark/Light Toggle -->
+<button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+  <span class="dot light"></span> Light
+</button>
+
+<!-- Layout -->
+<div class="layout">
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="nav-label">Foundation</div>
+  <a href="#colors">Color Palette</a>
+  <a href="#typography">Typography Scale</a>
+  <a href="#spacing">Spacing &amp; Radius</a>
+  <div class="nav-label">Components</div>
+  <a href="#buttons">Buttons</a>
+  <a href="#forms">Form Controls</a>
+  <a href="#cards">Cards &amp; Containers</a>
+  <a href="#hud">HUD Elements</a>
+  <a href="#game">Game Elements</a>
+  <div class="nav-label">Environment</div>
+  <a href="#backgrounds">Backgrounds</a>
+  <a href="#particles">Floating Particles</a>
+</nav>
+
+<!-- Main Content -->
+<div class="main" id="mainContent">
+
+<!-- ============================================ -->
+<!-- 1. COLOR PALETTE -->
+<!-- ============================================ -->
+<section id="colors">
+<h2>1. Color Palette</h2>
+<p class="section-desc">Every color used in Garden Grow, organized by purpose.</p>
+
+<!-- Brand Colors -->
+<div class="subsection">
+<h3>Brand Colors</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#E91E8C;"></div><div class="hex">#E91E8C</div><div class="name">Magenta</div></div>
+  <div class="swatch"><div class="color-box" style="background:#7B2D8E;"></div><div class="hex">#7B2D8E</div><div class="name">Purple</div></div>
+  <div class="swatch"><div class="color-box" style="background:#5B1D6E;"></div><div class="hex">#5B1D6E</div><div class="name">Deep Purple</div></div>
+</div>
+</div>
+</div>
+
+<!-- Game UI -->
+<div class="subsection">
+<h3>Game UI — Dark Theme</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#1a2e1a;"></div><div class="hex">#1a2e1a</div><div class="name">bg-primary</div></div>
+  <div class="swatch"><div class="color-box" style="background:#213e21;"></div><div class="hex">#213e21</div><div class="name">bg-secondary</div></div>
+  <div class="swatch"><div class="color-box" style="background:#4ade80;"></div><div class="hex">#4ade80</div><div class="name">accent-primary</div></div>
+  <div class="swatch"><div class="color-box" style="background:#22c55e;"></div><div class="hex">#22c55e</div><div class="name">accent-secondary</div></div>
+  <div class="swatch"><div class="color-box" style="background:#ffffff;border:1px solid #ccc;"></div><div class="hex">#ffffff</div><div class="name">text-primary</div></div>
+  <div class="swatch"><div class="color-box" style="background:#a8d5a8;"></div><div class="hex">#a8d5a8</div><div class="name">text-secondary</div></div>
+</div>
+</div>
+</div>
+
+<!-- Plant Colors -->
+<div class="subsection">
+<h3>Plant Colors</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#FF6347;"></div><div class="hex">#FF6347</div><div class="name">Tomato</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FFD700;"></div><div class="hex">#FFD700</div><div class="name">Sunflower</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FF8C00;"></div><div class="hex">#FF8C00</div><div class="name">Carrot</div></div>
+  <div class="swatch"><div class="color-box" style="background:#90EE90;"></div><div class="hex">#90EE90</div><div class="name">Lettuce</div></div>
+  <div class="swatch"><div class="color-box" style="background:#4169E1;"></div><div class="hex">#4169E1</div><div class="name">Blueberry</div></div>
+</div>
+</div>
+</div>
+
+<!-- Player Colors -->
+<div class="subsection">
+<h3>Player Colors</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#FF8C42;"></div><div class="hex">#FF8C42</div><div class="name">P1 Orange</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FFF5E6;"></div><div class="hex">#FFF5E6</div><div class="name">P1 Light</div></div>
+  <div class="swatch"><div class="color-box" style="background:#4A90D9;"></div><div class="hex">#4A90D9</div><div class="name">P2 Blue</div></div>
+  <div class="swatch"><div class="color-box" style="background:#E6F0FF;"></div><div class="hex">#E6F0FF</div><div class="name">P2 Light</div></div>
+  <div class="swatch"><div class="color-box" style="background:#2E8B57;"></div><div class="hex">#2E8B57</div><div class="name">Solo Green</div></div>
+  <div class="swatch"><div class="color-box" style="background:#F0FFF0;"></div><div class="hex">#F0FFF0</div><div class="name">Solo Light</div></div>
+</div>
+</div>
+</div>
+
+<!-- Environment -->
+<div class="subsection">
+<h3>Environment</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#8B4513;"></div><div class="hex">#8B4513</div><div class="name">Soil Brown</div></div>
+  <div class="swatch"><div class="color-box" style="background:#654321;"></div><div class="hex">#654321</div><div class="name">Soil Dark</div></div>
+  <div class="swatch"><div class="color-box" style="background:#87CEEB;"></div><div class="hex">#87CEEB</div><div class="name">Sky Blue</div></div>
+  <div class="swatch"><div class="color-box" style="background:#E07A5F;"></div><div class="hex">#E07A5F</div><div class="name">Terracotta</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FFE4B5;"></div><div class="hex">#FFE4B5</div><div class="name">Sunlight Warm</div></div>
+  <div class="swatch"><div class="color-box" style="background:#228B22;"></div><div class="hex">#228B22</div><div class="name">Forest Green</div></div>
+</div>
+</div>
+</div>
+
+<!-- Seed Colors -->
+<div class="subsection">
+<h3>Seed Colors</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#8B0000;"></div><div class="hex">#8B0000</div><div class="name">Tomato Seed</div></div>
+  <div class="swatch"><div class="color-box" style="background:#8B4513;"></div><div class="hex">#8B4513</div><div class="name">Sunflower Seed</div></div>
+  <div class="swatch"><div class="color-box" style="background:#D2691E;"></div><div class="hex">#D2691E</div><div class="name">Carrot Seed</div></div>
+  <div class="swatch"><div class="color-box" style="background:#556B2F;"></div><div class="hex">#556B2F</div><div class="name">Lettuce Seed</div></div>
+  <div class="swatch"><div class="color-box" style="background:#483D8B;"></div><div class="hex">#483D8B</div><div class="name">Blueberry Seed</div></div>
+</div>
+</div>
+</div>
+
+<!-- Feedback -->
+<div class="subsection">
+<h3>Feedback Colors</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#4ade80;"></div><div class="hex">#4ade80</div><div class="name">Positive / Healthy</div></div>
+  <div class="swatch"><div class="color-box" style="background:#fbbf24;"></div><div class="hex">#fbbf24</div><div class="name">Warning</div></div>
+  <div class="swatch"><div class="color-box" style="background:#ef4444;"></div><div class="hex">#ef4444</div><div class="name">Urgent / Critical</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FFD700;"></div><div class="hex">#FFD700</div><div class="name">Timer</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FF3B30;"></div><div class="hex">#FF3B30</div><div class="name">Timer Warning</div></div>
+</div>
+</div>
+</div>
+
+<!-- Confetti -->
+<div class="subsection">
+<h3>Confetti Palette</h3>
+<div class="card">
+<div class="swatch-grid">
+  <div class="swatch"><div class="color-box" style="background:#FF6B6B;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#FF6B6B</div><div class="name">Coral Red</div></div>
+  <div class="swatch"><div class="color-box" style="background:#4ECDC4;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#4ECDC4</div><div class="name">Teal</div></div>
+  <div class="swatch"><div class="color-box" style="background:#45B7D1;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#45B7D1</div><div class="name">Sky Blue</div></div>
+  <div class="swatch"><div class="color-box" style="background:#FFA07A;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#FFA07A</div><div class="name">Salmon</div></div>
+  <div class="swatch"><div class="color-box" style="background:#98D8C8;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#98D8C8</div><div class="name">Mint</div></div>
+  <div class="swatch"><div class="color-box" style="background:#F7DC6F;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#F7DC6F</div><div class="name">Pale Gold</div></div>
+  <div class="swatch"><div class="color-box" style="background:#BB8FCE;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#BB8FCE</div><div class="name">Soft Purple</div></div>
+  <div class="swatch"><div class="color-box" style="background:#85C1E2;width:50px;height:50px;border-radius:50%;"></div><div class="hex">#85C1E2</div><div class="name">Light Blue</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 2. TYPOGRAPHY SCALE -->
+<!-- ============================================ -->
+<section id="typography">
+<h2>2. Typography Scale</h2>
+<p class="section-desc">System font stack at each token size. Font: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif.</p>
+
+<div class="subsection">
+<h3>On Light Background</h3>
+<div class="card">
+  <div class="type-sample">
+    <div class="token">--text-huge: 72px / weight 800</div>
+    <div class="game-font" style="font-size:72px;font-weight:800;color:#1a2e1a;line-height:1.1;">Garden Grow!</div>
+  </div>
+  <div class="type-sample">
+    <div class="token">--text-large: 48px / weight 800</div>
+    <div class="game-font" style="font-size:48px;font-weight:800;color:#1a2e1a;line-height:1.2;">Beautiful Garden!</div>
+  </div>
+  <div class="type-sample">
+    <div class="token">--text-medium: 32px / weight 700</div>
+    <div class="game-font" style="font-size:32px;font-weight:700;color:#4b5563;">Use your hands to help plants grow</div>
+  </div>
+  <div class="type-sample">
+    <div class="token">--text-normal: 24px / weight 400</div>
+    <div class="game-font" style="font-size:24px;font-weight:400;color:#4b5563;">Every plant you grow brings life</div>
+  </div>
+  <div class="type-sample" style="border:none;">
+    <div class="token">--text-small: 18px / weight 400</div>
+    <div class="game-font" style="font-size:18px;font-weight:400;color:#9ca3af;">Camera access required</div>
+  </div>
+</div>
+</div>
+
+<div class="subsection">
+<h3>On Dark Background</h3>
+<div class="card dark-bg">
+  <div class="type-sample on-dark">
+    <div class="token">--text-huge: 72px</div>
+    <div class="game-font" style="font-size:72px;font-weight:800;color:#fff;line-height:1.1;">Garden Grow!</div>
+  </div>
+  <div class="type-sample on-dark">
+    <div class="token">--text-large: 48px</div>
+    <div class="game-font" style="font-size:48px;font-weight:800;color:#fff;line-height:1.2;">Beautiful Garden!</div>
+  </div>
+  <div class="type-sample on-dark">
+    <div class="token">--text-medium: 32px</div>
+    <div class="game-font" style="font-size:32px;font-weight:700;color:#a8d5a8;">Use your hands to help plants grow</div>
+  </div>
+  <div class="type-sample on-dark">
+    <div class="token">--text-normal: 24px</div>
+    <div class="game-font" style="font-size:24px;font-weight:400;color:#a8d5a8;">Every plant you grow brings life</div>
+  </div>
+  <div class="type-sample on-dark">
+    <div class="token">--text-small: 18px</div>
+    <div class="game-font" style="font-size:18px;font-weight:400;color:#a8d5a8;">Camera access required</div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 3. SPACING & RADIUS -->
+<!-- ============================================ -->
+<section id="spacing">
+<h2>3. Spacing &amp; Radius</h2>
+<p class="section-desc">Consistent spacing and border radius tokens.</p>
+
+<div class="subsection">
+<h3>Spacing Scale</h3>
+<div class="card">
+<div class="spacing-demo">
+  <div>
+    <div class="spacing-box" style="width:40px;height:40px;">40</div>
+    <div style="font-size:11px;font-weight:600;color:#7B2D8E;text-align:center;margin-top:4px;">--spacing-large</div>
+  </div>
+  <div>
+    <div class="spacing-box" style="width:24px;height:24px;font-size:9px;">24</div>
+    <div style="font-size:11px;font-weight:600;color:#7B2D8E;text-align:center;margin-top:4px;">--spacing-medium</div>
+  </div>
+  <div>
+    <div class="spacing-box" style="width:12px;height:12px;font-size:7px;">12</div>
+    <div style="font-size:11px;font-weight:600;color:#7B2D8E;text-align:center;margin-top:4px;">--spacing-small</div>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="subsection">
+<h3>Border Radius Scale</h3>
+<div class="card">
+<div class="radius-demo">
+  <div><div class="radius-box" style="border-radius:3px;">3px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">xs</div></div>
+  <div><div class="radius-box" style="border-radius:5px;">5px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">sm</div></div>
+  <div><div class="radius-box" style="border-radius:8px;">8px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">md</div></div>
+  <div><div class="radius-box" style="border-radius:10px;">10px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">lg</div></div>
+  <div><div class="radius-box" style="border-radius:12px;">12px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">—</div></div>
+  <div><div class="radius-box" style="border-radius:16px;">16px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">xl</div></div>
+  <div><div class="radius-box" style="border-radius:20px;">20px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">2xl</div></div>
+  <div><div class="radius-box" style="border-radius:24px;">24px</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">3xl</div></div>
+  <div><div class="radius-box" style="border-radius:50%;width:60px;height:60px;">50%</div><div style="font-size:10px;color:#94a3b8;text-align:center;margin-top:4px;">pill</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 4. BUTTONS -->
+<!-- ============================================ -->
+<section id="buttons">
+<h2>4. Buttons</h2>
+<p class="section-desc">Every button variant at actual game size with all interaction states.</p>
+
+<!-- Primary Big Button -->
+<div class="subsection">
+<h3>Primary Big Button</h3>
+<div class="dual-preview">
+<div class="preview-pane dark">
+  <div class="pane-label">On Dark Background</div>
+  <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;">
+    <div class="component-item">
+      <div class="dwell-ring-wrapper">
+        <div class="dwell-ring"><div class="dwell-ring-track"></div><div class="dwell-ring-fill"></div></div>
+        <button class="btn-big primary game-font">Start Growing</button>
+      </div>
+      <div class="label" style="color:#a8d5a8;">Default (hover for dwell ring)</div>
+      <div class="css-ref" style="color:#a8d5a8;">.big-button</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-big primary game-font" style="transform:scale(1.05);box-shadow:0 0 30px rgba(74,222,128,0.6);">Start Growing</button>
+      <div class="label" style="color:#a8d5a8;">Hover / Hand-Hovering</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-big primary game-font" style="transform:scale(0.98);">Start Growing</button>
+      <div class="label" style="color:#a8d5a8;">Active / Pressed</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-big primary game-font disabled" disabled>Start Growing</button>
+      <div class="label" style="color:#a8d5a8;">Disabled (50% opacity)</div>
+    </div>
+  </div>
+</div>
+<div class="preview-pane light">
+  <div class="pane-label">On Light Background</div>
+  <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;">
+    <div class="component-item">
+      <button class="btn-big primary-light game-font">Start Growing</button>
+      <div class="label">Default on Light Screen</div>
+      <div class="css-ref">.light-screen .big-button</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-big primary-light game-font" style="transform:scale(1.05);">Start Growing</button>
+      <div class="label">Hover</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Secondary Button -->
+<div class="subsection">
+<h3>Secondary Button</h3>
+<div class="card dark-bg">
+  <div class="component-row">
+    <div class="component-item">
+      <button class="btn-big secondary game-font">Settings</button>
+      <div class="label" style="color:#a8d5a8;">Default</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-big secondary game-font" style="transform:scale(1.05);border-color:#fff;">Settings</button>
+      <div class="label" style="color:#a8d5a8;">Hover</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Card Buttons -->
+<div class="subsection">
+<h3>Card Buttons (Player &amp; Mode Select)</h3>
+<div class="card" style="background:linear-gradient(180deg,#FFF8F0,#FEFCE8,#F0FDF4);border:none;">
+  <div class="component-row">
+    <div class="component-item">
+      <button class="btn-card game-font" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;">
+        <span class="icon">&#x1F44B;</span>
+        <span class="btn-label">1 Player</span>
+        <span class="btn-desc" style="color:rgba(255,255,255,0.8);">Solo gardening</span>
+      </button>
+      <div class="label">Player Select Card</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-card game-font" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;">
+        <span class="icon">&#x1F91D;</span>
+        <span class="btn-label">2 Players</span>
+        <span class="btn-desc" style="color:rgba(255,255,255,0.8);">Play together</span>
+      </button>
+      <div class="label">Player Select Card</div>
+    </div>
+  </div>
+  <div class="component-row" style="margin-top:20px;">
+    <div class="component-item">
+      <button class="btn-card game-font" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;min-width:200px;">
+        <span class="icon">&#x1F331;</span>
+        <span class="btn-label">Co-op</span>
+        <span class="btn-desc" style="color:rgba(255,255,255,0.8);">Shared garden</span>
+      </button>
+      <div class="label">Mode Select Card</div>
+    </div>
+    <div class="component-item">
+      <button class="btn-card game-font" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;min-width:200px;">
+        <span class="icon">&#x1F3C6;</span>
+        <span class="btn-label">Competitive</span>
+        <span class="btn-desc" style="color:rgba(255,255,255,0.8);">Split zones</span>
+      </button>
+      <div class="label">Mode Select Card</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Settings Close -->
+<div class="subsection">
+<h3>Settings Close Button</h3>
+<div class="card dark-bg" style="max-width:400px;">
+  <button class="settings-close-btn game-font">Close Settings</button>
+  <div class="component-item" style="margin-top:8px;"><div class="label" style="color:#a8d5a8;">Full-width, gradient, 12px radius</div></div>
+</div>
+</div>
+
+<!-- Contrast Toggle -->
+<div class="subsection">
+<h3>Contrast Toggle Buttons</h3>
+<div class="card dark-bg">
+  <div class="component-row" style="gap:8px;">
+    <div class="component-item">
+      <button class="contrast-btn active game-font">Normal</button>
+      <div class="label" style="color:#a8d5a8;">Active</div>
+    </div>
+    <div class="component-item">
+      <button class="contrast-btn inactive game-font">High</button>
+      <div class="label" style="color:#a8d5a8;">Inactive</div>
+    </div>
+    <div class="component-item">
+      <button class="contrast-btn inactive game-font">Maximum</button>
+      <div class="label" style="color:#a8d5a8;">Inactive</div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 5. FORM CONTROLS -->
+<!-- ============================================ -->
+<section id="forms">
+<h2>5. Form Controls</h2>
+<p class="section-desc">Toggle switches, volume controls, and background theme selectors.</p>
+
+<!-- Toggle Switch -->
+<div class="subsection">
+<h3>Toggle Switch</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:40px;">
+  <div class="component-item">
+    <div class="toggle-switch" onclick="this.querySelector('.toggle-track').classList.toggle('on');let l=this.querySelector('.toggle-label');l.textContent=l.textContent==='ON'?'OFF':'ON';l.classList.toggle('on');l.classList.toggle('off');">
+      <div class="toggle-track on"><div class="toggle-knob"></div></div>
+      <span class="toggle-label on">ON</span>
+    </div>
+    <div class="label" style="color:#a8d5a8;">ON State (click to toggle)</div>
+  </div>
+  <div class="component-item">
+    <div class="toggle-switch" onclick="this.querySelector('.toggle-track').classList.toggle('on');let l=this.querySelector('.toggle-label');l.textContent=l.textContent==='OFF'?'ON':'OFF';l.classList.toggle('on');l.classList.toggle('off');">
+      <div class="toggle-track"><div class="toggle-knob"></div></div>
+      <span class="toggle-label off">OFF</span>
+    </div>
+    <div class="label" style="color:#a8d5a8;">OFF State (click to toggle)</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Text Toggle (ON/OFF in settings) -->
+<div class="subsection">
+<h3>Sound Effects Text Toggle</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:12px;">
+  <div class="component-item">
+    <button class="text-toggle on game-font">ON</button>
+    <div class="label" style="color:#a8d5a8;">Active</div>
+    <div class="css-ref" style="color:#a8d5a8;">.toggle-btn</div>
+  </div>
+  <div class="component-item">
+    <button class="text-toggle off game-font">OFF</button>
+    <div class="label" style="color:#a8d5a8;">Inactive</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Volume Control -->
+<div class="subsection">
+<h3>Volume Control</h3>
+<div class="card dark-bg">
+<div class="volume-control">
+  <button class="vol-btn">-</button>
+  <div class="vol-bar">
+    <div class="vol-fill" style="width:65%;"></div>
+    <div class="vol-handle" style="left:65%;"></div>
+  </div>
+  <button class="vol-btn">+</button>
+</div>
+<div class="component-item" style="margin-top:8px;"><div class="label" style="color:#a8d5a8;">120px bar, 24px handle, green fill</div></div>
+</div>
+</div>
+
+<!-- Background Swatches -->
+<div class="subsection">
+<h3>Background Theme Swatches</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:8px;">
+  <div class="bg-preview active" onclick="document.querySelectorAll('.bg-preview').forEach(b=>b.classList.remove('active'));this.classList.add('active');">
+    <div class="preview-box" style="background:#1a2e1a;position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background:linear-gradient(45deg,transparent 45%,#a8d5a8 45%,#a8d5a8 55%,transparent 55%);opacity:0.5;"></div></div>
+    <span class="preview-label">None</span>
+  </div>
+  <div class="bg-preview" onclick="document.querySelectorAll('.bg-preview').forEach(b=>b.classList.remove('active'));this.classList.add('active');">
+    <div class="preview-box" style="background:linear-gradient(180deg,rgba(135,206,150,0.9),rgba(80,150,80,0.9));"></div>
+    <span class="preview-label">Garden</span>
+  </div>
+  <div class="bg-preview" onclick="document.querySelectorAll('.bg-preview').forEach(b=>b.classList.remove('active'));this.classList.add('active');">
+    <div class="preview-box" style="background:linear-gradient(180deg,rgba(135,206,235,0.9),rgba(100,180,220,0.9) 40%,rgba(194,178,128,0.9) 70%,rgba(210,190,140,0.9));"></div>
+    <span class="preview-label">Beach</span>
+  </div>
+  <div class="bg-preview" onclick="document.querySelectorAll('.bg-preview').forEach(b=>b.classList.remove('active'));this.classList.add('active');">
+    <div class="preview-box" style="background:linear-gradient(180deg,rgba(34,80,50,0.9),rgba(55,100,60,0.9) 60%,rgba(40,70,45,0.9));"></div>
+    <span class="preview-label">Forest</span>
+  </div>
+  <div class="bg-preview" onclick="document.querySelectorAll('.bg-preview').forEach(b=>b.classList.remove('active'));this.classList.add('active');">
+    <div class="preview-box" style="background:linear-gradient(180deg,rgba(135,206,250,0.95),rgba(175,225,255,0.9) 50%,rgba(200,235,255,0.85));"></div>
+    <span class="preview-label">Sky</span>
+  </div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 6. CARDS & CONTAINERS -->
+<!-- ============================================ -->
+<section id="cards">
+<h2>6. Cards &amp; Containers</h2>
+<p class="section-desc">Score boxes, ribbon cards, hand indicators, and panels.</p>
+
+<!-- Score Box -->
+<div class="subsection">
+<h3>Score Box</h3>
+<div class="card dark-bg">
+<div class="component-row">
+  <div class="component-item">
+    <div class="score-box"><div class="score-label">Score</div><div class="score-value">450</div></div>
+    <div class="label" style="color:#a8d5a8;">Round End Score</div>
+    <div class="css-ref" style="color:#a8d5a8;">.score-box</div>
+  </div>
+  <div class="component-item">
+    <div class="score-box"><div class="score-label">Plants Grown</div><div class="score-value">6</div></div>
+    <div class="label" style="color:#a8d5a8;">Plants Counter</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Ribbon Cards -->
+<div class="subsection">
+<h3>Ribbon Card (2P Round End)</h3>
+<div class="card dark-bg">
+<div class="component-row">
+  <div class="component-item">
+    <div class="ribbon-card p1">
+      <div class="ribbon-icon">&#x1F3C6;</div>
+      <div class="ribbon-name">Player 1</div>
+      <div class="ribbon-score">520</div>
+      <div class="ribbon-title">Blue Ribbon!</div>
+    </div>
+    <div class="label" style="color:#a8d5a8;">P1 Winner (#FF8C42 border)</div>
+  </div>
+  <div class="component-item">
+    <div class="ribbon-card p2">
+      <div class="ribbon-icon">&#x1F331;</div>
+      <div class="ribbon-name">Player 2</div>
+      <div class="ribbon-score">380</div>
+      <div class="ribbon-title">Red Ribbon!</div>
+    </div>
+    <div class="label" style="color:#a8d5a8;">P2 Runner-Up (#4A90D9 border)</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Hand Indicator -->
+<div class="subsection">
+<h3>Hand Indicator Card</h3>
+<div class="card dark-bg">
+<div class="component-row">
+  <div class="component-item">
+    <div class="hand-indicator">
+      <div class="hand-label">&#x270B; Right Hand</div>
+      <div class="hand-status">Not detected</div>
+    </div>
+    <div class="label" style="color:#a8d5a8;">Not Detected</div>
+  </div>
+  <div class="component-item">
+    <div class="hand-indicator detected">
+      <div class="hand-label">&#x270B; Right Hand</div>
+      <div class="hand-status">Detected!</div>
+    </div>
+    <div class="label" style="color:#a8d5a8;">Detected (green border + glow)</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Challenge Text Box -->
+<div class="subsection">
+<h3>Challenge Text Box</h3>
+<div class="card dark-bg">
+  <div style="margin-bottom:12px;">
+    <span class="challenge-mini">Grow 3 tomatoes &#x1F345;</span>
+  </div>
+  <div class="component-item"><div class="label" style="color:#a8d5a8;">Semi-transparent dark bg, 12px radius</div><div class="css-ref" style="color:#a8d5a8;">.challenge-mini</div></div>
+</div>
+</div>
+
+<!-- Settings Panel -->
+<div class="subsection">
+<h3>Settings Panel</h3>
+<div class="card" style="background:rgba(0,20,0,0.85);border:none;">
+  <div class="settings-panel-demo">
+    <div class="settings-close-x" title="Close">&#x2715;</div>
+    <div class="settings-title game-font">Settings</div>
+    <div class="settings-divider">
+      <div class="settings-section-title game-font">Sound Effects</div>
+      <div class="toggle-switch" onclick="this.querySelector('.toggle-track').classList.toggle('on');let l=this.querySelector('.toggle-label');l.textContent=l.textContent==='ON'?'OFF':'ON';l.classList.toggle('on');l.classList.toggle('off');" style="margin-top:8px;">
+        <div class="toggle-track on"><div class="toggle-knob"></div></div>
+        <span class="toggle-label on" style="color:#4ade80;">ON</span>
+      </div>
+    </div>
+    <div class="settings-divider">
+      <div class="settings-section-title game-font">Volume</div>
+      <div class="volume-control" style="margin-top:8px;">
+        <button class="vol-btn">-</button>
+        <div class="vol-bar"><div class="vol-fill" style="width:50%;"></div><div class="vol-handle" style="left:50%;"></div></div>
+        <button class="vol-btn">+</button>
+      </div>
+    </div>
+    <div style="padding-bottom:8px;">
+      <div class="settings-section-title game-font">Contrast</div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button class="contrast-btn active game-font">Normal</button>
+        <button class="contrast-btn inactive game-font">High</button>
+        <button class="contrast-btn inactive game-font">Maximum</button>
+      </div>
+    </div>
+    <button class="settings-close-btn game-font">Close Settings</button>
+  </div>
+</div>
+</div>
+
+<!-- HUD Bar -->
+<div class="subsection">
+<h3>HUD Bar</h3>
+<div class="card dark-bg" style="padding:0;">
+  <div style="background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);padding:24px;border-radius:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+      <div class="hud-item"><div class="hud-label game-font">TIME</div><div class="hud-value timer game-font">47</div></div>
+      <div class="hud-item"><div class="hud-value game-font" style="font-size:32px;font-weight:700;color:#fff;">Grow 3 tomatoes &#x1F345;</div></div>
+      <div class="hud-item"><div class="hud-label game-font">PLANTS</div><div class="hud-value score game-font">6</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:24px;margin-top:24px;">
+      <div class="progress-bar" style="flex:1;"><div class="progress-fill green" style="width:66%;"></div></div>
+      <div style="background:rgba(0,0,0,0.7);padding:12px 24px;border-radius:10px;min-width:100px;text-align:center;"><span class="game-font" style="font-size:24px;font-weight:700;color:#fff;">2 / 3</span></div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 7. HUD ELEMENTS -->
+<!-- ============================================ -->
+<section id="hud">
+<h2>7. HUD Elements</h2>
+<p class="section-desc">Individual HUD items, progress bars, and countdown indicators.</p>
+
+<!-- HUD Items -->
+<div class="subsection">
+<h3>HUD Item Variants</h3>
+<div class="card dark-bg">
+<div class="component-row">
+  <div class="component-item">
+    <div class="hud-item"><div class="hud-label game-font">TIME</div><div class="hud-value timer game-font">47</div></div>
+    <div class="label" style="color:#a8d5a8;">Timer (#FFD700)</div>
+  </div>
+  <div class="component-item">
+    <div class="hud-item"><div class="hud-label game-font">PLANTS</div><div class="hud-value score game-font">6</div></div>
+    <div class="label" style="color:#a8d5a8;">Score (#4ade80)</div>
+  </div>
+  <div class="component-item">
+    <div class="hud-item"><div class="hud-label game-font">TIME</div><div class="hud-value timer-warn game-font">8</div></div>
+    <div class="label" style="color:#a8d5a8;">Timer Warning (#FF3B30)</div>
+  </div>
+  <div class="component-item">
+    <div class="hud-item"><div class="hud-label game-font" style="color:#FF8C42;">PLAYER 1</div><div class="hud-value p1 game-font">520</div></div>
+    <div class="label" style="color:#a8d5a8;">P1 Score (#FF8C42)</div>
+  </div>
+  <div class="component-item">
+    <div class="hud-item"><div class="hud-label game-font" style="color:#4A90D9;">PLAYER 2</div><div class="hud-value p2 game-font">380</div></div>
+    <div class="label" style="color:#a8d5a8;">P2 Score (#4A90D9)</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Progress Bars -->
+<div class="subsection">
+<h3>Progress Bar Variants</h3>
+<div class="card dark-bg">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:500px;">
+  <div>
+    <div style="font-size:11px;color:#a8d5a8;margin-bottom:4px;font-weight:600;">Challenge Progress (25%)</div>
+    <div class="progress-bar"><div class="progress-fill green" style="width:25%;"></div></div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:#a8d5a8;margin-bottom:4px;font-weight:600;">Challenge Progress (50%)</div>
+    <div class="progress-bar"><div class="progress-fill green" style="width:50%;"></div></div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:#a8d5a8;margin-bottom:4px;font-weight:600;">Challenge Progress (75%)</div>
+    <div class="progress-bar"><div class="progress-fill green" style="width:75%;"></div></div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:#a8d5a8;margin-bottom:4px;font-weight:600;">Challenge Progress (100%)</div>
+    <div class="progress-bar"><div class="progress-fill green" style="width:100%;"></div></div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:#FF8C42;margin-bottom:4px;font-weight:600;">P1 Progress (60%)</div>
+    <div class="progress-bar p1-track"><div class="progress-fill p1" style="width:60%;"></div></div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:#4A90D9;margin-bottom:4px;font-weight:600;">P2 Progress (40%)</div>
+    <div class="progress-bar p2-track"><div class="progress-fill p2" style="width:40%;"></div></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Countdown -->
+<div class="subsection">
+<h3>Countdown Circle</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:40px;align-items:center;">
+  <div class="component-item"><div class="countdown-num">3</div><div class="label" style="color:#a8d5a8;">Pulsing animation</div></div>
+  <div class="component-item"><div class="countdown-num">2</div></div>
+  <div class="component-item"><div class="countdown-num">1</div></div>
+  <div class="component-item"><div class="countdown-num" style="font-size:80px;">Go!</div></div>
+</div>
+</div>
+</div>
+
+<!-- Challenge Mini -->
+<div class="subsection">
+<h3>Challenge Mini Bar</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:12px;">
+  <span class="challenge-mini">Grow 3 tomatoes &#x1F345;</span>
+  <span class="challenge-mini">Harvest 2 sunflowers &#x1F33B;</span>
+  <span class="challenge-mini">Water 4 plants &#x1F4A7;</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 8. GAME ELEMENTS -->
+<!-- ============================================ -->
+<section id="game">
+<h2>8. Game Elements</h2>
+<p class="section-desc">CSS representations of canvas-rendered game items.</p>
+
+<!-- Plant Pot -->
+<div class="subsection">
+<h3>Plant Pot</h3>
+<div class="card dark-bg" style="display:flex;align-items:flex-end;gap:40px;flex-wrap:wrap;">
+  <div class="component-item">
+    <div class="css-pot">
+      <div class="pot-rim"></div>
+      <div class="pot-soil"></div>
+      <div class="pot-body"></div>
+    </div>
+    <div class="label" style="color:#a8d5a8;">Terracotta gradient pot</div>
+    <div class="css-ref" style="color:#a8d5a8;">120x100px, 3px #8B4513 stroke</div>
+  </div>
+</div>
+</div>
+
+<!-- Plant Growth Stages -->
+<div class="subsection">
+<h3>Plant Growth Stages</h3>
+<div class="card">
+<div class="growth-grid">
+  <div class="gh">Plant</div><div class="gh">Seed</div><div class="gh">Sprout</div><div class="gh">Growing</div><div class="gh">Mature</div><div class="gh">Harvest</div>
+
+  <div class="gc" style="color:#FF6347;font-weight:700;font-size:14px;">Tomato</div>
+  <div class="gc">&#x1F330;<div class="stage-name">Seed</div></div>
+  <div class="gc">&#x1F331;<div class="stage-name">Sprout</div></div>
+  <div class="gc">&#x1FAB4;<div class="stage-name">Growing</div></div>
+  <div class="gc">&#x1F33F;<div class="stage-name">Mature</div></div>
+  <div class="gc">&#x1F345;<div class="stage-name">Harvest!</div></div>
+
+  <div class="gc" style="color:#FFD700;font-weight:700;font-size:14px;">Sunflower</div>
+  <div class="gc">&#x1F330;<div class="stage-name">Seed</div></div>
+  <div class="gc">&#x1F331;<div class="stage-name">Sprout</div></div>
+  <div class="gc">&#x1FAB4;<div class="stage-name">Growing</div></div>
+  <div class="gc">&#x1F33F;<div class="stage-name">Mature</div></div>
+  <div class="gc">&#x1F33B;<div class="stage-name">Harvest!</div></div>
+
+  <div class="gc" style="color:#FF8C00;font-weight:700;font-size:14px;">Carrot</div>
+  <div class="gc">&#x1F330;<div class="stage-name">Seed</div></div>
+  <div class="gc">&#x1F331;<div class="stage-name">Sprout</div></div>
+  <div class="gc">&#x1FAB4;<div class="stage-name">Growing</div></div>
+  <div class="gc">&#x1F33F;<div class="stage-name">Mature</div></div>
+  <div class="gc">&#x1F955;<div class="stage-name">Harvest!</div></div>
+
+  <div class="gc" style="color:#228B22;font-weight:700;font-size:14px;">Lettuce</div>
+  <div class="gc">&#x1F330;<div class="stage-name">Seed</div></div>
+  <div class="gc">&#x1F331;<div class="stage-name">Sprout</div></div>
+  <div class="gc">&#x1FAB4;<div class="stage-name">Growing</div></div>
+  <div class="gc">&#x1F33F;<div class="stage-name">Mature</div></div>
+  <div class="gc">&#x1F96C;<div class="stage-name">Harvest!</div></div>
+
+  <div class="gc" style="color:#4169E1;font-weight:700;font-size:14px;">Blueberry</div>
+  <div class="gc">&#x1F330;<div class="stage-name">Seed</div></div>
+  <div class="gc">&#x1F331;<div class="stage-name">Sprout</div></div>
+  <div class="gc">&#x1FAB4;<div class="stage-name">Growing</div></div>
+  <div class="gc">&#x1F33F;<div class="stage-name">Mature</div></div>
+  <div class="gc">&#x1FAD0;<div class="stage-name">Harvest!</div></div>
+</div>
+</div>
+</div>
+
+<!-- Need Meter Bars -->
+<div class="subsection">
+<h3>Need Meter Bars</h3>
+<div class="card dark-bg">
+<div style="background:rgba(0,0,0,0.6);border-radius:15px;padding:16px 20px;display:inline-block;">
+  <div class="game-font" style="font-size:16px;font-weight:700;color:#fff;margin-bottom:12px;font-family:Arial,sans-serif;">Plant Needs</div>
+  <div class="need-bar-demo">
+    <span class="need-icon">&#x1F4A7;</span>
+    <div class="need-track" style="position:relative;">
+      <div class="need-fill" style="width:80%;background:#4ade80;"></div>
+      <div class="need-label">Water</div>
+    </div>
+    <span style="font-size:10px;color:#4ade80;font-weight:600;">Healthy</span>
+  </div>
+  <div class="need-bar-demo">
+    <span class="need-icon">&#x2600;&#xFE0F;</span>
+    <div class="need-track" style="position:relative;">
+      <div class="need-fill" style="width:45%;background:#fbbf24;"></div>
+      <div class="need-label">Sun</div>
+    </div>
+    <span style="font-size:10px;color:#fbbf24;font-weight:600;">Warning</span>
+  </div>
+  <div class="need-bar-demo">
+    <span class="need-icon">&#x1F331;</span>
+    <div class="need-track critical" style="position:relative;">
+      <div class="need-fill" style="width:15%;background:#ef4444;"></div>
+      <div class="need-label">Food</div>
+    </div>
+    <span style="font-size:10px;color:#ef4444;font-weight:600;">Critical</span>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Cartoon Gloves -->
+<div class="subsection">
+<h3>Cartoon Glove Variants</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:32px;">
+  <div class="component-item">
+    <div class="css-glove" style="background:#F0FFF0;border-color:#2E8B57;box-shadow:0 0 20px rgba(46,139,87,0.4);">&#x1F44B;</div>
+    <div class="label" style="color:#a8d5a8;">Solo (Teal Glow)</div>
+    <div class="css-ref" style="color:#a8d5a8;">Fill: #F0FFF0 / Outline: #2E8B57</div>
+  </div>
+  <div class="component-item">
+    <div class="css-glove" style="background:#FFF5E6;border-color:#FF8C42;box-shadow:0 0 20px rgba(255,140,66,0.4);">&#x1F44B;</div>
+    <div class="label" style="color:#a8d5a8;">P1 (Orange Glow)</div>
+    <div class="css-ref" style="color:#a8d5a8;">Fill: #FFF5E6 / Outline: #FF8C42</div>
+  </div>
+  <div class="component-item">
+    <div class="css-glove" style="background:#E6F0FF;border-color:#4A90D9;box-shadow:0 0 20px rgba(74,144,217,0.4);">&#x1F44B;</div>
+    <div class="label" style="color:#a8d5a8;">P2 (Blue Glow)</div>
+    <div class="css-ref" style="color:#a8d5a8;">Fill: #E6F0FF / Outline: #4A90D9</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Watering Can -->
+<div class="subsection">
+<h3>Watering Can</h3>
+<div class="card dark-bg">
+<div class="component-row" style="gap:32px;">
+  <div class="component-item">
+    <div style="font-size:56px;filter:drop-shadow(0 4px 12px rgba(74,144,217,0.5));">&#x1F4A7;</div>
+    <div class="label" style="color:#a8d5a8;">Standard (Blue)</div>
+    <div class="css-ref" style="color:#a8d5a8;">Body: #4A90D9 / Stroke: #2E5A87</div>
+  </div>
+  <div class="component-item">
+    <div style="font-size:56px;filter:drop-shadow(0 4px 12px rgba(255,215,0,0.5));">&#x2728;</div>
+    <div class="label" style="color:#a8d5a8;">Golden (Rubber-band)</div>
+    <div class="css-ref" style="color:#a8d5a8;">Body: #FFD700 / Stroke: #DAA520</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Seed Colors -->
+<div class="subsection">
+<h3>Seed Colors</h3>
+<div class="card">
+<div class="component-row" style="gap:16px;">
+  <div class="component-item">
+    <div class="seed-dot" style="background:#8B0000;"></div>
+    <div class="label">Tomato</div>
+    <div class="css-ref">#8B0000</div>
+  </div>
+  <div class="component-item">
+    <div class="seed-dot" style="background:#8B4513;"></div>
+    <div class="label">Sunflower</div>
+    <div class="css-ref">#8B4513</div>
+  </div>
+  <div class="component-item">
+    <div class="seed-dot" style="background:#D2691E;"></div>
+    <div class="label">Carrot</div>
+    <div class="css-ref">#D2691E</div>
+  </div>
+  <div class="component-item">
+    <div class="seed-dot" style="background:#556B2F;"></div>
+    <div class="label">Lettuce</div>
+    <div class="css-ref">#556B2F</div>
+  </div>
+  <div class="component-item">
+    <div class="seed-dot" style="background:#483D8B;"></div>
+    <div class="label">Blueberry</div>
+    <div class="css-ref">#483D8B</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Confetti -->
+<div class="subsection">
+<h3>Confetti Colors</h3>
+<div class="card">
+<div class="component-row" style="gap:12px;">
+  <div class="component-item"><div class="confetti-dot" style="background:#FF6B6B;"></div><div class="label">Coral</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#4ECDC4;"></div><div class="label">Teal</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#45B7D1;"></div><div class="label">Sky</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#FFA07A;"></div><div class="label">Salmon</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#98D8C8;"></div><div class="label">Mint</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#F7DC6F;"></div><div class="label">Gold</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#BB8FCE;"></div><div class="label">Purple</div></div>
+  <div class="component-item"><div class="confetti-dot" style="background:#85C1E2;"></div><div class="label">Blue</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 9. BACKGROUNDS -->
+<!-- ============================================ -->
+<section id="backgrounds">
+<h2>9. Backgrounds</h2>
+<p class="section-desc">Game background themes and screen gradients.</p>
+
+<div class="subsection">
+<h3>Background Themes</h3>
+<div class="card">
+<div class="component-row" style="gap:16px;flex-wrap:wrap;">
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,rgba(135,206,250,0.95),rgba(175,225,255,0.9) 50%,rgba(200,235,255,0.85));"></div>
+    <div class="label">Sky</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,rgba(135,206,150,0.9) 0%,rgba(100,180,100,0.85) 40%,rgba(139,115,85,0.9) 70%,rgba(101,67,33,0.95) 100%);"></div>
+    <div class="label">Garden</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,rgba(34,80,50,0.9),rgba(55,100,60,0.9) 60%,rgba(40,70,45,0.9));"></div>
+    <div class="label">Forest</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,rgba(135,206,235,0.9),rgba(100,180,220,0.9) 40%,rgba(194,178,128,0.9) 70%,rgba(210,190,140,0.9));"></div>
+    <div class="label">Beach</div>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="subsection">
+<h3>Screen Gradients</h3>
+<div class="card">
+<div class="component-row" style="gap:16px;flex-wrap:wrap;">
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,#FFF8F0 0%,#FFF5E6 20%,#FEFCE8 45%,#F0FDF4 70%,#DCFCE7 100%);"></div>
+    <div class="label">Welcome / Light Screen (Ch.1)</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,#FFF6E8 0%,#FFF0D4 20%,#FEFADC 45%,#F5FCEC 70%,#E2F9D8 100%);"></div>
+    <div class="label">Light Screen (Ch.2)</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,#FFF3E0 0%,#FFECCC 20%,#FFF5D6 45%,#F8FAE4 70%,#E8F5CC 100%);"></div>
+    <div class="label">Light Screen (Ch.3)</div>
+  </div>
+  <div class="component-item">
+    <div class="bg-card" style="background:linear-gradient(180deg,#1a2e1a 0%,#213e21 50%,#1a2e1a 100%);"></div>
+    <div class="label">Dark Game Screen</div>
+  </div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- 10. FLOATING PARTICLES -->
+<!-- ============================================ -->
+<section id="particles">
+<h2>10. Floating Particles</h2>
+<p class="section-desc">Decorative leaf/petal shapes that drift across light screen backgrounds.</p>
+
+<div class="subsection">
+<h3>Particle Colors &amp; Shape</h3>
+<div class="card" style="background:linear-gradient(180deg,#FFF8F0,#FEFCE8,#F0FDF4);border:none;min-height:200px;position:relative;overflow:hidden;">
+<div class="component-row" style="gap:24px;position:relative;z-index:2;">
+  <div class="component-item">
+    <div class="leaf-particle" style="width:20px;height:14px;background:rgba(74,222,128,0.3);"></div>
+    <div class="label">Green Leaf</div>
+    <div class="css-ref">rgba(74,222,128,0.3)</div>
+  </div>
+  <div class="component-item">
+    <div class="leaf-particle" style="width:18px;height:12px;background:rgba(255,200,120,0.25);animation-delay:0.5s;"></div>
+    <div class="label">Warm Petal</div>
+    <div class="css-ref">rgba(255,200,120,0.25)</div>
+  </div>
+  <div class="component-item">
+    <div class="leaf-particle" style="width:16px;height:11px;background:rgba(255,182,193,0.25);animation-delay:1s;"></div>
+    <div class="label">Pink Blossom</div>
+    <div class="css-ref">rgba(255,182,193,0.25)</div>
+  </div>
+  <div class="component-item">
+    <div class="leaf-particle" style="width:22px;height:15px;background:rgba(144,238,144,0.3);animation-delay:1.5s;"></div>
+    <div class="label">Light Green</div>
+    <div class="css-ref">rgba(144,238,144,0.3)</div>
+  </div>
+  <div class="component-item">
+    <div class="leaf-particle" style="width:14px;height:10px;background:rgba(255,223,186,0.2);animation-delay:2s;"></div>
+    <div class="label">Peach</div>
+    <div class="css-ref">rgba(255,223,186,0.2)</div>
+  </div>
+</div>
+<div style="position:relative;z-index:2;margin-top:24px;padding:16px;background:rgba(255,255,255,0.6);border-radius:12px;">
+  <div style="font-size:12px;color:#475569;"><strong>Shape:</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">border-radius: 50% 0 50% 0</code> (leaf shape)</div>
+  <div style="font-size:12px;color:#475569;margin-top:4px;"><strong>Size:</strong> 10-24px wide, height = width * 0.7</div>
+  <div style="font-size:12px;color:#475569;margin-top:4px;"><strong>Animation:</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">particleDrift</code> 10-20s, translates right 80px + down 110vh, rotates 400deg</div>
+</div>
+
+<!-- Floating particles in background -->
+<div style="position:absolute;top:10%;left:5%;width:18px;height:12px;background:rgba(74,222,128,0.35);border-radius:50% 0 50% 0;animation:particleDrift 6s linear infinite;"></div>
+<div style="position:absolute;top:30%;left:25%;width:14px;height:10px;background:rgba(255,200,120,0.3);border-radius:50% 0 50% 0;animation:particleDrift 8s linear infinite;animation-delay:2s;"></div>
+<div style="position:absolute;top:15%;left:50%;width:20px;height:14px;background:rgba(255,182,193,0.25);border-radius:50% 0 50% 0;animation:particleDrift 7s linear infinite;animation-delay:1s;"></div>
+<div style="position:absolute;top:40%;left:70%;width:16px;height:11px;background:rgba(144,238,144,0.3);border-radius:50% 0 50% 0;animation:particleDrift 9s linear infinite;animation-delay:3s;"></div>
+<div style="position:absolute;top:5%;left:85%;width:12px;height:8px;background:rgba(255,223,186,0.2);border-radius:50% 0 50% 0;animation:particleDrift 10s linear infinite;animation-delay:4s;"></div>
+</div>
+</div>
+</section>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// Smooth scroll for sidebar
+document.querySelectorAll('.sidebar a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+// Active sidebar link on scroll
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.sidebar a');
+window.addEventListener('scroll',()=>{
+  let current='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)current=s.id;});
+  navLinks.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+current);});
+});
+
+// Dark/Light theme toggle
+let isDark=false;
+function toggleTheme(){
+  isDark=!isDark;
+  const main=document.getElementById('mainContent');
+  const btn=document.getElementById('themeToggle');
+  if(isDark){
+    document.body.style.background='#0f172a';
+    document.body.style.color='#e2e8f0';
+    main.querySelectorAll('.card:not(.dark-bg)').forEach(c=>{c.style.background='#1e293b';c.style.borderColor='#334155';});
+    main.querySelectorAll('section h2').forEach(h=>{h.style.color='#f1f5f9';});
+    main.querySelectorAll('.subsection h3').forEach(h=>{h.style.color='#94a3b8';});
+    main.querySelectorAll('.section-desc').forEach(p=>{p.style.color='#94a3b8';});
+    document.querySelector('.sidebar').style.background='#1e293b';
+    document.querySelector('.sidebar').style.borderColor='#334155';
+    navLinks.forEach(l=>{l.style.color='#94a3b8';});
+    btn.innerHTML='<span class="dot dark"></span> Dark';
+    btn.style.background='#1e293b';btn.style.borderColor='#334155';btn.style.color='#e2e8f0';
+  }else{
+    document.body.style.background='#FAFBFC';
+    document.body.style.color='#1e293b';
+    main.querySelectorAll('.card:not(.dark-bg)').forEach(c=>{c.style.background='#fff';c.style.borderColor='#e2e8f0';});
+    main.querySelectorAll('section h2').forEach(h=>{h.style.color='#1e293b';});
+    main.querySelectorAll('.subsection h3').forEach(h=>{h.style.color='#475569';});
+    main.querySelectorAll('.section-desc').forEach(p=>{p.style.color='#64748b';});
+    document.querySelector('.sidebar').style.background='#fff';
+    document.querySelector('.sidebar').style.borderColor='#e2e8f0';
+    navLinks.forEach(l=>{l.style.color='#64748b';});
+    btn.innerHTML='<span class="dot light"></span> Light';
+    btn.style.background='#fff';btn.style.borderColor='#e2e8f0';btn.style.color='#475569';
+  }
+}
+</script>
+</body>
+</html>
