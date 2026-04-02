@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Grow — Design Exploration | re:Action Health Technologies</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%);
+    padding: 56px 32px 48px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 40px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .page-header .company {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 20px;
+  }
+  .page-header .intro {
+    font-size: 17px;
+    font-weight: 300;
+    max-width: 580px;
+    margin: 0 auto;
+    opacity: 0.85;
+    line-height: 1.7;
+  }
+
+  /* ── Variation Cards ── */
+  .variations-grid {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap: 48px;
+  }
+  .variation-card {
+    background: #1e293b;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #334155;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .variation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .card-label {
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-label .badge {
+    padding: 4px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .card-label h3 {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .badge-a { background: #FEF3C7; color: #92400E; }
+  .badge-b { background: #DBEAFE; color: #1E40AF; }
+  .badge-c { background: #D1FAE5; color: #065F46; }
+  .badge-current { background: #FCE7F3; color: #9D174D; }
+
+  .mockup-wrapper {
+    padding: 0 20px;
+  }
+
+  /* ── Shared Mockup Container ── */
+  .mockup {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  .card-description {
+    padding: 20px 28px 24px;
+  }
+  .card-description p {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .personality-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .personality-tag {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.06);
+    color: #cbd5e1;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Footer ── */
+  .page-footer {
+    text-align: center;
+    padding: 48px 32px 60px;
+    border-top: 1px solid #334155;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .page-footer .cta {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .page-footer .note {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.7;
+  }
+
+  /* ── Current Design Section ── */
+  .current-section {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+  .current-section .section-divider {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .current-section .section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #334155;
+  }
+  .current-section .section-divider span {
+    position: relative;
+    background: #0f172a;
+    padding: 0 24px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #64748b;
+  }
+
+  /* ═══════════════════════════════════════════════
+     VARIATION A: STORYBOOK
+     ═══════════════════════════════════════════════ */
+  .mock-storybook {
+    background: #FFF8E7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Watercolor edge washes */
+  .mock-storybook::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(ellipse, rgba(144,200,80,0.18) 0%, rgba(144,200,80,0.06) 40%, transparent 70%);
+    pointer-events: none;
+  }
+  .mock-storybook::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 320px;
+    height: 260px;
+    background: radial-gradient(ellipse, rgba(255,200,80,0.2) 0%, rgba(255,200,80,0.05) 45%, transparent 70%);
+    pointer-events: none;
+  }
+  /* Top-right gold wash */
+  .mock-storybook .wash-tr {
+    position: absolute;
+    top: -20px;
+    right: 60px;
+    width: 200px;
+    height: 180px;
+    background: radial-gradient(ellipse, rgba(200,230,140,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Decorative drawn elements */
+  .sb-flower {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .sb-flower-1 {
+    bottom: 40px;
+    left: 32px;
+  }
+  .sb-flower-1 .petal {
+    width: 10px;
+    height: 10px;
+    background: #F9A8D4;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .sb-flower-1 .petal:nth-child(1) { top: 0; left: 5px; }
+  .sb-flower-1 .petal:nth-child(2) { top: 5px; left: 0; }
+  .sb-flower-1 .petal:nth-child(3) { top: 5px; left: 10px; }
+  .sb-flower-1 .petal:nth-child(4) { top: 10px; left: 5px; }
+  .sb-flower-1 .center {
+    width: 6px;
+    height: 6px;
+    background: #FBBF24;
+    border-radius: 50%;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+  }
+  .sb-flower-1 .stem {
+    width: 2px;
+    height: 18px;
+    background: #6B8E23;
+    position: absolute;
+    top: 16px;
+    left: 7px;
+    border-radius: 1px;
+  }
+
+  .sb-flower-2 {
+    bottom: 52px;
+    left: 72px;
+  }
+  .sb-flower-2 .petal {
+    width: 8px;
+    height: 8px;
+    background: #FDE68A;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .sb-flower-2 .petal:nth-child(1) { top: 0; left: 4px; }
+  .sb-flower-2 .petal:nth-child(2) { top: 4px; left: 0; }
+  .sb-flower-2 .petal:nth-child(3) { top: 4px; left: 8px; }
+  .sb-flower-2 .petal:nth-child(4) { top: 8px; left: 4px; }
+  .sb-flower-2 .center {
+    width: 5px;
+    height: 5px;
+    background: #D97706;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+  }
+  .sb-flower-2 .stem {
+    width: 2px;
+    height: 14px;
+    background: #6B8E23;
+    position: absolute;
+    top: 14px;
+    left: 5px;
+    border-radius: 1px;
+  }
+
+  .sb-flower-3 {
+    bottom: 36px;
+    right: 40px;
+  }
+  .sb-flower-3 .petal {
+    width: 9px;
+    height: 9px;
+    background: #C4B5FD;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .sb-flower-3 .petal:nth-child(1) { top: 0; left: 4px; }
+  .sb-flower-3 .petal:nth-child(2) { top: 4px; left: 0; }
+  .sb-flower-3 .petal:nth-child(3) { top: 4px; left: 9px; }
+  .sb-flower-3 .petal:nth-child(4) { top: 9px; left: 4px; }
+  .sb-flower-3 .center {
+    width: 5px;
+    height: 5px;
+    background: #FBBF24;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+  }
+  .sb-flower-3 .stem {
+    width: 2px;
+    height: 16px;
+    background: #6B8E23;
+    position: absolute;
+    top: 14px;
+    left: 5px;
+    border-radius: 1px;
+  }
+
+  /* Butterfly */
+  .sb-butterfly {
+    position: absolute;
+    top: 60px;
+    right: 80px;
+    z-index: 1;
+    pointer-events: none;
+    animation: sb-flutter 4s ease-in-out infinite;
+  }
+  @keyframes sb-flutter {
+    0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+    25% { transform: translate(8px, -6px) rotate(3deg); }
+    50% { transform: translate(4px, -10px) rotate(-2deg); }
+    75% { transform: translate(-4px, -4px) rotate(4deg); }
+  }
+  .sb-butterfly .wing {
+    width: 10px;
+    height: 7px;
+    background: #FBBF24;
+    border-radius: 50% 50% 20% 50%;
+    position: absolute;
+  }
+  .sb-butterfly .wing.left { transform: rotate(-20deg); }
+  .sb-butterfly .wing.right { left: 9px; transform: rotate(20deg) scaleX(-1); }
+  .sb-butterfly .body-part {
+    width: 2px;
+    height: 10px;
+    background: #92400E;
+    border-radius: 1px;
+    position: absolute;
+    left: 8px;
+    top: -1px;
+  }
+
+  /* Sun with rays */
+  .sb-sun {
+    position: absolute;
+    top: 24px;
+    left: 36px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .sb-sun .core {
+    width: 22px;
+    height: 22px;
+    background: #FDE68A;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 12px rgba(253, 230, 138, 0.5);
+  }
+  .sb-sun .ray {
+    position: absolute;
+    width: 2px;
+    height: 8px;
+    background: #FCD34D;
+    border-radius: 1px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center -2px;
+  }
+  .sb-sun .ray:nth-child(2) { transform: translate(-1px, -20px) rotate(0deg); }
+  .sb-sun .ray:nth-child(3) { transform: translate(-1px, -20px) rotate(45deg); }
+  .sb-sun .ray:nth-child(4) { transform: translate(-1px, -20px) rotate(90deg); }
+  .sb-sun .ray:nth-child(5) { transform: translate(-1px, -20px) rotate(135deg); }
+  .sb-sun .ray:nth-child(6) { transform: translate(-1px, -20px) rotate(180deg); }
+  .sb-sun .ray:nth-child(7) { transform: translate(-1px, -20px) rotate(225deg); }
+  .sb-sun .ray:nth-child(8) { transform: translate(-1px, -20px) rotate(270deg); }
+  .sb-sun .ray:nth-child(9) { transform: translate(-1px, -20px) rotate(315deg); }
+
+  .sb-logo {
+    width: 170px;
+    margin-bottom: 8px;
+    opacity: 0.85;
+    position: relative;
+    z-index: 2;
+  }
+  .sb-title {
+    font-size: 46px;
+    font-weight: 800;
+    color: #5D4037;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 0 rgba(93,64,55,0.15), 2px 2px 4px rgba(93,64,55,0.08);
+    font-style: normal;
+  }
+  .sb-subtitle {
+    font-size: 18px;
+    color: #8D6E63;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 2;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .sb-seedling-wrap {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 12px;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #A1887F;
+    border-radius: 52% 48% 50% 50%;
+    animation: sb-pulse 2s ease-in-out infinite;
+  }
+  @keyframes sb-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+  .sb-seedling-wrap .seedling { font-size: 38px; }
+  .sb-btn {
+    background: #6B8E23;
+    color: #FFFEF5;
+    border: none;
+    padding: 14px 36px;
+    font-size: 20px;
+    font-weight: 700;
+    border-radius: 28px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 4px 16px rgba(107,142,35,0.3);
+    font-family: 'Inter', sans-serif;
+  }
+  .sb-hint {
+    font-size: 11px;
+    color: #A1887F;
+    margin-top: 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .sb-gear {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(93,64,55,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    border: 1.5px dashed #BCAAA4;
+  }
+  .sb-gear svg { width: 20px; height: 20px; fill: #8D6E63; }
+
+
+  /* ═══════════════════════════════════════════════
+     VARIATION B: MODERN MINIMAL
+     ═══════════════════════════════════════════════ */
+  .mock-minimal {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F1F8F1 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 48px;
+    text-align: center;
+    position: relative;
+  }
+  .mm-logo {
+    width: 150px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+    position: relative;
+    z-index: 1;
+  }
+  .mm-title {
+    font-size: 52px;
+    font-weight: 300;
+    color: #1B4332;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .mm-subtitle {
+    font-size: 15px;
+    color: #9CA3AF;
+    font-weight: 300;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 1px;
+  }
+  /* CSS leaf icon */
+  .mm-leaf-wrap {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 36px;
+  }
+  .mm-leaf {
+    width: 32px;
+    height: 48px;
+    background: transparent;
+    border: 2px solid #22c55e;
+    border-radius: 50% 0 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+  }
+  .mm-leaf::after {
+    content: '';
+    position: absolute;
+    width: 1.5px;
+    height: 32px;
+    background: #22c55e;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(0deg);
+    border-radius: 1px;
+  }
+  .mm-btn {
+    background: transparent;
+    color: #22c55e;
+    border: 2px solid #22c55e;
+    padding: 14px 40px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .mm-btn:hover {
+    background: #22c55e;
+    color: white;
+  }
+  .mm-hint {
+    font-size: 11px;
+    color: #D1D5DB;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+  .mm-gear {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    border: 1.5px solid #D1D5DB;
+  }
+  .mm-gear svg { width: 16px; height: 16px; fill: none; stroke: #9CA3AF; stroke-width: 1.5px; }
+
+
+  /* ═══════════════════════════════════════════════
+     VARIATION C: PLAYFUL GARDEN
+     ═══════════════════════════════════════════════ */
+  .mock-playful {
+    background: linear-gradient(180deg, #87CEEB 0%, #7EC8E3 30%, #6BCB77 65%, #4ADE80 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Clouds */
+  .pf-cloud {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+  }
+  .pf-cloud-1 {
+    width: 200px;
+    height: 60px;
+    top: 30px;
+    left: 40px;
+    border-radius: 40px;
+    box-shadow: 60px -20px 0 20px rgba(255,255,255,0.4), 120px -10px 0 10px rgba(255,255,255,0.35);
+  }
+  .pf-cloud-2 {
+    width: 160px;
+    height: 50px;
+    top: 60px;
+    right: 60px;
+    border-radius: 30px;
+    box-shadow: 40px -15px 0 15px rgba(255,255,255,0.4), 90px -8px 0 8px rgba(255,255,255,0.3);
+  }
+  .pf-cloud-3 {
+    width: 120px;
+    height: 40px;
+    top: 14px;
+    right: 220px;
+    border-radius: 24px;
+    box-shadow: 30px -12px 0 12px rgba(255,255,255,0.35);
+  }
+
+  /* Sun */
+  .pf-sun {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .pf-sun .face {
+    width: 48px;
+    height: 48px;
+    background: #FFD93D;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 24px rgba(255,217,61,0.5);
+  }
+  .pf-sun .face::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 12px;
+    width: 5px;
+    height: 5px;
+    background: #F59E0B;
+    border-radius: 50%;
+    box-shadow: 14px 0 0 0 #F59E0B;
+  }
+  .pf-sun .face::after {
+    content: '';
+    position: absolute;
+    top: 27px;
+    left: 14px;
+    width: 20px;
+    height: 8px;
+    border: none;
+    border-bottom: 2.5px solid #F59E0B;
+    border-radius: 0 0 50% 50%;
+  }
+  .pf-sun .sun-ray {
+    position: absolute;
+    width: 3px;
+    height: 12px;
+    background: #FFD93D;
+    border-radius: 2px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center -6px;
+  }
+  .pf-sun .sun-ray:nth-child(2) { transform: translate(-1.5px, -30px) rotate(0deg); }
+  .pf-sun .sun-ray:nth-child(3) { transform: translate(-1.5px, -30px) rotate(45deg); }
+  .pf-sun .sun-ray:nth-child(4) { transform: translate(-1.5px, -30px) rotate(90deg); }
+  .pf-sun .sun-ray:nth-child(5) { transform: translate(-1.5px, -30px) rotate(135deg); }
+  .pf-sun .sun-ray:nth-child(6) { transform: translate(-1.5px, -30px) rotate(180deg); }
+  .pf-sun .sun-ray:nth-child(7) { transform: translate(-1.5px, -30px) rotate(225deg); }
+  .pf-sun .sun-ray:nth-child(8) { transform: translate(-1.5px, -30px) rotate(270deg); }
+  .pf-sun .sun-ray:nth-child(9) { transform: translate(-1.5px, -30px) rotate(315deg); }
+
+  /* Flowers at bottom */
+  .pf-flower-group {
+    position: absolute;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .pf-flower-group.left { left: 16px; }
+  .pf-flower-group.right { right: 16px; }
+
+  .pf-flower {
+    position: relative;
+    display: inline-block;
+    margin: 0 4px;
+  }
+  .pf-flower .pf-petal {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .pf-flower .pf-petal:nth-child(1) { top: 0; left: 7px; }
+  .pf-flower .pf-petal:nth-child(2) { top: 7px; left: 0; }
+  .pf-flower .pf-petal:nth-child(3) { top: 7px; left: 14px; }
+  .pf-flower .pf-petal:nth-child(4) { top: 14px; left: 7px; }
+  .pf-flower .pf-petal:nth-child(5) { top: 4px; left: 1px; }
+  .pf-flower .pf-fc {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    top: 7px;
+    left: 9px;
+    z-index: 1;
+  }
+  .pf-flower .pf-stem {
+    width: 3px;
+    height: 30px;
+    background: #16a34a;
+    position: absolute;
+    top: 22px;
+    left: 11px;
+    border-radius: 2px;
+  }
+  .pf-flower .pf-leaf-l {
+    width: 10px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50% 0 50% 0;
+    position: absolute;
+    top: 32px;
+    left: 2px;
+    transform: rotate(-20deg);
+  }
+  .pf-flower .pf-leaf-r {
+    width: 10px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 0 50% 0 50%;
+    position: absolute;
+    top: 38px;
+    left: 14px;
+    transform: rotate(20deg);
+  }
+
+  .pf-flower.red .pf-petal { background: #EF4444; }
+  .pf-flower.red .pf-fc { background: #FBBF24; }
+  .pf-flower.pink .pf-petal { background: #F472B6; }
+  .pf-flower.pink .pf-fc { background: #FDE68A; }
+  .pf-flower.yellow .pf-petal { background: #FBBF24; }
+  .pf-flower.yellow .pf-fc { background: #92400E; }
+  .pf-flower.blue .pf-petal { background: #60A5FA; }
+  .pf-flower.blue .pf-fc { background: #FDE68A; }
+
+  /* Bee */
+  .pf-bee {
+    position: absolute;
+    top: 120px;
+    right: 100px;
+    z-index: 3;
+    pointer-events: none;
+    animation: pf-buzz 3s ease-in-out infinite;
+  }
+  @keyframes pf-buzz {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(12px, -8px); }
+    50% { transform: translate(6px, -14px); }
+    75% { transform: translate(-6px, -6px); }
+  }
+  .pf-bee .bee-body {
+    width: 14px;
+    height: 10px;
+    background: #FBBF24;
+    border-radius: 50%;
+    position: relative;
+  }
+  .pf-bee .bee-body::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 2px;
+    width: 10px;
+    height: 2px;
+    background: #1a1a1a;
+    border-radius: 1px;
+    box-shadow: 0 4px 0 0 #1a1a1a;
+  }
+  .pf-bee .bee-wing {
+    width: 8px;
+    height: 5px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    position: absolute;
+    top: -3px;
+  }
+  .pf-bee .bee-wing.left { left: 1px; transform: rotate(-20deg); animation: pf-wingflap 0.15s ease-in-out infinite alternate; }
+  .pf-bee .bee-wing.right { right: 1px; transform: rotate(20deg); animation: pf-wingflap 0.15s ease-in-out infinite alternate-reverse; }
+  @keyframes pf-wingflap { from { transform: rotate(-30deg); } to { transform: rotate(10deg); } }
+
+  .pf-logo {
+    width: 160px;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 2;
+    filter: brightness(1.1);
+  }
+  .pf-title {
+    font-size: 56px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.0;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 2;
+    -webkit-text-stroke: 2px #16a34a;
+    text-shadow:
+      2px 2px 0 #16a34a,
+      3px 3px 0 rgba(22,163,106,0.4),
+      4px 4px 8px rgba(0,0,0,0.15);
+  }
+  .pf-title span { display: block; }
+  .pf-subtitle {
+    font-size: 16px;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 2;
+    text-decoration: underline;
+    text-decoration-color: rgba(22,163,106,0.5);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  /* Seedling on soil mound */
+  .pf-seedling-area {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 14px;
+  }
+  .pf-seedling-emoji {
+    font-size: 64px;
+    display: block;
+    position: relative;
+    z-index: 1;
+    animation: pf-bounce 2s ease-in-out infinite;
+  }
+  @keyframes pf-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .pf-soil {
+    width: 80px;
+    height: 20px;
+    background: #8B6F47;
+    border-radius: 50% 50% 0 0;
+    margin: -8px auto 0;
+    position: relative;
+    z-index: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .pf-soil::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+    bottom: -3px;
+    left: 0;
+  }
+  /* Sparkles */
+  .pf-sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .pf-sparkle::before, .pf-sparkle::after {
+    content: '';
+    position: absolute;
+    background: #FDE68A;
+    border-radius: 1px;
+  }
+  .pf-sparkle::before {
+    width: 2px;
+    height: 6px;
+    top: 0;
+    left: 2px;
+  }
+  .pf-sparkle::after {
+    width: 6px;
+    height: 2px;
+    top: 2px;
+    left: 0;
+  }
+  .pf-sparkle-1 { top: 140px; left: 380px; animation: pf-twinkle 1.5s ease-in-out infinite; }
+  .pf-sparkle-2 { top: 160px; right: 370px; animation: pf-twinkle 1.5s ease-in-out 0.5s infinite; }
+  .pf-sparkle-3 { top: 130px; left: 420px; animation: pf-twinkle 1.5s ease-in-out 1s infinite; }
+  @keyframes pf-twinkle { 0%,100%{opacity:0;transform:scale(0.5)} 50%{opacity:1;transform:scale(1.2)} }
+
+  .pf-btn {
+    background: linear-gradient(135deg, #FFB347, #FF6B35);
+    color: white;
+    border: none;
+    padding: 16px 44px;
+    font-size: 22px;
+    font-weight: 800;
+    border-radius: 24px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+    font-family: 'Inter', sans-serif;
+    transition: transform 0.2s;
+  }
+  .pf-btn:hover {
+    animation: pf-btn-bounce 0.4s ease;
+  }
+  @keyframes pf-btn-bounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    70% { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  .pf-hint {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .pf-gear {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  .pf-gear svg { width: 20px; height: 20px; fill: white; }
+
+
+  /* ═══════════════════════════════════════════════
+     CURRENT DESIGN
+     ═══════════════════════════════════════════════ */
+  .mock-current {
+    background: linear-gradient(180deg, #FFF8F0 0%, #FFF5E6 20%, #FEFCE8 45%, #F0FDF4 70%, #DCFCE7 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .mock-current::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(255,220,120,0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  /* Particles */
+  .cur-particle {
+    position: absolute;
+    width: 12px;
+    height: 8px;
+    border-radius: 50% 0 50% 0;
+    opacity: 0.3;
+    animation: cur-drift 8s linear infinite;
+  }
+  @keyframes cur-drift {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(540px) rotate(360deg); opacity: 0; }
+  }
+
+  .cur-logo {
+    width: 170px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+  }
+  .cur-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #FF6347, #FFD700, #90EE90, #4169E1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cur-subtitle {
+    font-size: 18px;
+    color: #4b5563;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .cur-seedling {
+    font-size: 50px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+    animation: sb-pulse 2s ease-in-out infinite;
+  }
+  .cur-btn {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    padding: 14px 38px;
+    font-size: 20px;
+    font-weight: 700;
+    border-radius: 18px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.35);
+    font-family: 'Inter', sans-serif;
+  }
+  .cur-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .cur-gear {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .cur-gear svg { width: 20px; height: 20px; fill: white; }
+
+  /* ── SVG Icons ── */
+  .gear-icon-filled { fill: currentColor; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1080px) {
+    .variations-grid {
+      grid-template-columns: 1fr;
+      max-width: 700px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ────────────────────── HEADER ────────────────────── -->
+<div class="page-header">
+  <div class="company">re:Action Health Technologies</div>
+  <h1>Garden Grow — Design Exploration</h1>
+  <p class="intro">Three visual directions for the welcome screen. Same content, different personality.</p>
+</div>
+
+<!-- ────────────────────── VARIATION GRID ────────────────────── -->
+<div class="variations-grid">
+
+  <!-- ═══ VARIATION A: STORYBOOK ═══ -->
+  <div class="variation-card">
+    <div class="card-label">
+      <span class="badge badge-a">A</span>
+      <h3>Storybook</h3>
+    </div>
+    <div class="mockup-wrapper">
+      <div class="mockup mock-storybook">
+        <div class="wash-tr"></div>
+
+        <!-- Decorative: Sun -->
+        <div class="sb-sun">
+          <div class="core"></div>
+          <div class="ray"></div><div class="ray"></div><div class="ray"></div>
+          <div class="ray"></div><div class="ray"></div><div class="ray"></div>
+          <div class="ray"></div><div class="ray"></div>
+        </div>
+
+        <!-- Decorative: Butterfly -->
+        <div class="sb-butterfly">
+          <div class="wing left"></div>
+          <div class="wing right"></div>
+          <div class="body-part"></div>
+        </div>
+
+        <!-- Decorative: Flowers -->
+        <div class="sb-flower sb-flower-1">
+          <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+          <div class="center"></div>
+          <div class="stem"></div>
+        </div>
+        <div class="sb-flower sb-flower-2">
+          <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+          <div class="center"></div>
+          <div class="stem"></div>
+        </div>
+        <div class="sb-flower sb-flower-3">
+          <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+          <div class="center"></div>
+          <div class="stem"></div>
+        </div>
+
+        <!-- Content -->
+        <img src="assets/images/logo.png" alt="re-Action logo" class="sb-logo">
+        <div class="sb-title">Garden Grow!</div>
+        <div class="sb-subtitle">Use your hands to help plants grow</div>
+        <div class="sb-seedling-wrap">
+          <span class="seedling">&#127793;</span>
+        </div>
+        <button class="sb-btn">Start Growing</button>
+        <div class="sb-hint">Camera access required</div>
+
+        <!-- Settings gear -->
+        <div class="sb-gear">
+          <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="card-description">
+      <p>A warm, illustrated, hand-crafted feeling — like opening a children's picture book. Parchment background, ink-bleed title, hand-drawn decorative elements, and earthy pillow-shaped button. Nostalgic and gentle.</p>
+      <div class="personality-tags">
+        <span class="personality-tag">Warm</span>
+        <span class="personality-tag">Nostalgic</span>
+        <span class="personality-tag">Gentle</span>
+        <span class="personality-tag">Hand-crafted</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VARIATION B: MODERN MINIMAL ═══ -->
+  <div class="variation-card">
+    <div class="card-label">
+      <span class="badge badge-b">B</span>
+      <h3>Modern Minimal</h3>
+    </div>
+    <div class="mockup-wrapper">
+      <div class="mockup mock-minimal">
+        <!-- Content -->
+        <img src="assets/images/logo.png" alt="re-Action logo" class="mm-logo">
+        <div class="mm-title">Garden Grow</div>
+        <div class="mm-subtitle">Use your hands to help plants grow</div>
+        <div class="mm-leaf-wrap">
+          <div class="mm-leaf"></div>
+        </div>
+        <button class="mm-btn">Start Growing</button>
+        <div class="mm-hint">Camera access required</div>
+
+        <!-- Settings gear -->
+        <div class="mm-gear">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="card-description">
+      <p>Clean, spacious, lots of breathing room. Thin typography, generous whitespace, a single line-art leaf icon, and a ghost button. No particles, no decoration — just calm confidence. Apple-influenced premium feel.</p>
+      <div class="personality-tags">
+        <span class="personality-tag">Clean</span>
+        <span class="personality-tag">Premium</span>
+        <span class="personality-tag">Calm</span>
+        <span class="personality-tag">Spacious</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VARIATION C: PLAYFUL GARDEN ═══ -->
+  <div class="variation-card">
+    <div class="card-label">
+      <span class="badge badge-c">C</span>
+      <h3>Playful Garden</h3>
+    </div>
+    <div class="mockup-wrapper">
+      <div class="mockup mock-playful">
+        <!-- Clouds -->
+        <div class="pf-cloud pf-cloud-1"></div>
+        <div class="pf-cloud pf-cloud-2"></div>
+        <div class="pf-cloud pf-cloud-3"></div>
+
+        <!-- Sun -->
+        <div class="pf-sun">
+          <div class="face"></div>
+          <div class="sun-ray"></div><div class="sun-ray"></div><div class="sun-ray"></div>
+          <div class="sun-ray"></div><div class="sun-ray"></div><div class="sun-ray"></div>
+          <div class="sun-ray"></div><div class="sun-ray"></div>
+        </div>
+
+        <!-- Bee -->
+        <div class="pf-bee">
+          <div class="bee-wing left"></div>
+          <div class="bee-wing right"></div>
+          <div class="bee-body"></div>
+        </div>
+
+        <!-- Sparkles around seedling -->
+        <div class="pf-sparkle pf-sparkle-1"></div>
+        <div class="pf-sparkle pf-sparkle-2"></div>
+        <div class="pf-sparkle pf-sparkle-3"></div>
+
+        <!-- Flowers bottom-left -->
+        <div class="pf-flower-group left">
+          <div class="pf-flower red">
+            <div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div>
+            <div class="pf-fc"></div>
+            <div class="pf-stem"></div>
+            <div class="pf-leaf-l"></div>
+            <div class="pf-leaf-r"></div>
+          </div>
+          <div class="pf-flower yellow" style="position:relative; top:-6px; left:8px;">
+            <div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div>
+            <div class="pf-fc"></div>
+            <div class="pf-stem"></div>
+            <div class="pf-leaf-l"></div>
+          </div>
+        </div>
+
+        <!-- Flowers bottom-right -->
+        <div class="pf-flower-group right">
+          <div class="pf-flower pink">
+            <div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div>
+            <div class="pf-fc"></div>
+            <div class="pf-stem"></div>
+            <div class="pf-leaf-r"></div>
+          </div>
+          <div class="pf-flower blue" style="position:relative; top:-8px; left:-6px;">
+            <div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div><div class="pf-petal"></div>
+            <div class="pf-fc"></div>
+            <div class="pf-stem"></div>
+            <div class="pf-leaf-l"></div>
+            <div class="pf-leaf-r"></div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <img src="assets/images/logo.png" alt="re-Action logo" class="pf-logo">
+        <div class="pf-title">
+          <span>Garden</span>
+          <span>Grow!</span>
+        </div>
+        <div class="pf-subtitle">Use your hands to help plants grow</div>
+        <div class="pf-seedling-area">
+          <span class="pf-seedling-emoji">&#127793;</span>
+          <div class="pf-soil"></div>
+        </div>
+        <button class="pf-btn">Start Growing</button>
+        <div class="pf-hint">Camera access required</div>
+
+        <!-- Settings gear -->
+        <div class="pf-gear">
+          <svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="card-description">
+      <p>Bold, colorful, high-energy but still gentle. A bright garden on a sunny day with fluffy clouds, CSS flowers, a buzzing bee, and a warm orange call-to-action. Each word of the title stacks for impact. Joyful and inviting.</p>
+      <div class="personality-tags">
+        <span class="personality-tag">Bold</span>
+        <span class="personality-tag">Joyful</span>
+        <span class="personality-tag">Inviting</span>
+        <span class="personality-tag">Energetic</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CURRENT DESIGN ═══ -->
+  <div class="variation-card">
+    <div class="card-label">
+      <span class="badge badge-current">Current</span>
+      <h3>Warm Garden</h3>
+    </div>
+    <div class="mockup-wrapper">
+      <div class="mockup mock-current">
+        <!-- Particles -->
+        <div class="cur-particle" style="background:rgba(74,222,128,0.3); left:12%; top:10%; animation-delay:0s; animation-duration:9s;"></div>
+        <div class="cur-particle" style="background:rgba(255,200,120,0.25); left:35%; top:5%; animation-delay:1.5s; animation-duration:11s;"></div>
+        <div class="cur-particle" style="background:rgba(255,182,193,0.25); left:58%; top:8%; animation-delay:3s; animation-duration:10s;"></div>
+        <div class="cur-particle" style="background:rgba(144,238,144,0.3); left:78%; top:3%; animation-delay:4.5s; animation-duration:8s;"></div>
+        <div class="cur-particle" style="background:rgba(255,223,186,0.2); left:90%; top:12%; animation-delay:2s; animation-duration:12s;"></div>
+        <div class="cur-particle" style="background:rgba(74,222,128,0.3); left:25%; top:15%; animation-delay:5s; animation-duration:10s;"></div>
+        <div class="cur-particle" style="background:rgba(255,200,120,0.25); left:65%; top:7%; animation-delay:6.5s; animation-duration:9s;"></div>
+        <div class="cur-particle" style="background:rgba(255,182,193,0.25); left:48%; top:2%; animation-delay:7s; animation-duration:11s;"></div>
+
+        <!-- Content -->
+        <img src="assets/images/logo.png" alt="re-Action logo" class="cur-logo">
+        <div class="cur-title">Garden Grow!</div>
+        <div class="cur-subtitle">Use your hands to help plants grow</div>
+        <div class="cur-seedling">&#127793;</div>
+        <button class="cur-btn">Start Growing</button>
+        <div class="cur-hint">Camera access required</div>
+
+        <!-- Settings gear -->
+        <div class="cur-gear">
+          <svg viewBox="0 0 24 24"><path fill="white" d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.58 1.69-.98l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="card-description">
+      <p>The current welcome screen: cream-to-mint gradient with golden sun glow, rainbow gradient title, floating leaf particles, and a green call-to-action. Warm and nature-themed with gentle animations throughout.</p>
+      <div class="personality-tags">
+        <span class="personality-tag">Warm</span>
+        <span class="personality-tag">Natural</span>
+        <span class="personality-tag">Familiar</span>
+        <span class="personality-tag">Established</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ────────────────────── FOOTER ────────────────────── -->
+<div class="page-footer">
+  <p class="cta">Which direction resonates? Each can be adapted and refined.</p>
+  <p class="note">All variations maintain accessibility standards: large text, high contrast buttons, generous touch targets. Designed for dementia patients in therapeutic settings.</p>
+</div>
+
+</body>
+</html>
