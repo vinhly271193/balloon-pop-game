@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Grow — Game Design Document | re:Action Health Technologies</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --magenta: #E91E8C;
+    --purple: #7B2D8E;
+    --deep-purple: #5B1D6E;
+    --violet: #9B59B6;
+    --teal: #2B7A78;
+    --teal-light: #3AAFA9;
+    --p1-orange: #FF8C42;
+    --p2-blue: #4A90D9;
+    --green: #27AE60;
+    --green-light: #2ECC71;
+    --yellow: #F1C40F;
+    --red: #E74C3C;
+    --bg: #FAFBFC;
+    --card-bg: #FFFFFF;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #E5E7EB;
+    --lavender: #F5E6F5;
+    --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+  }
+
+  /* Navigation */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  nav .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 32px;
+    height: 60px; overflow-x: auto;
+  }
+  nav .nav-brand {
+    font-weight: 800; font-size: 16px; white-space: nowrap;
+    background: linear-gradient(135deg, var(--magenta), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  nav a {
+    color: var(--text-muted); text-decoration: none; font-size: 13px;
+    font-weight: 500; white-space: nowrap; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--purple); }
+
+  /* Hero Cover */
+  .hero {
+    background: linear-gradient(135deg, var(--magenta) 0%, var(--purple) 50%, var(--deep-purple) 100%);
+    color: white; padding: 140px 24px 80px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 80%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+  .hero-logo { max-width: 320px; margin-bottom: 24px; filter: brightness(0) invert(1); opacity: 0.9; }
+  .hero h1 { font-size: 64px; font-weight: 900; letter-spacing: -2px; margin-bottom: 16px; }
+  .hero .subtitle { font-size: 22px; opacity: 0.9; font-weight: 300; max-width: 600px; margin: 0 auto 32px; }
+  .hero .pillars {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 40px;
+  }
+  .hero .pillar-tag {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    padding: 10px 20px; border-radius: 100px; font-size: 14px; font-weight: 600;
+  }
+
+  /* Main Content */
+  main { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* Section Headers */
+  .section-header {
+    margin: 64px 0 32px; padding-top: 24px;
+    border-top: 3px solid var(--lavender);
+  }
+  .section-header h2 {
+    font-size: 36px; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--magenta), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .section-header p { color: var(--text-muted); font-size: 16px; }
+
+  /* Cards */
+  .card-grid {
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  }
+  .card-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .card-grid.two { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.single { grid-template-columns: 1fr; }
+
+  .card {
+    background: var(--card-bg); border-radius: 16px; padding: 28px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .card h3 {
+    font-size: 18px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card h3 .icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .card p, .card li { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li { padding: 4px 0; padding-left: 20px; position: relative; }
+  .card ul li::before {
+    content: ''; position: absolute; left: 0; top: 12px;
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  /* Accent borders */
+  .card.accent-magenta { border-left: 4px solid var(--magenta); }
+  .card.accent-purple { border-left: 4px solid var(--purple); }
+  .card.accent-teal { border-left: 4px solid var(--teal); }
+  .card.accent-orange { border-left: 4px solid var(--p1-orange); }
+  .card.accent-blue { border-left: 4px solid var(--p2-blue); }
+  .card.accent-green { border-left: 4px solid var(--green); }
+  .card.accent-yellow { border-left: 4px solid var(--yellow); }
+  .card.accent-violet { border-left: 4px solid var(--violet); }
+
+  .card.accent-magenta ul li::before { background: var(--magenta); }
+  .card.accent-purple ul li::before { background: var(--purple); }
+  .card.accent-teal ul li::before { background: var(--teal); }
+  .card.accent-orange ul li::before { background: var(--p1-orange); }
+  .card.accent-blue ul li::before { background: var(--p2-blue); }
+  .card.accent-green ul li::before { background: var(--green); }
+  .card.accent-yellow ul li::before { background: var(--yellow); }
+  .card.accent-violet ul li::before { background: var(--violet); }
+
+  /* Highlight cards */
+  .card.highlight {
+    background: linear-gradient(135deg, var(--lavender), #EDE7F6);
+    border: none;
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th { background: linear-gradient(135deg, var(--purple), var(--deep-purple)); color: white;
+       padding: 12px 16px; text-align: left; font-weight: 600; font-size: 13px; }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  tr:nth-child(even) td { background: #F9FAFB; }
+  tr:hover td { background: var(--lavender); }
+
+  /* Tags / Badges */
+  .tag {
+    display: inline-block; padding: 4px 12px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+  }
+  .tag.green { background: #D1FAE5; color: #065F46; }
+  .tag.blue { background: #DBEAFE; color: #1E40AF; }
+  .tag.orange { background: #FED7AA; color: #9A3412; }
+  .tag.purple { background: #E9D5FF; color: #6B21A8; }
+  .tag.pink { background: #FCE7F3; color: #9D174D; }
+  .tag.teal { background: #CCFBF1; color: #115E59; }
+
+  /* Color swatches */
+  .swatch-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+  .swatch {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 8px; background: #F3F4F6; font-size: 13px;
+  }
+  .swatch-dot { width: 20px; height: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+
+  /* Flow diagram */
+  .flow {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; margin: 16px 0;
+  }
+  .flow-step {
+    background: linear-gradient(135deg, var(--purple), var(--magenta));
+    color: white; padding: 10px 20px; border-radius: 12px;
+    font-size: 14px; font-weight: 600; white-space: nowrap;
+  }
+  .flow-arrow { color: var(--text-muted); font-size: 20px; }
+
+  /* Stats grid */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+  .stat {
+    text-align: center; padding: 20px; background: var(--card-bg);
+    border-radius: 12px; border: 1px solid var(--border);
+  }
+  .stat .value { font-size: 28px; font-weight: 800; color: var(--purple); }
+  .stat .label { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+  /* Persona cards */
+  .persona { display: flex; gap: 16px; align-items: flex-start; }
+  .persona-avatar {
+    width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+
+  /* Mode cards */
+  .mode-card {
+    background: var(--card-bg); border-radius: 16px; padding: 32px;
+    box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center;
+  }
+  .mode-card .mode-icon { font-size: 48px; margin-bottom: 16px; }
+  .mode-card h3 { font-size: 20px; margin-bottom: 4px; }
+  .mode-card .mode-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+  .mode-card ul { text-align: left; }
+
+  /* Growth stages */
+  .stages { display: flex; gap: 0; margin: 16px 0; }
+  .stage {
+    flex: 1; text-align: center; padding: 16px 8px;
+    position: relative; font-size: 13px;
+  }
+  .stage::after {
+    content: ''; position: absolute; right: -1px; top: 50%;
+    transform: translateY(-50%); width: 0; height: 0;
+    border-top: 12px solid transparent; border-bottom: 12px solid transparent;
+    border-left: 12px solid; z-index: 1;
+  }
+  .stage:last-child::after { display: none; }
+  .stage .stage-icon { font-size: 28px; margin-bottom: 6px; }
+  .stage:nth-child(1) { background: #FEF3C7; color: #92400E; }
+  .stage:nth-child(1)::after { border-left-color: #FEF3C7; }
+  .stage:nth-child(2) { background: #D1FAE5; color: #065F46; }
+  .stage:nth-child(2)::after { border-left-color: #D1FAE5; }
+  .stage:nth-child(3) { background: #BBF7D0; color: #166534; }
+  .stage:nth-child(3)::after { border-left-color: #BBF7D0; }
+  .stage:nth-child(4) { background: #86EFAC; color: #14532D; }
+  .stage:nth-child(4)::after { border-left-color: #86EFAC; }
+  .stage:nth-child(5) { background: #4ADE80; color: #052E16; }
+  .stage:nth-child(5)::after { border-left-color: #4ADE80; }
+  .stage:nth-child(6) { background: linear-gradient(135deg, var(--magenta), var(--purple)); color: white; border-radius: 0 12px 12px 0; }
+  .stage:first-child { border-radius: 12px 0 0 12px; }
+
+  /* DDA meter */
+  .dda-meter { margin: 12px 0; }
+  .dda-bar {
+    height: 24px; border-radius: 12px; position: relative; overflow: hidden;
+    background: #E5E7EB; margin: 6px 0;
+  }
+  .dda-fill {
+    height: 100%; border-radius: 12px; transition: width 0.3s;
+    display: flex; align-items: center; padding: 0 12px;
+    font-size: 11px; font-weight: 600; color: white;
+  }
+  .dda-label { font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; }
+
+  /* Chapter cards */
+  .chapter { position: relative; padding-left: 32px; margin: 20px 0; }
+  .chapter::before {
+    content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+    width: 3px; background: linear-gradient(to bottom, var(--magenta), var(--purple));
+  }
+  .chapter::after {
+    content: ''; position: absolute; left: 4px; top: 4px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--magenta), var(--purple));
+  }
+  .chapter h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .chapter .ch-levels { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .chapter p { font-size: 14px; color: var(--text-muted); }
+  .chapter .ch-quote { font-style: italic; color: var(--purple); }
+
+  /* Footer */
+  footer {
+    text-align: center; padding: 40px 24px; color: var(--text-muted);
+    font-size: 13px; border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--purple); text-decoration: none; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 40px; }
+    .hero .subtitle { font-size: 18px; }
+    .card-grid.three, .card-grid.two { grid-template-columns: 1fr; }
+    .section-header h2 { font-size: 28px; }
+    nav .nav-inner { gap: 16px; }
+    .stages { flex-direction: column; }
+    .stage::after { display: none; }
+    .stage { border-radius: 8px !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Garden Grow GDD</span>
+    <a href="#overview">Overview</a>
+    <a href="#pillars">Pillars</a>
+    <a href="#audience">Audience</a>
+    <a href="#loop">Core Loop</a>
+    <a href="#mechanics">Mechanics</a>
+    <a href="#modes">Modes</a>
+    <a href="#dda">DDA</a>
+    <a href="#therapeutic">Therapeutic</a>
+    <a href="#art">Art & Audio</a>
+    <a href="#tech">Tech</a>
+    <a href="#accessibility">Accessibility</a>
+    <a href="#story">Story</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<!-- Hero Cover -->
+<section class="hero">
+  <div class="hero-content">
+    <img src="assets/images/logo.png" alt="re:Action Health Technologies" class="hero-logo">
+    <h1>Garden Grow</h1>
+    <p class="subtitle">A therapeutic hand-tracking gardening game for people living with dementia and their care partners</p>
+    <div class="pillars">
+      <span class="pillar-tag">Physical Activity</span>
+      <span class="pillar-tag">Cognitive Stimulation</span>
+      <span class="pillar-tag">Social Engagement</span>
+      <span class="pillar-tag">Wellbeing Support</span>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ========== GAME OVERVIEW ========== -->
+<div class="section-header" id="overview">
+  <h2>Game Overview</h2>
+  <p>The elevator pitch, key differentiators, and what makes Garden Grow unique</p>
+</div>
+
+<div class="card-grid three">
+  <div class="card accent-magenta">
+    <h3><span class="icon" style="background:#FCE7F3">&#127793;</span> Elevator Pitch</h3>
+    <p><em>"An old garden has been waiting for someone special to help it bloom again..."</em></p>
+    <br>
+    <p>Garden Grow brings grandparents and grandchildren together through gentle, camera-powered gardening that adapts to every player. No controllers, no touchscreens &mdash; just hands and a webcam.</p>
+  </div>
+  <div class="card accent-purple">
+    <h3><span class="icon" style="background:#E9D5FF">&#9733;</span> Key Differentiators</h3>
+    <ul>
+      <li>Camera-based hand tracking (no controllers)</li>
+      <li>Real-time Dynamic Difficulty Adjustment per player</li>
+      <li>Co-operative & competitive multiplayer on shared screen</li>
+      <li>Fully synthesised audio (no external files)</li>
+      <li>Runs in any modern browser &mdash; no install needed</li>
+    </ul>
+  </div>
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#128154;</span> Core Values</h3>
+    <ul>
+      <li>No failure states &mdash; every interaction is rewarded</li>
+      <li>Gentle, intuitive hand controls</li>
+      <li>Social connection &mdash; intergenerational 2-player play</li>
+      <li>Therapeutic fine motor + sensory engagement</li>
+      <li>Adaptive difficulty meets each player where they are</li>
+    </ul>
+  </div>
+</div>
+
+<div style="margin-top: 20px;">
+  <div class="card highlight" style="text-align:center;">
+    <p style="font-size:16px; font-weight:600; color:var(--purple); margin-bottom:8px;">Live Now</p>
+    <p style="font-size:14px; color:var(--text-muted);">
+      <a href="https://vinhly271193.github.io/balloon-pop-game/" target="_blank" style="color:var(--magenta); font-weight:600; text-decoration:none;">
+        vinhly271193.github.io/balloon-pop-game
+      </a>
+      &nbsp;&bull;&nbsp; GitHub Pages &nbsp;&bull;&nbsp; Chrome, Edge, Safari &nbsp;&bull;&nbsp; No install required
+    </p>
+  </div>
+</div>
+
+<!-- ========== DESIGN PILLARS ========== -->
+<div class="section-header" id="pillars">
+  <h2>Design Pillars</h2>
+  <p>The four core experiences driving every design decision</p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-magenta">
+    <h3><span class="icon" style="background:#FCE7F3">&#127939;</span> Physical Activity</h3>
+    <p style="font-weight:600; margin-bottom:8px;">Exercise for the body</p>
+    <ul>
+      <li>Natural hand movements: reaching, hovering, grasping</li>
+      <li>Maps directly to physiotherapy exercises</li>
+      <li>Supports both seated and standing play</li>
+      <li>Fine and gross motor engagement</li>
+    </ul>
+  </div>
+  <div class="card accent-violet">
+    <h3><span class="icon" style="background:#E9D5FF">&#129504;</span> Cognitive Stimulation</h3>
+    <p style="font-weight:600; margin-bottom:8px;">Exercise for the mind</p>
+    <ul>
+      <li>Sequential task planning (plant &rarr; water &rarr; grow)</li>
+      <li>Monitoring multiple plant needs simultaneously</li>
+      <li>Pattern recognition across plant types</li>
+      <li>Gentle decision-making without time pressure</li>
+    </ul>
+  </div>
+  <div class="card accent-blue">
+    <h3><span class="icon" style="background:#DBEAFE">&#129309;</span> Social Engagement</h3>
+    <p style="font-weight:600; margin-bottom:8px;">Connection over correction</p>
+    <ul>
+      <li>2-player shared screen designed for intergenerational pairs</li>
+      <li>Co-op teamwork moments (Magic Pumpkin)</li>
+      <li>Competitive but always celebratory language</li>
+      <li>"Us vs. The Garden" &mdash; never adversarial</li>
+    </ul>
+  </div>
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#128156;</span> Wellbeing Support</h3>
+    <p style="font-weight:600; margin-bottom:8px;">Emotional & psychological nurturing</p>
+    <ul>
+      <li>Nostalgic garden themes and familiar activities</li>
+      <li>Narrative purpose gives each session meaning</li>
+      <li>No failure, only growth &mdash; every round celebrates</li>
+      <li>Gentle, calming synthesised audio</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== TARGET AUDIENCE ========== -->
+<div class="section-header" id="audience">
+  <h2>Target Audience</h2>
+  <p>Designed for a grandmother with dementia and her teenage grandson, side by side</p>
+</div>
+
+<div class="card-grid three">
+  <div class="card accent-magenta">
+    <div class="persona">
+      <div class="persona-avatar" style="background:#FCE7F3;">&#128117;</div>
+      <div>
+        <h3 style="margin-bottom:4px;">Primary: Person Living with Dementia</h3>
+        <span class="tag pink">Core User</span>
+      </div>
+    </div>
+    <ul style="margin-top:16px;">
+      <li>Mild to moderate cognitive impairment</li>
+      <li>May have reduced fine motor control</li>
+      <li>Benefits from sensory stimulation & repetitive positive actions</li>
+      <li>May not understand complex instructions &mdash; game must be self-evident</li>
+    </ul>
+  </div>
+  <div class="card accent-blue">
+    <div class="persona">
+      <div class="persona-avatar" style="background:#DBEAFE;">&#128102;</div>
+      <div>
+        <h3 style="margin-bottom:4px;">Secondary: Care Partner</h3>
+        <span class="tag blue">Play Partner</span>
+      </div>
+    </div>
+    <ul style="margin-top:16px;">
+      <li>Teenager, adult child, or professional caregiver</li>
+      <li>Plays alongside in 2-player mode</li>
+      <li>Provides encouragement and shared experience</li>
+      <li>Benefits from structured, positive activity together</li>
+    </ul>
+  </div>
+  <div class="card accent-teal">
+    <div class="persona">
+      <div class="persona-avatar" style="background:#CCFBF1;">&#129490;</div>
+      <div>
+        <h3 style="margin-bottom:4px;">Tertiary: Clinical Staff</h3>
+        <span class="tag teal">Facilitator</span>
+      </div>
+    </div>
+    <ul style="margin-top:16px;">
+      <li>Nurses, caregivers, activity coordinators</li>
+      <li>Variable technology proficiency</li>
+      <li>Limited time per resident</li>
+      <li>Need setup under 30 seconds</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h3><span class="icon" style="background:#FEF3C7">&#129504;</span> Cognitive Considerations</h3>
+  <table>
+    <tr><th>Domain</th><th>Consideration</th><th>Design Response</th></tr>
+    <tr><td>Attention</td><td>Limited span</td><td>5&ndash;15 minute sessions</td></tr>
+    <tr><td>Memory</td><td>Short-term impairment</td><td>No rules to remember; current task always displayed</td></tr>
+    <tr><td>Processing Speed</td><td>Slower</td><td>Generous time limits, no pressure</td></tr>
+    <tr><td>Executive Function</td><td>Difficulty with complex decisions</td><td>Single clear objective always visible</td></tr>
+  </table>
+</div>
+
+<!-- ========== CORE LOOP ========== -->
+<div class="section-header" id="loop">
+  <h2>Core Loop</h2>
+  <p>What the player does every 30 seconds</p>
+</div>
+
+<div class="flow">
+  <span class="flow-step">&#127793; Catch Seed</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#127793; Plant in Pot</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#128167; Water</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#9728;&#65039; Sunlight</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#129514; Fertilize</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#127807; Grow!</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">&#129382; Harvest!</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step" style="background:var(--green)">&#127881; Score + Repeat</span>
+</div>
+
+<div class="stages" style="margin-top:32px;">
+  <div class="stage"><div class="stage-icon">&#127858;</div>Empty Pot</div>
+  <div class="stage"><div class="stage-icon">&#127793;</div>Seed Planted</div>
+  <div class="stage"><div class="stage-icon">&#127793;</div>Sprouting</div>
+  <div class="stage"><div class="stage-icon">&#127807;</div>Growing</div>
+  <div class="stage"><div class="stage-icon">&#127795;</div>Mature</div>
+  <div class="stage"><div class="stage-icon">&#10024;</div>Harvestable!</div>
+</div>
+
+<div class="card-grid two" style="margin-top:24px;">
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#127793;</span> Plant Types</h3>
+    <table>
+      <tr><th>Plant</th><th>Seed Color</th><th>Plant Color</th><th>Icon</th></tr>
+      <tr><td>Tomato</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#8B0000;vertical-align:middle;"></span> #8B0000</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#FF6347;vertical-align:middle;"></span> #FF6347</td><td>&#127813;</td></tr>
+      <tr><td>Sunflower</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#8B4513;vertical-align:middle;"></span> #8B4513</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#FFD700;vertical-align:middle;"></span> #FFD700</td><td>&#127803;</td></tr>
+      <tr><td>Carrot</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#D2691E;vertical-align:middle;"></span> #D2691E</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#FF8C00;vertical-align:middle;"></span> #FF8C00</td><td>&#129365;</td></tr>
+      <tr><td>Lettuce</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#556B2F;vertical-align:middle;"></span> #556B2F</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#90EE90;vertical-align:middle;"></span> #90EE90</td><td>&#129388;</td></tr>
+      <tr><td>Blueberry</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#483D8B;vertical-align:middle;"></span> #483D8B</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#4169E1;vertical-align:middle;"></span> #4169E1</td><td>&#129744;</td></tr>
+    </table>
+  </div>
+  <div class="card accent-blue">
+    <h3><span class="icon" style="background:#DBEAFE">&#128167;</span> Plant Needs System</h3>
+    <table>
+      <tr><th>Need</th><th>Color</th><th>Tool</th><th>Interaction</th></tr>
+      <tr><td>&#128167; Water</td><td><span class="tag blue">Blue</span></td><td>Watering Can</td><td>Pick up &rarr; hold over pot</td></tr>
+      <tr><td>&#9728;&#65039; Sunlight</td><td><span class="tag orange">Gold</span></td><td>Sun</td><td>Hover hand over sun area</td></tr>
+      <tr><td>&#129514; Fertiliser</td><td><span class="tag green">Green</span></td><td>Fertilizer Bag</td><td>Pick up &rarr; hold over pot</td></tr>
+    </table>
+    <p style="margin-top:12px;"><strong>Key rules:</strong> Needs deplete over time. Icons pulse when critical (&lt;20%). Plant pauses growth but <em>never dies</em>. Depletion rate controlled by DDA.</p>
+  </div>
+</div>
+
+<!-- ========== GAMEPLAY MECHANICS ========== -->
+<div class="section-header" id="mechanics">
+  <h2>Gameplay Mechanics</h2>
+  <p>Hand tracking, player assignment, and interaction design</p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-purple">
+    <h3><span class="icon" style="background:#E9D5FF">&#9995;</span> Hand Tracking</h3>
+    <p><strong>MediaPipe Hands</strong> (legacy <code>@mediapipe/hands</code> via CDN)</p>
+    <ul style="margin-top:12px;">
+      <li>Max 2 hands tracked (1 per player in 2P mode)</li>
+      <li>6 collision points per hand: palm center + 5 fingertips</li>
+      <li>Camera resolution: 640&times;480</li>
+      <li>Model complexity: 0 (fastest)</li>
+      <li>Confidence: 0.5 detection, 0.3 tracking</li>
+    </ul>
+  </div>
+  <div class="card accent-orange">
+    <h3><span class="icon" style="background:#FED7AA">&#128064;</span> Player Assignment</h3>
+    <p>Hands sorted by wrist x-position in camera frame:</p>
+    <ul style="margin-top:12px;">
+      <li><strong>Leftmost in camera</strong> &rarr; Player 1 (right side of mirrored screen)</li>
+      <li><strong>Rightmost in camera</strong> &rarr; Player 2 (left side of mirrored screen)</li>
+      <li>Canvas mirrored with CSS <code>scaleX(-1)</code></li>
+      <li>MediaPipe "Left" hand = user's actual RIGHT hand</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card-grid two" style="margin-top:20px;">
+  <div class="card accent-teal">
+    <h3><span class="icon" style="background:#CCFBF1">&#129526;</span> Cartoon Gloves</h3>
+    <table>
+      <tr><th>Mode</th><th>Player</th><th>Outline</th><th>Fill</th></tr>
+      <tr><td>Solo</td><td>Single</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#4ECDC4;vertical-align:middle;"></span> Teal</td><td>White</td></tr>
+      <tr><td>2-Player</td><td>Player 1</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#FF8C42;vertical-align:middle;"></span> Orange</td><td>Warm White</td></tr>
+      <tr><td>2-Player</td><td>Player 2</td><td><span class="swatch-dot" style="display:inline-block;width:14px;height:14px;background:#4A90D9;vertical-align:middle;"></span> Blue</td><td>Cool White</td></tr>
+    </table>
+    <p style="margin-top:12px;">Puffy fingertips with highlight shines, colored outer glow, 80% of raw hand size.</p>
+  </div>
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#128260;</span> Calibration Flow</h3>
+    <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px;">
+      <span style="font-size:14px;">1. Welcome &rarr; "Start Growing" (3s hand hover)</span>
+      <span style="font-size:14px;">2. Player Select &rarr; "1 Player" or "2 Players"</span>
+      <span style="font-size:14px;">3. Mode Select (if 2P) &rarr; Co-op or Competitive</span>
+      <span style="font-size:14px;">4. Calibrate P1 &rarr; "Show your hand on the right!"</span>
+      <span style="font-size:14px;">5. Calibrate P2 &rarr; "Show your hand on the left!"</span>
+      <span style="font-size:14px;">6. Divider calculated at midpoint of wrists</span>
+      <span style="font-size:14px; font-weight:700; color:var(--green);">7. Game begins!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== GAME MODES ========== -->
+<div class="section-header" id="modes">
+  <h2>Game Modes</h2>
+  <p>Solo, cooperative, and competitive play</p>
+</div>
+
+<div class="card-grid three">
+  <div class="mode-card" style="border-top:4px solid var(--green);">
+    <div class="mode-icon">&#127793;</div>
+    <h3>Solo Mode</h3>
+    <p class="mode-sub">1 Player</p>
+    <ul style="text-align:left; font-size:14px; color:var(--text-muted);">
+      <li style="padding:4px 0;">Full-width garden with 2&ndash;3 plant pots</li>
+      <li style="padding:4px 0;">One player interacts with all tools and plants</li>
+      <li style="padding:4px 0;">Standard challenge progression through chapters</li>
+      <li style="padding:4px 0;">DDA adjusts to single player's ability</li>
+    </ul>
+  </div>
+  <div class="mode-card" style="border-top:4px solid var(--p2-blue);">
+    <div class="mode-icon">&#127819;</div>
+    <h3>Community Garden</h3>
+    <p class="mode-sub">Co-operative &bull; 2 Players</p>
+    <ul style="text-align:left; font-size:14px; color:var(--text-muted);">
+      <li style="padding:4px 0;">Shared garden &mdash; both players interact with same pots</li>
+      <li style="padding:4px 0;">Shared goal: "Together, grow 8 plants!"</li>
+      <li style="padding:4px 0;">P1 = orange glove, P2 = blue glove</li>
+      <li style="padding:4px 0;"><strong>Magic Pumpkin:</strong> both touch = confetti + timer pause</li>
+      <li style="padding:4px 0;">Team celebration at round end</li>
+    </ul>
+  </div>
+  <div class="mode-card" style="border-top:4px solid var(--p1-orange);">
+    <div class="mode-icon">&#127942;</div>
+    <h3>Village Fair</h3>
+    <p class="mode-sub">Competitive &bull; 2 Players</p>
+    <ul style="text-align:left; font-size:14px; color:var(--text-muted);">
+      <li style="padding:4px 0;">Split garden with soft dashed divider</li>
+      <li style="padding:4px 0;">Individual scoring &mdash; each player has own zone</li>
+      <li style="padding:4px 0;">Cross-zone assist: harvest points go to zone owner</li>
+      <li style="padding:4px 0;"><strong>Rubber band:</strong> Golden Watering Can for trailing player</li>
+      <li style="padding:4px 0;">No "Game Over" &mdash; Blue Ribbon + Red Ribbon for both</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== DDA SYSTEM ========== -->
+<div class="section-header" id="dda">
+  <h2>The "Fair Play" DDA System</h2>
+  <p>Dynamic Difficulty Adjustment &mdash; the brain of the multiplayer experience</p>
+</div>
+
+<div class="card highlight" style="margin-bottom:20px; text-align:center;">
+  <p style="font-size:18px; font-weight:700; color:var(--purple);">&#9878;&#65039; Invisible Equity</p>
+  <p style="font-size:14px; color:var(--text-muted); max-width:600px; margin:8px auto 0;">
+    The AI creates a level playing field without anyone selecting a "difficulty setting." It monitors each player independently every 5 seconds and adjusts parameters to keep both in a Flow State.
+  </p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-purple">
+    <h3><span class="icon" style="background:#E9D5FF">&#128200;</span> Metrics Tracked (Per Player)</h3>
+    <table>
+      <tr><th>Metric</th><th>Description</th></tr>
+      <tr><td>Harvest Rate</td><td>Number of harvests in last 10-second window</td></tr>
+      <tr><td>Success Rate</td><td>Target plant harvests / total harvests</td></tr>
+      <tr><td>Idle Time</td><td>Seconds since last hand interaction</td></tr>
+    </table>
+  </div>
+  <div class="card accent-orange">
+    <h3><span class="icon" style="background:#FED7AA">&#127918;</span> Difficulty Parameters</h3>
+    <table>
+      <tr><th>Parameter</th><th>Range</th><th>Effect</th></tr>
+      <tr><td><code>seedSpeed</code></td><td>0.5x &ndash; 2.0x</td><td>How fast plant needs deplete</td></tr>
+      <tr><td><code>hitBoxMultiplier</code></td><td>0.7x &ndash; 1.8x</td><td>Collision detection radius</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h3><span class="icon" style="background:#FEF3C7">&#9881;&#65039;</span> Adjustment Rules</h3>
+  <div class="dda-meter">
+    <div class="dda-label"><span>High Performer (&gt;3 harvests/10s)</span><span>&#128293; Harder</span></div>
+    <div class="dda-bar"><div class="dda-fill" style="width:80%;background:linear-gradient(90deg,var(--p1-orange),var(--red));">Faster depletion, smaller hit boxes</div></div>
+  </div>
+  <div class="dda-meter">
+    <div class="dda-label"><span>Normal Player</span><span>&#9989; Maintain</span></div>
+    <div class="dda-bar"><div class="dda-fill" style="width:50%;background:linear-gradient(90deg,var(--green),var(--teal));">No changes</div></div>
+  </div>
+  <div class="dda-meter">
+    <div class="dda-label"><span>Struggling (&lt;1 harvest/10s)</span><span>&#128588; Easier</span></div>
+    <div class="dda-bar"><div class="dda-fill" style="width:90%;background:linear-gradient(90deg,var(--p2-blue),var(--violet));">30% slower depletion, 50% larger hit boxes</div></div>
+  </div>
+  <div class="dda-meter">
+    <div class="dda-label"><span>Idle (&gt;5s no interaction)</span><span>&#129303; Magnetic Mode</span></div>
+    <div class="dda-bar"><div class="dda-fill" style="width:95%;background:linear-gradient(90deg,var(--magenta),var(--purple));">Maximum ease &mdash; magnetic hit detection</div></div>
+  </div>
+  <p style="margin-top:12px; font-size:13px; color:var(--text-muted);">All adjustments interpolate smoothly over ~2 seconds. No jarring changes. Dementia-tuned: struggling &lt; 2 harvests/10s, idle &gt; 3s.</p>
+</div>
+
+<!-- ========== THERAPEUTIC FRAMEWORK ========== -->
+<div class="section-header" id="therapeutic">
+  <h2>Therapeutic Framework</h2>
+  <p>Research-backed design for dementia care</p>
+</div>
+
+<div class="card highlight" style="margin-bottom:20px;">
+  <p style="text-align:center; font-size:20px; font-weight:800; color:var(--purple);">
+    "45% of dementia cases could be prevented or delayed"
+  </p>
+  <p style="text-align:center; font-size:13px; color:var(--text-muted);">
+    &mdash; The Lancet Commission on Dementia, 2024 (Lancet 2024; 404: 572&ndash;628)
+  </p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-violet">
+    <h3><span class="icon" style="background:#E9D5FF">&#128218;</span> Research-Based Principles</h3>
+    <ul>
+      <li><strong>Errorless learning</strong> &mdash; no failure states, success is the default</li>
+      <li><strong>Building on remaining capacities</strong> &mdash; focus on what patients CAN do</li>
+      <li><strong>Multi-domain stimulation</strong> &mdash; motor + cognitive simultaneously</li>
+      <li><strong>Self-efficacy through positive feedback</strong> &mdash; generous rewards</li>
+      <li><strong>Social interaction</strong> &mdash; co-play for social engagement</li>
+    </ul>
+  </div>
+  <div class="card accent-magenta">
+    <h3><span class="icon" style="background:#FCE7F3">&#129505;</span> Physical Therapy Mapping</h3>
+    <table>
+      <tr><th>Game Action</th><th>Physiotherapy Equivalent</th></tr>
+      <tr><td>Catching seeds</td><td>Reaching & arm extension</td></tr>
+      <tr><td>Watering / sunlight</td><td>Hovering & sustained hold</td></tr>
+      <tr><td>Picking up tools</td><td>Grasping & grip strength</td></tr>
+      <tr><td>Gardening motions</td><td>Sweeping & range of motion</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h3><span class="icon" style="background:#FEF3C7">&#129302;</span> Auto-Help System (Invisible Assistance)</h3>
+  <p style="margin-bottom:12px; font-size:14px; color:var(--text-muted);">When a player appears to be struggling, the game provides progressive, invisible help:</p>
+  <table>
+    <tr><th>Level</th><th>Trigger</th><th>Response</th></tr>
+    <tr><td>1</td><td>15 seconds idle</td><td>"Take your time! &#127793;"</td></tr>
+    <tr><td>2</td><td>30 seconds</td><td>Target plant seeds get subtle glow</td></tr>
+    <tr><td>3</td><td>45 seconds</td><td>Seeds move 50% slower</td></tr>
+    <tr><td>4</td><td>60 seconds</td><td>Only target plant types spawn</td></tr>
+  </table>
+  <p style="margin-top:12px; font-size:13px; color:var(--purple); font-weight:600;">
+    Design principle: Help appears naturally without drawing attention to struggle. No "Having trouble?" messages.
+  </p>
+</div>
+
+<!-- ========== ART & AUDIO ========== -->
+<div class="section-header" id="art">
+  <h2>Art & Audio</h2>
+  <p>Visual identity and synthesised soundscape</p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-magenta">
+    <h3><span class="icon" style="background:#FCE7F3">&#127912;</span> Visual Identity</h3>
+    <p style="font-weight:600; margin-bottom:12px;">Brand: re:Action Health Technologies</p>
+    <div class="swatch-row">
+      <div class="swatch"><div class="swatch-dot" style="background:linear-gradient(135deg,#E91E8C,#7B2D8E);"></div> Brand Gradient</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#FF8C42;"></div> P1 Orange</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#4A90D9;"></div> P2 Blue</div>
+    </div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="swatch-dot" style="background:#4ECDC4;"></div> Solo Teal</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#27AE60;"></div> UI Green</div>
+      <div class="swatch"><div class="swatch-dot" style="background:#FFD700;"></div> Gold</div>
+    </div>
+    <p style="margin-top:12px; font-size:13px; color:var(--text-muted);">Garden setting: peaceful sky, grass, soil. Warm cream-to-mint welcome screen with floating leaf particles.</p>
+  </div>
+  <div class="card accent-blue">
+    <h3><span class="icon" style="background:#DBEAFE">&#127925;</span> Sound Effects (Web Audio API)</h3>
+    <p style="font-weight:600; margin-bottom:8px;">All synthesised &mdash; zero audio files!</p>
+    <table>
+      <tr><th>Sound</th><th>Description</th><th>Trigger</th></tr>
+      <tr><td>Plant</td><td>Soft rising tone with rustling</td><td>Seed planted</td></tr>
+      <tr><td>Harvest</td><td>Satisfying pluck/pick</td><td>Plant harvested</td></tr>
+      <tr><td>Water</td><td>Gentle droplet</td><td>Watering can used</td></tr>
+      <tr><td>Bird Song</td><td>Gentle chirp</td><td>Random ambient</td></tr>
+      <tr><td>Wind Chimes</td><td>Soft metallic tones</td><td>Chapter complete</td></tr>
+      <tr><td>Garden Ambient</td><td>Layered nature sounds</td><td>Background loop</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card-grid two" style="margin-top:20px;">
+  <div class="card accent-orange">
+    <h3><span class="icon" style="background:#FED7AA">&#127926;</span> Per-Player Audio (2P)</h3>
+    <table>
+      <tr><th>Player</th><th>Shift</th><th>Effect</th></tr>
+      <tr><td>Player 1</td><td>0.8x (lower octave)</td><td>Warmer, deeper tones</td></tr>
+      <tr><td>Player 2</td><td>1.25x (higher octave)</td><td>Brighter, lighter tones</td></tr>
+    </table>
+    <p style="margin-top:12px;">When both trigger actions within 200ms: <strong>harmonized chord</strong> plays instead of two separate sounds. A "playing together" audio reward.</p>
+  </div>
+  <div class="card accent-violet">
+    <h3><span class="icon" style="background:#E9D5FF">&#10024;</span> Visual Effects</h3>
+    <ul>
+      <li>Confetti burst on harvest</li>
+      <li>Growth pulse (15% scale) on stage advance</li>
+      <li>Glowing plant when harvestable</li>
+      <li>Hint arrows for struggling players</li>
+      <li>Golden watering can glow (rubber band)</li>
+      <li>Magic pumpkin confetti explosion (co-op)</li>
+      <li>Floating leaf/petal particles on welcome</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== TECH STACK ========== -->
+<div class="section-header" id="tech">
+  <h2>Technical Architecture</h2>
+  <p>Zero dependencies, runs everywhere</p>
+</div>
+
+<div class="stat-grid" style="margin-bottom:24px;">
+  <div class="stat"><div class="value">0</div><div class="label">Dependencies</div></div>
+  <div class="stat"><div class="value">0</div><div class="label">Build Steps</div></div>
+  <div class="stat"><div class="value">&lt;30s</div><div class="label">Setup Time</div></div>
+  <div class="stat"><div class="value">100%</div><div class="label">Browser Based</div></div>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-purple">
+    <h3><span class="icon" style="background:#E9D5FF">&#128187;</span> Technology Stack</h3>
+    <table>
+      <tr><th>Component</th><th>Technology</th></tr>
+      <tr><td>Runtime</td><td>Browser (Chrome, Edge, Safari)</td></tr>
+      <tr><td>Language</td><td>Vanilla JavaScript (no frameworks)</td></tr>
+      <tr><td>Hand Tracking</td><td>MediaPipe Hands (legacy CDN)</td></tr>
+      <tr><td>Rendering</td><td>HTML5 Canvas (single element)</td></tr>
+      <tr><td>Audio</td><td>Web Audio API (synthesised)</td></tr>
+      <tr><td>Storage</td><td>localStorage</td></tr>
+      <tr><td>Hosting</td><td>GitHub Pages</td></tr>
+    </table>
+  </div>
+  <div class="card accent-teal">
+    <h3><span class="icon" style="background:#CCFBF1">&#128193;</span> Key Files</h3>
+    <table>
+      <tr><th>File</th><th>Purpose</th></tr>
+      <tr><td><code>index.html</code></td><td>Entry point, screen overlays</td></tr>
+      <tr><td><code>css/styles.css</code></td><td>All styling & animations</td></tr>
+      <tr><td><code>js/game.js</code></td><td>State machine, round coordination</td></tr>
+      <tr><td><code>js/garden/</code></td><td>Garden subsystem (6 files)</td></tr>
+      <tr><td><code>js/handTracking.js</code></td><td>MediaPipe, glove rendering</td></tr>
+      <tr><td><code>js/dda.js</code></td><td>Dynamic Difficulty Adjustment</td></tr>
+      <tr><td><code>js/ui.js</code></td><td>Screen management, hover system</td></tr>
+      <tr><td><code>js/audio.js</code></td><td>Synthesised sounds</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <h3><span class="icon" style="background:#FEF3C7">&#127760;</span> Browser & Hardware Requirements</h3>
+  <div class="card-grid two" style="margin-top:12px;">
+    <div>
+      <table>
+        <tr><th>Browser</th><th>Minimum</th></tr>
+        <tr><td>Chrome</td><td>88+</td></tr>
+        <tr><td>Edge</td><td>88+</td></tr>
+        <tr><td>Safari</td><td>14+</td></tr>
+        <tr><td>Firefox</td><td>78+</td></tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tr><th>Hardware</th><th>Minimum</th><th>Recommended</th></tr>
+        <tr><td>Webcam</td><td>720p</td><td>1080p</td></tr>
+        <tr><td>Display</td><td>1024&times;768</td><td>1920&times;1080</td></tr>
+        <tr><td>CPU</td><td>Dual-core</td><td>Quad-core</td></tr>
+        <tr><td>RAM</td><td>4GB</td><td>8GB</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ACCESSIBILITY ========== -->
+<div class="section-header" id="accessibility">
+  <h2>Accessibility</h2>
+  <p>Designed for users with cognitive, motor, and visual impairments</p>
+</div>
+
+<div class="card-grid three">
+  <div class="card accent-blue">
+    <h3><span class="icon" style="background:#DBEAFE">&#128065;</span> Visual</h3>
+    <ul>
+      <li>Minimum 32px primary text</li>
+      <li>WCAG AA contrast (4.5:1 min)</li>
+      <li>Plant names always shown with colors</li>
+      <li>No rapid flashing (&lt;3 per second)</li>
+      <li>70px+ hit zone targets</li>
+    </ul>
+  </div>
+  <div class="card accent-orange">
+    <h3><span class="icon" style="background:#FED7AA">&#9995;</span> Motor</h3>
+    <ul>
+      <li>Both hands tracked; either works</li>
+      <li>Generous hit detection windows</li>
+      <li>Seated play fully supported</li>
+      <li>3-second dwell (no clicking)</li>
+      <li>DDA adapts to motor ability</li>
+    </ul>
+  </div>
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#129504;</span> Cognitive</h3>
+    <ul>
+      <li>Single objective always visible</li>
+      <li>Fixed UI positions throughout</li>
+      <li>No penalty for wrong touches</li>
+      <li>Current task always displayed</li>
+      <li>All challenges eventually completable</li>
+      <li>No time pressure</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== STORYLINE ========== -->
+<div class="section-header" id="story">
+  <h2>Storyline</h2>
+  <p>Three chapters of warm, encouraging narrative</p>
+</div>
+
+<div class="card accent-violet" style="padding:32px;">
+  <div class="chapter">
+    <h4>Chapter 1: The Forgotten Garden</h4>
+    <div class="ch-levels">Levels 1&ndash;3</div>
+    <p class="ch-quote">"An old garden has been waiting for someone special to help it bloom again..."</p>
+    <p style="margin-top:8px;"><strong>Goal:</strong> Plant your first seeds and watch them grow</p>
+    <p><strong>Reward:</strong> "The garden is waking up! You can see tiny sprouts everywhere." &bull; Unlocks Garden background</p>
+  </div>
+  <div class="chapter">
+    <h4>Chapter 2: Spring Awakening</h4>
+    <div class="ch-levels">Levels 4&ndash;6</div>
+    <p class="ch-quote">"The garden is coming alive! Different vegetables and flowers want to join..."</p>
+    <p style="margin-top:8px;"><strong>Goal:</strong> Grow different types of plants</p>
+    <p><strong>Reward:</strong> "Colors are returning to the garden! Butterflies have started to visit."</p>
+  </div>
+  <div class="chapter">
+    <h4>Chapter 3: The Greenhouse</h4>
+    <div class="ch-levels">Levels 7&ndash;10</div>
+    <p class="ch-quote">"You've discovered an old greenhouse! Inside, special plants await..."</p>
+    <p style="margin-top:8px;"><strong>Goal:</strong> Master the greenhouse</p>
+    <p><strong>Reward:</strong> "The garden is thriving! Birds sing and bees buzz happily." &bull; Unlocks Forest background</p>
+  </div>
+</div>
+
+<!-- ========== ROADMAP ========== -->
+<div class="section-header" id="roadmap">
+  <h2>Future Roadmap</h2>
+  <p>Designed but not yet implemented &mdash; the next iterations of Garden Grow</p>
+</div>
+
+<div class="card-grid two">
+  <div class="card accent-purple">
+    <h3><span class="icon" style="background:#E9D5FF">&#128170;</span> Near Term</h3>
+    <ul>
+      <li><strong>4-Hand Tracking</strong> &mdash; Migrate to <code>@mediapipe/tasks-vision</code>, enable <code>numHands: 4</code></li>
+      <li><strong>Web Worker</strong> &mdash; Move MediaPipe inference off main thread</li>
+      <li><strong>Free Play Mode</strong> &mdash; Untimed sandbox, no goals</li>
+    </ul>
+  </div>
+  <div class="card accent-magenta">
+    <h3><span class="icon" style="background:#FCE7F3">&#129504;</span> Expanded DDA</h3>
+    <ul>
+      <li>Visual distractions for high-ability players</li>
+      <li>Spawn rate adjustment per player</li>
+      <li>Asymmetric scoring (accuracy vs engagement)</li>
+      <li>Need complexity scaling</li>
+    </ul>
+  </div>
+  <div class="card accent-teal">
+    <h3><span class="icon" style="background:#CCFBF1">&#128101;</span> Social Metrics</h3>
+    <ul>
+      <li><strong>Head-turn detection</strong> via Face Mesh</li>
+      <li><strong>Microphone monitoring</strong> for laughter/talking</li>
+      <li><strong>Smile detection</strong> for engagement scoring</li>
+      <li><strong>Verbal encouragement</strong> NLP analysis</li>
+    </ul>
+  </div>
+  <div class="card accent-orange">
+    <h3><span class="icon" style="background:#FED7AA">&#127912;</span> New Game Themes</h3>
+    <table>
+      <tr><th>Theme</th><th>Key Movements</th></tr>
+      <tr><td>Kitchen</td><td>Pouring, whisking, flipping</td></tr>
+      <tr><td>Workshop</td><td>Hammering, painting, assembly</td></tr>
+      <tr><td>Aquarium</td><td>Fish feeding, coral growing</td></tr>
+      <tr><td>Music</td><td>Virtual instruments with gestures</td></tr>
+      <tr><td>Driving</td><td>Scenic steering</td></tr>
+    </table>
+  </div>
+  <div class="card accent-blue">
+    <h3><span class="icon" style="background:#DBEAFE">&#128241;</span> Platform Expansion</h3>
+    <ul>
+      <li><strong>Tablet Mode</strong> &mdash; Touch fallback when camera unavailable</li>
+      <li><strong>Smart TV</strong> &mdash; Cast to large screen, phone as controller</li>
+      <li><strong>Kiosk Mode</strong> &mdash; Full-screen auto-start for care facilities</li>
+      <li><strong>PWA</strong> &mdash; Installable, offline-capable</li>
+      <li><strong>Native Apps</strong> &mdash; iOS/Android wrappers</li>
+    </ul>
+  </div>
+  <div class="card accent-green">
+    <h3><span class="icon" style="background:#D1FAE5">&#128202;</span> Analytics Dashboard</h3>
+    <ul>
+      <li>Session frequency & duration trends</li>
+      <li>Motor engagement heatmaps</li>
+      <li>DDA difficulty curves over time</li>
+      <li>Social interaction scores</li>
+      <li>Exportable reports for care plans</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p><strong>re:Action Health Technologies</strong> &bull; Garden Grow Game Design Document</p>
+  <p style="margin-top:4px;">
+    <a href="https://re-action.co.uk/">re-action.co.uk</a> &bull;
+    <a href="mailto:info@re-action.co.uk">info@re-action.co.uk</a> &bull;
+    <a href="https://vinhly271193.github.io/balloon-pop-game/">Play Now</a>
+  </p>
+</footer>
+
+</body>
+</html>
