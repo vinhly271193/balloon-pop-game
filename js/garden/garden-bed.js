@@ -1172,7 +1172,7 @@ class GardenBed {
         drawUnmirroredText(ctx, 'Player 1', p1X, 40, true);
 
         // Player 2 (left, cool blue)
-        ctx.fillStyle = '#4A90E2';
+        ctx.fillStyle = '#4A90D9';
         const p2X = this.dividerX / 2;
         drawUnmirroredText(ctx, 'Player 2', p2X, 40, true);
 
