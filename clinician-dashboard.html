@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Grow — Clinical Dashboard | re:Action Health Technologies</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --magenta: #E91E8C;
+    --purple: #7B2D8E;
+    --gradient: linear-gradient(135deg, #E91E8C 0%, #7B2D8E 100%);
+    --gradient-soft: linear-gradient(135deg, rgba(233,30,140,0.08) 0%, rgba(123,45,142,0.08) 100%);
+    --green: #22c55e;
+    --green-light: #dcfce7;
+    --green-bg: #f0fdf4;
+    --orange: #FF8C42;
+    --orange-light: #fff7ed;
+    --blue: #4A90D9;
+    --blue-light: #dbeafe;
+    --red: #ef4444;
+    --bg: #FAFBFC;
+    --card: #FFFFFF;
+    --sidebar-bg: #FFFFFF;
+    --text: #1a1a2e;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --nav-height: 56px;
+    --sidebar-width: 280px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ─── TOP NAV ─── */
+  .top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-height);
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(123,45,142,0.3);
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-logo {
+    height: 32px;
+    width: 32px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .nav-logo img {
+    height: 28px;
+    width: auto;
+  }
+
+  .nav-title {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .nav-title span {
+    font-weight: 400;
+    opacity: 0.85;
+    margin-left: 6px;
+    font-size: 13px;
+  }
+
+  .nav-separator {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.3);
+    margin: 0 4px;
+  }
+
+  .nav-facility {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 3px;
+  }
+
+  .nav-tab {
+    padding: 5px 14px;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.75);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+  }
+
+  .nav-tab:hover {
+    color: white;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .nav-tab.active {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    font-weight: 600;
+  }
+
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px 4px 4px;
+    border-radius: 20px;
+    transition: background 0.2s;
+  }
+
+  .nav-user:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  .nav-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+
+  .nav-user-name {
+    font-weight: 500;
+  }
+
+  /* ─── LAYOUT ─── */
+  .layout {
+    display: flex;
+    margin-top: var(--nav-height);
+    height: calc(100vh - var(--nav-height));
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .sidebar-header h3 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .sidebar-search {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .sidebar-search:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(123,45,142,0.1);
+  }
+
+  .sidebar-search::placeholder {
+    color: var(--text-muted);
+  }
+
+  .patient-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  .patient-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+
+  .patient-item:hover {
+    background: var(--bg);
+  }
+
+  .patient-item.active {
+    background: var(--green-bg);
+    border-color: var(--green);
+  }
+
+  .patient-item.active .patient-name {
+    color: #166534;
+    font-weight: 600;
+  }
+
+  .patient-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: var(--border-light);
+  }
+
+  .patient-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .patient-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .patient-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .patient-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .patient-status.active { background: var(--green); }
+  .patient-status.recent { background: var(--orange); }
+  .patient-status.inactive { background: var(--border); }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .btn-add-patient {
+    width: 100%;
+    padding: 8px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-add-patient:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+    background: rgba(123,45,142,0.04);
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    scroll-behavior: smooth;
+  }
+
+  .main-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .main-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .main-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+
+  /* ─── PATIENT HEADER ─── */
+  .patient-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .patient-header-left {
+    display: flex;
+    gap: 16px;
+  }
+
+  .patient-header-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    background: var(--gradient-soft);
+    border: 2px solid rgba(123,45,142,0.15);
+  }
+
+  .patient-header-info h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .patient-header-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+
+  .patient-detail-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .patient-detail-tag strong {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .patient-detail-divider {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .patient-care-note {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-style: italic;
+    max-width: 500px;
+  }
+
+  .patient-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .session-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--green-bg);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #166534;
+  }
+
+  .session-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .session-count {
+    padding: 6px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .btn-generate-report {
+    padding: 8px 16px;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-generate-report:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  .btn-generate-report:active {
+    transform: translateY(0);
+  }
+
+  /* ─── PILLARS BAR ─── */
+  .pillars-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    background: var(--gradient-soft);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(123,45,142,0.1);
+  }
+
+  .pillar-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: white;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--purple);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .pillar-chip .icon {
+    font-size: 13px;
+  }
+
+  /* ─── STATS ROW ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .stat-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .stat-trend.up {
+    color: #166534;
+    background: var(--green-light);
+  }
+
+  .stat-trend.neutral {
+    color: var(--text-secondary);
+    background: var(--border-light);
+  }
+
+  .stat-subtext {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .stat-mood {
+    font-size: 32px;
+    display: inline-block;
+  }
+
+  /* ─── CONTENT SECTIONS ─── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .content-grid.full {
+    grid-template-columns: 1fr;
+  }
+
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .section-card:hover {
+    box-shadow: var(--shadow);
+  }
+
+  .section-card.span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .section-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .icon {
+    font-size: 15px;
+  }
+
+  .section-action {
+    font-size: 12px;
+    color: var(--purple);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+
+  .section-action:hover {
+    background: rgba(123,45,142,0.08);
+  }
+
+  .section-body {
+    padding: 18px;
+  }
+
+  /* ─── CHART ─── */
+  .chart-container {
+    position: relative;
+    height: 200px;
+    padding: 0;
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-stats {
+    display: flex;
+    gap: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 12px;
+  }
+
+  .chart-stat {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .chart-stat strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ─── DDA CHART ─── */
+  .dda-chart-container {
+    position: relative;
+    height: 180px;
+  }
+
+  .dda-caption {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--green-bg);
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    color: #166534;
+    line-height: 1.5;
+    border-left: 3px solid var(--green);
+  }
+
+  .dda-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .dda-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .dda-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ─── HEATMAP ─── */
+  .heatmap-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .heatmap-grid {
+    flex: 1;
+    aspect-ratio: 16/9;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 2px;
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    max-width: 400px;
+  }
+
+  .heatmap-cell {
+    aspect-ratio: auto;
+    transition: transform 0.15s;
+  }
+
+  .heatmap-cell:hover {
+    transform: scale(1.1);
+    z-index: 1;
+  }
+
+  .heatmap-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 120px;
+  }
+
+  .heatmap-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .heatmap-scale-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .heatmap-scale-bar {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #dbeafe, #60a5fa, #f59e0b, #ef4444);
+    width: 100%;
+  }
+
+  .heatmap-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--text-muted);
+  }
+
+  .heatmap-insight {
+    padding: 10px 12px;
+    background: var(--orange-light);
+    border-radius: var(--radius-xs);
+    font-size: 11.5px;
+    color: #9a3412;
+    line-height: 1.5;
+    border-left: 3px solid var(--orange);
+  }
+
+  /* ─── TIMELINE ─── */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 18px;
+    padding-left: 8px;
+  }
+
+  .timeline-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--green);
+  }
+
+  .timeline-item.milestone::before {
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+  }
+
+  .timeline-item.today::before {
+    background: var(--magenta);
+    border-color: var(--magenta);
+    box-shadow: 0 0 0 3px rgba(233,30,140,0.2);
+  }
+
+  .timeline-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .timeline-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ─── TABLE ─── */
+  .session-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .session-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .session-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--bg);
+  }
+
+  .session-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .session-table tr:hover td {
+    background: var(--bg);
+  }
+
+  .session-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .dda-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .dda-badge.comfortable {
+    background: var(--green-light);
+    color: #166534;
+  }
+
+  .dda-badge.challenged {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .dda-badge.easy {
+    background: var(--blue-light);
+    color: #1e40af;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 14px;
+  }
+
+  .btn-table-action {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--card);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-table-action:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+  }
+
+  /* ─── CARE NOTES ─── */
+  .care-notes-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    resize: vertical;
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .care-notes-area:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(123,45,142,0.08);
+  }
+
+  .note-timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  .btn-add-note {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: var(--purple);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xs);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-add-note:hover {
+    opacity: 0.9;
+  }
+
+  /* ─── FOOTER ─── */
+  .dashboard-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+  }
+
+  .footer-brand {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+  }
+
+  .footer-links a {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover {
+    color: var(--purple);
+  }
+
+  /* ─── TAB CONTENT ─── */
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1200px) {
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+    .patient-header {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .patient-header-right {
+      flex-wrap: wrap;
+    }
+    .pillars-bar {
+      flex-wrap: wrap;
+    }
+    .heatmap-container {
+      flex-direction: column;
+    }
+    .nav-facility, .nav-tabs {
+      display: none;
+    }
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .sidebar, .top-nav, .btn-generate-report, .btn-table-action, .btn-add-note, .nav-tabs, .footer-links { display: none !important; }
+    .main-content { margin: 0; padding: 20px; overflow: visible; }
+    .layout { display: block; height: auto; }
+    body { overflow: visible; height: auto; }
+    .section-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ TOP NAVIGATION ═══════════ -->
+<nav class="top-nav">
+  <div class="nav-left">
+    <div class="nav-logo">
+      <img src="assets/images/logo.png" alt="re:Action">
+    </div>
+    <div class="nav-title">
+      Garden Grow <span>Clinical Dashboard</span>
+    </div>
+    <div class="nav-separator"></div>
+    <div class="nav-facility">Sunrise Care Home</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('overview')">Overview</button>
+      <button class="nav-tab" onclick="switchTab('sessions')">Sessions</button>
+      <button class="nav-tab" onclick="switchTab('motor')">Motor Analysis</button>
+      <button class="nav-tab" onclick="switchTab('social')">Social</button>
+    </div>
+    <div class="nav-user" title="Dr. Sarah Chen">
+      <div class="nav-avatar">SC</div>
+      <span class="nav-user-name">Dr. Sarah Chen</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ LAYOUT ═══════════ -->
+<div class="layout">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3>Patients</h3>
+      <input type="text" class="sidebar-search" placeholder="Search patients..." onkeyup="filterPatients(this.value)">
+    </div>
+    <div class="patient-list" id="patientList">
+      <!-- Patients populated by JS -->
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-add-patient">+ Add Patient</button>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN ─── -->
+  <main class="main-content">
+
+    <!-- PATIENT HEADER -->
+    <div class="patient-header">
+      <div class="patient-header-left">
+        <div class="patient-header-avatar" id="mainAvatar"></div>
+        <div class="patient-header-info">
+          <h1 id="mainName">Margaret Thompson</h1>
+          <div class="patient-header-details">
+            <span class="patient-detail-tag">Age: <strong id="mainAge">78</strong></span>
+            <span class="patient-detail-divider"></span>
+            <span class="patient-detail-tag" id="mainDiagnosis">Mild-moderate Alzheimer's</span>
+            <span class="patient-detail-divider"></span>
+            <span class="patient-detail-tag">ID: <strong id="mainId">PT-2024-0147</strong></span>
+          </div>
+          <div class="patient-care-note" id="mainCareNote">"Responds well to garden metaphors. Enjoys sunflower activities. Consider daily sessions."</div>
+        </div>
+      </div>
+      <div class="patient-header-right">
+        <div class="session-badge">
+          <span class="dot"></span>
+          <span id="mainLastSession">Last session: Today, 2:30 PM</span>
+        </div>
+        <div class="session-count" id="mainSessionCount">47 sessions</div>
+        <button class="btn-generate-report" onclick="window.print()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          Generate Report
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 PILLARS BAR -->
+    <div class="pillars-bar">
+      <div class="pillar-chip"><span class="icon">&#9994;</span> Physical Activity</div>
+      <div class="pillar-chip"><span class="icon">&#129504;</span> Cognitive Stimulation</div>
+      <div class="pillar-chip"><span class="icon">&#129309;</span> Social Engagement</div>
+      <div class="pillar-chip"><span class="icon">&#127807;</span> Wellbeing Support</div>
+    </div>
+
+    <!-- ═══ TAB: OVERVIEW ═══ -->
+    <div class="tab-content active" id="tab-overview">
+
+      <!-- QUICK STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Sessions This Week</div>
+          <div class="stat-value">4</div>
+          <div class="stat-trend up">&#9650; +1 vs last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Session Duration</div>
+          <div class="stat-value">8.2<span style="font-size:16px;font-weight:400;color:var(--text-muted)"> min</span></div>
+          <div class="stat-trend up">In target range (5-15 min)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Motor Engagement</div>
+          <div class="stat-value">73<span style="font-size:16px;font-weight:400;color:var(--text-muted)">%</span></div>
+          <div class="stat-trend up">&#9650; +5% from 68%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Mood Indicator</div>
+          <div class="stat-mood">&#128522;</div>
+          <div class="stat-subtext">Positive — based on engagement patterns</div>
+        </div>
+      </div>
+
+      <!-- SESSION HISTORY + DDA -->
+      <div class="content-grid">
+        <!-- Session History Chart -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#128200;</span> Growth Trends — Session Duration</div>
+            <button class="section-action">Last 30 days</button>
+          </div>
+          <div class="section-body">
+            <div class="chart-container">
+              <svg class="chart-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+                <!-- Target band -->
+                <rect x="0" y="50" width="500" height="100" fill="rgba(34,197,94,0.06)" />
+                <line x1="0" y1="50" x2="500" y2="50" stroke="rgba(34,197,94,0.2)" stroke-dasharray="4,4" stroke-width="1"/>
+                <line x1="0" y1="150" x2="500" y2="150" stroke="rgba(34,197,94,0.2)" stroke-dasharray="4,4" stroke-width="1"/>
+                <text x="505" y="54" fill="#9ca3af" font-size="9" font-family="Inter">15m</text>
+                <text x="505" y="154" fill="#9ca3af" font-size="9" font-family="Inter">5m</text>
+                <text x="505" y="204" fill="#9ca3af" font-size="9" font-family="Inter">0m</text>
+                <!-- Grid lines -->
+                <line x1="0" y1="100" x2="500" y2="100" stroke="#f3f4f6" stroke-width="0.5"/>
+                <line x1="0" y1="200" x2="500" y2="200" stroke="#e5e7eb" stroke-width="1"/>
+                <!-- Data line (30 days of session durations) -->
+                <polyline fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                  points="16,160 33,155 50,140 67,148 84,130 100,135 117,125 134,115 150,120 167,110 184,105 200,115 217,100 234,108 250,95 267,105 284,90 300,98 317,85 334,92 350,80 367,88 384,78 400,85 417,75 434,82 450,73 467,78 484,70" />
+                <!-- Data points -->
+                <g fill="#22c55e">
+                  <circle cx="16" cy="160" r="3" opacity="0.6"/>
+                  <circle cx="67" cy="148" r="3" opacity="0.6"/>
+                  <circle cx="134" cy="115" r="3" opacity="0.6"/>
+                  <circle cx="200" cy="115" r="3" opacity="0.6"/>
+                  <circle cx="267" cy="105" r="3" opacity="0.6"/>
+                  <circle cx="334" cy="92" r="3" opacity="0.6"/>
+                  <circle cx="400" cy="85" r="3" opacity="0.6"/>
+                  <circle cx="484" cy="70" r="4" fill="#22c55e" stroke="white" stroke-width="2"/>
+                </g>
+                <!-- Area fill -->
+                <polygon fill="url(#greenGradient)" opacity="0.15"
+                  points="16,160 33,155 50,140 67,148 84,130 100,135 117,125 134,115 150,120 167,110 184,105 200,115 217,100 234,108 250,95 267,105 284,90 300,98 317,85 334,92 350,80 367,88 384,78 400,85 417,75 434,82 450,73 467,78 484,70 484,200 16,200" />
+                <defs>
+                  <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#22c55e" />
+                    <stop offset="100%" stop-color="#22c55e" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="chart-stats">
+              <div class="chart-stat"><strong>Avg:</strong> 8.2 min</div>
+              <div class="chart-stat"><strong>Sessions:</strong> 18</div>
+              <div class="chart-stat"><strong>Longest:</strong> 14 min</div>
+              <div class="chart-stat"><strong>Trend:</strong> &#9650; Blooming</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DDA Difficulty Curve -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#127793;</span> Adaptive Difficulty Curve</div>
+            <button class="section-action">Last 30 days</button>
+          </div>
+          <div class="section-body">
+            <div class="dda-chart-container">
+              <svg class="chart-svg" viewBox="0 0 500 180" preserveAspectRatio="none">
+                <!-- Grid -->
+                <line x1="0" y1="45" x2="500" y2="45" stroke="#f3f4f6" stroke-width="0.5"/>
+                <line x1="0" y1="90" x2="500" y2="90" stroke="#f3f4f6" stroke-width="0.5"/>
+                <line x1="0" y1="135" x2="500" y2="135" stroke="#f3f4f6" stroke-width="0.5"/>
+                <line x1="0" y1="180" x2="500" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+                <!-- seedSpeed line (orange) - increasing over time = more challenge -->
+                <polyline fill="none" stroke="#FF8C42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="16,150 50,148 84,140 117,142 150,135 184,130 217,128 250,125 284,118 317,115 350,110 384,105 417,100 450,95 484,90" />
+                <!-- hitBoxMultiplier line (blue) - decreasing over time = less assistance needed -->
+                <polyline fill="none" stroke="#4A90D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  points="16,50 50,52 84,58 117,55 150,65 184,68 217,72 250,75 284,80 317,85 350,88 384,95 417,98 450,102 484,105" />
+                <!-- Labels -->
+                <text x="4" y="12" fill="#FF8C42" font-size="9" font-weight="600" font-family="Inter">Speed</text>
+                <text x="4" y="46" fill="#4A90D9" font-size="9" font-weight="600" font-family="Inter">Assist</text>
+              </svg>
+            </div>
+            <div class="dda-legend">
+              <div class="dda-legend-item">
+                <div class="dda-legend-dot" style="background: #FF8C42;"></div>
+                Seed Speed (challenge)
+              </div>
+              <div class="dda-legend-item">
+                <div class="dda-legend-dot" style="background: #4A90D9;"></div>
+                Hit Box Assist (support)
+              </div>
+            </div>
+            <div class="dda-caption">
+              The system has gradually increased challenge as Margaret's motor confidence improved. Assistance levels are decreasing naturally — a positive growth indicator.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEATMAP + TIMELINE -->
+      <div class="content-grid">
+        <!-- Motor Engagement Heatmap -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#128293;</span> Motor Engagement Heatmap</div>
+            <button class="section-action">Last 7 sessions</button>
+          </div>
+          <div class="section-body">
+            <div class="heatmap-container">
+              <div class="heatmap-grid" id="heatmapGrid">
+                <!-- Populated by JS -->
+              </div>
+              <div class="heatmap-legend">
+                <div class="heatmap-scale">
+                  <div class="heatmap-scale-label">Activity Level</div>
+                  <div class="heatmap-scale-bar"></div>
+                  <div class="heatmap-scale-labels">
+                    <span>Low</span>
+                    <span>High</span>
+                  </div>
+                </div>
+                <div class="heatmap-insight">
+                  Right-hand dominant engagement. Consider encouraging left-side reaching exercises in next session.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Achievement Timeline -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#127942;</span> Achievement Garden</div>
+            <button class="section-action">View all</button>
+          </div>
+          <div class="section-body">
+            <div class="timeline">
+              <div class="timeline-item today">
+                <div class="timeline-title">Completed 3 consecutive daily sessions</div>
+                <div class="timeline-date">Today — Consistency milestone</div>
+              </div>
+              <div class="timeline-item milestone">
+                <div class="timeline-title">Started Chapter 2: Spring Awakening</div>
+                <div class="timeline-date">3 days ago — Story progression</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-title">New personal best: 12 plants in one session</div>
+                <div class="timeline-date">5 days ago — Motor skill milestone</div>
+              </div>
+              <div class="timeline-item milestone">
+                <div class="timeline-title">First 2-Player Session (with grandson Alex)</div>
+                <div class="timeline-date">10 days ago — Social engagement</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-title">Completed Chapter 1: The Forgotten Garden</div>
+                <div class="timeline-date">2 weeks ago — Story milestone</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SESSION LOG TABLE -->
+      <div class="content-grid full">
+        <div class="section-card span-2">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#128221;</span> Session Log</div>
+            <button class="section-action">View all sessions</button>
+          </div>
+          <div class="section-body">
+            <div class="session-table-wrapper">
+              <table class="session-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Duration</th>
+                    <th>Mode</th>
+                    <th>Plants Grown</th>
+                    <th>Score</th>
+                    <th>DDA Level</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Apr 2, 2026</td>
+                    <td>9.5 min</td>
+                    <td>Solo</td>
+                    <td>11</td>
+                    <td>340</td>
+                    <td><span class="dda-badge comfortable">Comfortable</span></td>
+                    <td>Strong engagement throughout</td>
+                  </tr>
+                  <tr>
+                    <td>Apr 1, 2026</td>
+                    <td>8.2 min</td>
+                    <td>Solo</td>
+                    <td>9</td>
+                    <td>285</td>
+                    <td><span class="dda-badge comfortable">Comfortable</span></td>
+                    <td>Preferred sunflower levels</td>
+                  </tr>
+                  <tr>
+                    <td>Mar 31, 2026</td>
+                    <td>7.8 min</td>
+                    <td>Co-op</td>
+                    <td>14</td>
+                    <td>420</td>
+                    <td><span class="dda-badge challenged">Challenged</span></td>
+                    <td>2P with grandson Alex, great energy</td>
+                  </tr>
+                  <tr>
+                    <td>Mar 29, 2026</td>
+                    <td>6.5 min</td>
+                    <td>Solo</td>
+                    <td>7</td>
+                    <td>210</td>
+                    <td><span class="dda-badge easy">Easy Mode</span></td>
+                    <td>Tired today, shorter session</td>
+                  </tr>
+                  <tr>
+                    <td>Mar 28, 2026</td>
+                    <td>11.2 min</td>
+                    <td>Solo</td>
+                    <td>12</td>
+                    <td>380</td>
+                    <td><span class="dda-badge comfortable">Comfortable</span></td>
+                    <td>Personal best — very motivated</td>
+                  </tr>
+                  <tr>
+                    <td>Mar 26, 2026</td>
+                    <td>8.0 min</td>
+                    <td>Competitive</td>
+                    <td>10</td>
+                    <td>310</td>
+                    <td><span class="dda-badge challenged">Challenged</span></td>
+                    <td>Played with staff member Jenny</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-actions">
+              <button class="btn-table-action">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+              <button class="btn-table-action" onclick="window.print()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARE PLAN NOTES -->
+      <div class="content-grid full">
+        <div class="section-card span-2">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#128466;</span> Care Plan Notes</div>
+            <button class="section-action">History</button>
+          </div>
+          <div class="section-body">
+            <textarea class="care-notes-area" placeholder="Add a note about this patient's progress...">Margaret responds well to the sunflower levels. Consider increasing session frequency to daily. Motor engagement improving significantly since introducing 2-player mode with grandson Alex.
+
+Occupational therapy goals: Improve bilateral reaching, increase sustained attention to 10+ minutes. Garden Grow sessions complement traditional therapy — Margaret is more motivated and engaged during the game than standard tabletop exercises.
+
+Note: Family reported Margaret mentions "her garden" at home — positive sign of engagement and memory formation around the activity.</textarea>
+            <div class="note-timestamp">Last updated by Dr. Sarah Chen — April 1, 2026 at 4:15 PM</div>
+            <button class="btn-add-note">Save Note</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-overview -->
+
+    <!-- ═══ TAB: SESSIONS ═══ -->
+    <div class="tab-content" id="tab-sessions">
+      <div class="content-grid full">
+        <div class="section-card span-2">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#128197;</span> Full Session History</div>
+            <button class="section-action">Filter</button>
+          </div>
+          <div class="section-body" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+            <div style="font-size:48px;margin-bottom:12px;">&#127793;</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;">Session History Detail View</div>
+            <div style="font-size:13px;">Detailed session-by-session analysis with video replay timestamps, interaction heatmaps, and DDA parameter logs for each session.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: MOTOR ═══ -->
+    <div class="tab-content" id="tab-motor">
+      <div class="content-grid full">
+        <div class="section-card span-2">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#9994;</span> Motor Analysis Deep Dive</div>
+            <button class="section-action">Configure</button>
+          </div>
+          <div class="section-body" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+            <div style="font-size:48px;margin-bottom:12px;">&#128170;</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;">Motor Engagement Analytics</div>
+            <div style="font-size:13px;">Detailed reach distance tracking, hand speed analysis, bilateral coordination metrics, and physiotherapy goal progress over time.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: SOCIAL ═══ -->
+    <div class="tab-content" id="tab-social">
+      <div class="content-grid full">
+        <div class="section-card span-2">
+          <div class="section-header">
+            <div class="section-title"><span class="icon">&#129309;</span> Social Engagement Metrics</div>
+            <button class="section-action">Configure</button>
+          </div>
+          <div class="section-body" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+            <div style="font-size:48px;margin-bottom:12px;">&#128106;</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;">Social Interaction Dashboard</div>
+            <div style="font-size:13px;">2-player session frequency, partner engagement scores, verbal interaction estimates, and intergenerational play patterns.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dashboard-footer">
+      <div class="footer-brand">Garden Grow Clinical Dashboard v0.1 — re:Action Health Technologies</div>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="#">Documentation</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// PATIENT DATA
+// ═══════════════════════════════════════
+const patients = [
+  {
+    id: 'PT-2024-0147',
+    name: 'Margaret Thompson',
+    age: 78,
+    avatar: '\uD83D\uDC75',
+    diagnosis: 'Mild-moderate Alzheimer\'s',
+    lastSession: 'Last session: Today, 2:30 PM',
+    lastSessionShort: 'Today, 2:30 PM',
+    sessions: 47,
+    status: 'active',
+    careNote: '"Responds well to garden metaphors. Enjoys sunflower activities. Consider daily sessions."'
+  },
+  {
+    id: 'PT-2024-0092',
+    name: 'Robert Chen',
+    age: 82,
+    avatar: '\uD83D\uDC74',
+    diagnosis: 'Early-stage vascular dementia',
+    lastSession: 'Last session: Yesterday',
+    lastSessionShort: 'Yesterday, 10:15 AM',
+    sessions: 31,
+    status: 'active',
+    careNote: '"Making steady progress with co-op mode. Enjoys playing with his daughter on weekends."'
+  },
+  {
+    id: 'PT-2024-0201',
+    name: 'Dorothy Williams',
+    age: 85,
+    avatar: '\uD83D\uDC75',
+    diagnosis: 'Moderate Alzheimer\'s',
+    lastSession: 'Last session: 2 days ago',
+    lastSessionShort: 'Mar 31, 11:00 AM',
+    sessions: 23,
+    status: 'recent',
+    careNote: '"Needs more encouragement at start. Very engaged once the first plant grows. Prefers easy mode."'
+  },
+  {
+    id: 'PT-2025-0015',
+    name: 'James O\'Brien',
+    age: 74,
+    avatar: '\uD83D\uDC74',
+    diagnosis: 'Mild cognitive impairment',
+    lastSession: 'Last session: 3 days ago',
+    lastSessionShort: 'Mar 30, 3:45 PM',
+    sessions: 56,
+    status: 'recent',
+    careNote: '"High performer. Enjoys competitive mode. DDA consistently at challenging level."'
+  },
+  {
+    id: 'PT-2025-0033',
+    name: 'Evelyn Santos',
+    age: 80,
+    avatar: '\uD83D\uDC75',
+    diagnosis: 'Mixed dementia',
+    lastSession: 'Last session: 1 week ago',
+    lastSessionShort: 'Mar 26, 2:00 PM',
+    sessions: 12,
+    status: 'inactive',
+    careNote: '"New patient. Still building comfort with the webcam. Short sessions (3-5 min) recommended."'
+  },
+  {
+    id: 'PT-2025-0041',
+    name: 'Frank Morrison',
+    age: 88,
+    avatar: '\uD83D\uDC74',
+    diagnosis: 'Moderate Alzheimer\'s',
+    lastSession: 'Last session: 5 days ago',
+    lastSessionShort: 'Mar 28, 1:30 PM',
+    sessions: 8,
+    status: 'inactive',
+    careNote: '"Mobility limited — seated play only. Very responsive to audio cues. Increase volume."'
+  }
+];
+
+let activePatientIdx = 0;
+
+// ═══════════════════════════════════════
+// RENDER PATIENT LIST
+// ═══════════════════════════════════════
+function renderPatientList(filterText) {
+  const list = document.getElementById('patientList');
+  const filter = (filterText || '').toLowerCase();
+  list.innerHTML = '';
+
+  patients.forEach((p, idx) => {
+    if (filter && !p.name.toLowerCase().includes(filter)) return;
+
+    const item = document.createElement('div');
+    item.className = 'patient-item' + (idx === activePatientIdx ? ' active' : '');
+    item.onclick = () => selectPatient(idx);
+    item.innerHTML = `
+      <div class="patient-avatar">${p.avatar}</div>
+      <div class="patient-info">
+        <div class="patient-name">${p.name}</div>
+        <div class="patient-meta">${p.lastSessionShort}</div>
+      </div>
+      <div class="patient-status ${p.status}"></div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════
+// SELECT PATIENT
+// ═══════════════════════════════════════
+function selectPatient(idx) {
+  activePatientIdx = idx;
+  const p = patients[idx];
+
+  document.getElementById('mainAvatar').textContent = p.avatar;
+  document.getElementById('mainName').textContent = p.name;
+  document.getElementById('mainAge').textContent = p.age;
+  document.getElementById('mainDiagnosis').textContent = p.diagnosis;
+  document.getElementById('mainId').textContent = p.id;
+  document.getElementById('mainCareNote').textContent = p.careNote;
+  document.getElementById('mainLastSession').textContent = p.lastSession;
+  document.getElementById('mainSessionCount').textContent = p.sessions + ' sessions';
+
+  renderPatientList();
+}
+
+// ═══════════════════════════════════════
+// FILTER PATIENTS
+// ═══════════════════════════════════════
+function filterPatients(val) {
+  renderPatientList(val);
+}
+
+// ═══════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════
+function switchTab(tabId) {
+  // Update nav tabs
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // Update content
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  const target = document.getElementById('tab-' + tabId);
+  if (target) target.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// HEATMAP GENERATION
+// ═══════════════════════════════════════
+function generateHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  // 8 cols x 5 rows = 40 cells
+  // Right side (cols 5-8) = higher activity (right-hand dominant)
+  // Center = moderate, Left = low
+  const heatData = [
+    // Row 1 (top)
+    0.1, 0.15, 0.2, 0.25, 0.4, 0.55, 0.5, 0.35,
+    // Row 2
+    0.15, 0.2, 0.3, 0.45, 0.65, 0.8, 0.75, 0.5,
+    // Row 3 (middle - most active)
+    0.2, 0.25, 0.35, 0.55, 0.75, 0.95, 0.9, 0.6,
+    // Row 4
+    0.15, 0.2, 0.3, 0.5, 0.7, 0.85, 0.8, 0.5,
+    // Row 5 (bottom)
+    0.1, 0.12, 0.2, 0.3, 0.45, 0.6, 0.55, 0.3
+  ];
+
+  grid.innerHTML = '';
+  heatData.forEach(val => {
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+
+    let color;
+    if (val < 0.25) {
+      // Blue (low)
+      const t = val / 0.25;
+      const r = Math.round(219 + (96 - 219) * t);
+      const g = Math.round(234 + (165 - 234) * t);
+      const b = Math.round(254 + (250 - 254) * t);
+      color = `rgb(${r},${g},${b})`;
+    } else if (val < 0.5) {
+      // Blue to Yellow
+      const t = (val - 0.25) / 0.25;
+      const r = Math.round(96 + (245 - 96) * t);
+      const g = Math.round(165 + (158 - 165) * t);
+      const b = Math.round(250 + (11 - 250) * t);
+      color = `rgb(${r},${g},${b})`;
+    } else if (val < 0.75) {
+      // Yellow to Orange
+      const t = (val - 0.5) / 0.25;
+      const r = Math.round(245 + (249 - 245) * t);
+      const g = Math.round(158 + (115 - 158) * t);
+      const b = Math.round(11 + (22 - 11) * t);
+      color = `rgb(${r},${g},${b})`;
+    } else {
+      // Orange to Red
+      const t = (val - 0.75) / 0.25;
+      const r = Math.round(249 + (239 - 249) * t);
+      const g = Math.round(115 + (68 - 115) * t);
+      const b = Math.round(22 + (68 - 22) * t);
+      color = `rgb(${r},${g},${b})`;
+    }
+
+    cell.style.backgroundColor = color;
+    cell.title = Math.round(val * 100) + '% activity';
+    grid.appendChild(cell);
+  });
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderPatientList();
+selectPatient(0);
+generateHeatmap();
+</script>
+
+</body>
+</html>
