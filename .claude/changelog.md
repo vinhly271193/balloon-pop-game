@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-04-17 — Documentation SPA overhaul + competitive game features
+
+### Documentation overhaul
+- **Unified docs SPA**: Consolidated all 9 individual HTML documentation pages into a single `docs.html` with hash routing, collapsible sidebar navigation, and Confluence-style pagination
+- **Healthcare-branded design**: Clean professional aesthetic with re:Action magenta/purple brand colors used sparingly as accents, DM Sans + Source Sans 3 typography, generous whitespace
+- **Sidebar navigation**: 4 top-level groups (Product, Design, Clinical, Marketing) with collapsible nested pages, active page indicator, mobile hamburger toggle
+- **Home page**: Executive overview with re:Action branding, quick stats, section navigation cards
+- **Trimmed GDD**: All sections retained but each cut to 2-4 bullet points, prominent new Data Collection & Clinical Value section added
+- **Interactive clinician dashboard**: Full prototype with Chart.js visualizations (line, bar, radar, doughnut charts), 5 sample patients, 5 tabs (Overview, Sessions, Motor Analysis, Social, Reports), sortable tables, patient switching
+- **New Data & Analytics page**: Dedicated page covering motor/engagement/clinical metrics, data pipeline diagram, privacy considerations
+- **7 additional pages**: Screen Map, Interactive Prototype, Component Library, Design Variations, Animation Reference, Accessibility Preview, Landing Page — all rewritten with fresh content
+- **Old files removed**: Deleted all 9 individual HTML files (13,556 lines removed)
+
+### Game features
+- **Power-up system**: 3 new power-up types for competitive mode — InstantGrowth (🌟 instantly matures a plant), DoublePoints (⭐ 10-second double scoring), RainShower (🌧️ auto-waters all plants)
+- **DDA-driven spawning**: Power-ups appear when the DDA detects a struggling player (harvest rate < 2/10s), with 15-second cooldown between spawns
+- **Achievement system**: 10 unlockable badges (First Bloom, Green Thumb, Speed Grower, Village Champion, Photo Finish, Master Gardener, Tool Expert, Garden Friends, Power Player, Dedicated Gardener)
+- **Garden-themed toast notifications**: Achievement unlock toasts slide in from top-right with green garden styling, leaf decoration, 3-second display
+- **In-memory session leaderboard**: Top 10 scores tracked per browser session, displayed on round-end screens with gold highlight for #1
+
+### Terminology
+- **"Care partner" → "Companion"**: Replaced across all files per CEO request — warmer, less clinical term for the secondary player
+
+### Skills installed
+- `frontend-design` — Distinctive, production-grade frontend interfaces
+- `baseline-ui` — Spacing, typography, interaction state refinement
+- `fixing-accessibility` — WCAG compliance and keyboard navigation
+
+### Files changed
+- `docs.html` — Created: unified documentation SPA (~4,800 lines)
+- `js/power-ups.js` — Created: PowerUp base class + 3 subclasses
+- `js/achievements.js` — Created: AchievementManager with 10 badge definitions
+- `js/garden/garden-bed.js` — Power-up spawn/interaction/draw/clear integration
+- `js/dda.js` — DDA-driven power-up spawn triggers, gardenBed reference
+- `js/game.js` — Achievement tracking, leaderboard, double-points scoring, DDA wiring
+- `js/ui.js` — showToast() and updateLeaderboard() methods
+- `index.html` — Toast container, leaderboard sections, new script tags
+- `css/styles.css` — Toast notification styles, leaderboard styles
+- `game-design-document.html` — "care partner" → "companion" (then deleted)
+- Deleted: 9 individual HTML doc files
+
+### Flagged for later
+- `growTime` not yet plumbed through harvest data — Speed Grower achievement defaults to 30s
+- Tool use tracking (`all_tools` badge) not wired to garden-bed interactions yet
+- Magic Pumpkin achievement trigger not wired yet
+- Dashboard "Add Patient" button is cosmetic only
+- Dashboard Reports tab export is visual-only (no real download)
+
+---
+
 ## 2026-02-12 — Return-to-home item drop mechanic
 
 ### New feature

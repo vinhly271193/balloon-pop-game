@@ -45,7 +45,10 @@ This is required so changes go live on GitHub Pages immediately. Do NOT wait for
 | `js/audio.js` | Synthesized sounds with per-player octave shifting |
 | `js/challenges.js` | Challenge templates and progress tracking |
 | `js/story.js` | Chapter/narrative progression |
+| `js/power-ups.js` | PowerUp classes for competitive mode (InstantGrowth, DoublePoints, RainShower) |
+| `js/achievements.js` | Achievement definitions and unlock tracking (10 badges) |
 | `js/main.js` | Bootstrap and initialization |
+| `docs.html` | Unified documentation SPA with sidebar navigation and all project pages |
 | `assets/images/logo.png` | re-Action Health Technologies logo |
 
 ## Critical Gotchas
