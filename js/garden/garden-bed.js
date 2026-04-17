@@ -660,7 +660,8 @@ class GardenBed {
                         const isTargetPlant = typeof challengeManager !== 'undefined' &&
                             challengeManager.currentChallenge &&
                             challengeManager.getTargetPlants().includes(result);
-                        harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId, isTargetPlant });
+                        const targetPotComp = this.plantPots[effectivePlayerId - 1];
+                        harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId, isTargetPlant, growTime: targetPotComp && targetPotComp.plantedAt ? (Date.now() - targetPotComp.plantedAt) / 1000 : 30 });
                     }
                 });
             });
@@ -689,7 +690,9 @@ class GardenBed {
                             const isTargetPlant = typeof challengeManager !== 'undefined' &&
                                 challengeManager.currentChallenge &&
                                 challengeManager.getTargetPlants().includes(result);
-                            harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant });
+                            let closestPotFH = null, minDistFH = Infinity;
+                            this.plantPots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistFH) { minDistFH = d; closestPotFH = p; } });
+                            harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant, growTime: closestPotFH && closestPotFH.plantedAt ? (Date.now() - closestPotFH.plantedAt) / 1000 : 30 });
                         }
                     });
                     return;
@@ -701,7 +704,9 @@ class GardenBed {
                         const isTargetPlant = typeof challengeManager !== 'undefined' &&
                             challengeManager.currentChallenge &&
                             challengeManager.getTargetPlants().includes(result);
-                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant });
+                        let closestPotSH = null, minDistSH = Infinity;
+                        this.plantPots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistSH) { minDistSH = d; closestPotSH = p; } });
+                        harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant, growTime: closestPotSH && closestPotSH.plantedAt ? (Date.now() - closestPotSH.plantedAt) / 1000 : 30 });
                     }
                 });
 
@@ -728,6 +733,7 @@ class GardenBed {
                     this.timerPaused = true;
                     this.timerPauseDuration = 3; // 3 seconds
                     this.spawnConfetti(this.magicPumpkin.x, this.magicPumpkin.y, 80);
+                    if (typeof achievementManager !== 'undefined') achievementManager.recordMagicPumpkin();
                 }
             }
         }
@@ -899,6 +905,7 @@ class GardenBed {
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('water');
                     }
+                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('watering_can');
                 } else {
                     if (this.gameMode === 'competitive') {
                         this.waterInteractionTimeMap.set(zoneKey, newWaterTime);
@@ -926,6 +933,7 @@ class GardenBed {
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('plant');
                     }
+                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('fertilizer');
                 } else {
                     if (this.gameMode === 'competitive') {
                         this.foodInteractionTimeMap.set(zoneKey, newFoodTime);
@@ -1002,6 +1010,7 @@ class GardenBed {
                     } else {
                         this.sunInteractionTime = 0;
                     }
+                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
                 } else {
                     if (this.gameMode === 'competitive') {
                         this.sunInteractionTimeMap.set(zoneKey, newSunTime);
@@ -1086,6 +1095,7 @@ class GardenBed {
                 const plantNeeds = this.plantNeedsMap.get('shared') || this.plantNeeds;
                 if (plantNeeds) plantNeeds.addSun();
                 this.sunInteractionTime = 0;
+                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
             }
         }
 

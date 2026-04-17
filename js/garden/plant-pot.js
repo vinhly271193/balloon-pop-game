@@ -57,6 +57,7 @@ class PlantPot {
             this.plantType = plantType;
             this.growthStage = GrowthStage.SEED_PLANTED;
             this.growthProgress = 0;
+            this.plantedAt = Date.now();
             return true;
         }
         return false;
