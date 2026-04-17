@@ -3978,10 +3978,25 @@
               </div>
             </div>
 
-            <!-- Embedded game iframe — fixed 600px height, game fills innerWidth x innerHeight -->
-            <div style="width:100%;height:600px;border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border);border-top:none;">
-              <iframe id="protoGameFrame" src="index.html" allow="camera;microphone" style="width:100%;height:100%;border:none;"></iframe>
+            <!-- Embedded game: iframe rendered at 1280x800, scaled down to fit container -->
+            <div id="protoFrameWrap" style="position:relative;width:100%;border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border);border-top:none;">
+              <iframe id="protoGameFrame" src="index.html" allow="camera;microphone" style="width:1280px;height:800px;border:none;transform-origin:top left;"></iframe>
             </div>
+            <script>
+              (function() {
+                function scaleProtoFrame() {
+                  var wrap = document.getElementById('protoFrameWrap');
+                  var frame = document.getElementById('protoGameFrame');
+                  if (!wrap || !frame) return;
+                  var s = wrap.clientWidth / 1280;
+                  frame.style.transform = 'scale(' + s + ')';
+                  wrap.style.height = (800 * s) + 'px';
+                }
+                window.addEventListener('resize', scaleProtoFrame);
+                window.addEventListener('DOMContentLoaded', scaleProtoFrame);
+                setTimeout(scaleProtoFrame, 100);
+              })();
+            </script>
           </div>
 
           <!-- Instructions -->
