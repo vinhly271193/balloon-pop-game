@@ -1725,6 +1725,1596 @@
         transform: rotate(90deg);
       }
     }
+
+    /* ─────────────────────────────────────────────
+       SCREEN MAP PAGE
+    ───────────────────────────────────────────── */
+    .screens-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 0 0 36px;
+      padding: 24px 16px;
+      background: var(--surface-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .screens-flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 14px;
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      min-width: 80px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .screens-flow-step:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .screens-flow-icon {
+      font-size: 1.25rem;
+    }
+
+    .screens-flow-label {
+      font-family: var(--font-heading);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .screens-flow-arrow {
+      font-size: 1.25rem;
+      color: var(--brand-magenta);
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .screens-card {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .screens-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .screens-mockup {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
+      padding: 16px;
+      line-height: 1.4;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screens-mockup-label {
+      position: relative;
+      z-index: 1;
+    }
+
+    .screens-mockup-elements {
+      position: absolute;
+      bottom: 8px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      z-index: 1;
+    }
+
+    .screens-mockup-btn {
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.25);
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: #fff;
+      backdrop-filter: blur(4px);
+    }
+
+    .screens-body {
+      padding: 20px;
+    }
+
+    .screens-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .screens-purpose {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .screens-elements {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .screens-elements li {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      padding: 3px 0 3px 16px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .screens-elements li::before {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand-magenta);
+    }
+
+    @media (max-width: 768px) {
+      .screens-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .screens-flow {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .screens-flow-arrow {
+        transform: rotate(90deg);
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+       INTERACTIVE PROTOTYPE PAGE
+    ───────────────────────────────────────────── */
+    .proto-container {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .proto-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px;
+      background: var(--surface-secondary);
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.75rem;
+      font-family: var(--font-heading);
+      font-weight: 500;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .proto-crumb {
+      padding: 2px 10px;
+      border-radius: 100px;
+      background: var(--border-light);
+      color: var(--text-secondary);
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .proto-crumb.active {
+      background: var(--brand-magenta);
+      color: #fff;
+    }
+
+    .proto-crumb.visited {
+      background: rgba(233, 30, 140, 0.12);
+      color: var(--brand-magenta);
+    }
+
+    .proto-crumb-arrow {
+      color: var(--text-muted);
+      font-size: 0.625rem;
+    }
+
+    .proto-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      background: #1a1a2e;
+      overflow: hidden;
+    }
+
+    .proto-screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      animation: fadeInUp 200ms ease both;
+    }
+
+    .proto-screen.active {
+      display: flex;
+    }
+
+    .proto-screen-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .proto-screen-subtitle {
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+
+    .proto-screen-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .proto-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 100px;
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      margin: 4px;
+    }
+
+    .proto-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .proto-btn-primary {
+      background: var(--brand-magenta);
+      color: #fff;
+    }
+
+    .proto-btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      backdrop-filter: blur(4px);
+    }
+
+    .proto-btn-option {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 14px 20px;
+      min-width: 140px;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .proto-btn-option:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    .proto-option-icon {
+      font-size: 1.5rem;
+    }
+
+    .proto-option-label {
+      font-size: 0.8125rem;
+    }
+
+    .proto-options-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .proto-gameplay-area {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .proto-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .proto-hud-item {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      font-family: var(--font-heading);
+      font-weight: 600;
+    }
+
+    .proto-garden {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 24px;
+      padding-bottom: 20px;
+    }
+
+    .proto-pot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .proto-plant {
+      font-size: 2rem;
+      animation: protoBob 2s ease-in-out infinite;
+    }
+
+    @keyframes protoBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .proto-pot-base {
+      width: 48px;
+      height: 28px;
+      background: #8B4513;
+      border-radius: 4px 4px 8px 8px;
+    }
+
+    .proto-toolbar {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .proto-tool {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+    }
+
+    .proto-controls {
+      padding: 16px 20px;
+      background: var(--surface-secondary);
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .proto-controls-hint {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .proto-reset-btn {
+      padding: 6px 16px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      background: var(--surface-primary);
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .proto-reset-btn:hover {
+      border-color: var(--brand-magenta);
+      color: var(--brand-magenta);
+    }
+
+    .proto-instructions {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .proto-instructions h3 {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .proto-instructions-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+
+    .proto-instructions-list li {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      padding: 8px 12px;
+      background: var(--surface-secondary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .proto-instructions-list li span:first-child {
+      font-size: 1rem;
+    }
+
+    /* ─────────────────────────────────────────────
+       COMPONENT LIBRARY PAGE
+    ───────────────────────────────────────────── */
+    .comp-section {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .comp-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comp-swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .comp-swatch {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .comp-swatch:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .comp-swatch-color {
+      height: 64px;
+    }
+
+    .comp-swatch-info {
+      padding: 8px 10px;
+      background: var(--surface-primary);
+    }
+
+    .comp-swatch-name {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .comp-swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .comp-type-scale {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comp-type-row {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comp-type-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .comp-type-meta {
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .comp-type-size {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--brand-magenta);
+      font-weight: 500;
+    }
+
+    .comp-type-use {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .comp-type-sample {
+      font-family: var(--font-heading);
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .comp-spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .comp-spacing-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comp-spacing-box {
+      background: rgba(233, 30, 140, 0.12);
+      border: 1px dashed var(--brand-magenta);
+      border-radius: 3px;
+    }
+
+    .comp-spacing-label {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+    }
+
+    .comp-radius-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .comp-radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comp-radius-box {
+      width: 56px;
+      height: 56px;
+      background: var(--surface-secondary);
+      border: 2px solid var(--brand-magenta);
+    }
+
+    .comp-radius-label {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+    }
+
+    .comp-buttons-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .comp-btn-demo {
+      padding: 10px 24px;
+      border-radius: 100px;
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      border: 2px solid transparent;
+    }
+
+    .comp-btn-demo:hover {
+      transform: translateY(-1px);
+    }
+
+    .comp-btn-primary {
+      background: var(--brand-magenta);
+      color: #fff;
+      border-color: var(--brand-magenta);
+    }
+
+    .comp-btn-primary:hover {
+      background: var(--brand-purple);
+      border-color: var(--brand-purple);
+      box-shadow: 0 4px 12px rgba(123, 45, 142, 0.3);
+    }
+
+    .comp-btn-secondary {
+      background: transparent;
+      color: var(--brand-magenta);
+      border-color: var(--brand-magenta);
+    }
+
+    .comp-btn-secondary:hover {
+      background: rgba(233, 30, 140, 0.06);
+      box-shadow: 0 4px 12px rgba(233, 30, 140, 0.15);
+    }
+
+    .comp-btn-game {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+      border-color: #22c55e;
+      border-radius: var(--radius-md);
+    }
+
+    .comp-btn-game:hover {
+      background: rgba(34, 197, 94, 0.2);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+    }
+
+    .comp-game-elements {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .comp-game-el {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .comp-game-el-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .comp-game-el-name {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .comp-game-el-spec {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .comp-theme-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .comp-theme-btn {
+      padding: 6px 16px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      background: var(--surface-primary);
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .comp-theme-btn.active {
+      background: var(--brand-magenta);
+      color: #fff;
+      border-color: var(--brand-magenta);
+    }
+
+    .comp-theme-preview {
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px solid var(--border-light);
+      transition: background var(--transition-base), color var(--transition-base);
+    }
+
+    .comp-theme-preview.dark {
+      background: #1a1a2e;
+      border-color: #2d2d44;
+    }
+
+    .comp-theme-preview.dark .comp-theme-text {
+      color: #e2e8f0;
+    }
+
+    .comp-theme-preview.dark .comp-theme-muted {
+      color: #94a3b8;
+    }
+
+    .comp-theme-text {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .comp-theme-muted {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* ─────────────────────────────────────────────
+       DESIGN VARIATIONS PAGE
+    ───────────────────────────────────────────── */
+    .vars-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .vars-card {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .vars-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .vars-mockup {
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vars-mockup-title {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .vars-mockup-sub {
+      font-size: 0.8125rem;
+      opacity: 0.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    .vars-body {
+      padding: 20px;
+    }
+
+    .vars-name {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .vars-desc {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .vars-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .vars-tag {
+      padding: 2px 10px;
+      border-radius: 100px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      background: var(--surface-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+
+    .vars-current {
+      background: rgba(233, 30, 140, 0.08);
+      color: var(--brand-magenta);
+      border-color: rgba(233, 30, 140, 0.2);
+    }
+
+    /* Storybook mockup */
+    .vars-storybook {
+      background: #f5e6c8;
+      color: #5c3d1e;
+    }
+
+    .vars-storybook::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 20px,
+        rgba(139, 90, 43, 0.03) 20px,
+        rgba(139, 90, 43, 0.03) 40px
+      );
+    }
+
+    /* Modern minimal */
+    .vars-modern {
+      background: #ffffff;
+      color: #1e293b;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    /* Playful garden */
+    .vars-playful {
+      background: linear-gradient(180deg, #87CEEB 0%, #90EE90 100%);
+      color: #1a5c2a;
+    }
+
+    .vars-playful::before {
+      content: '🐝';
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-size: 1.5rem;
+      animation: protoBob 3s ease-in-out infinite;
+    }
+
+    /* Warm garden (current) */
+    .vars-warm {
+      background: linear-gradient(135deg, #FFF8E1, #E8F5E9);
+      color: #2e4a3a;
+    }
+
+    .vars-warm::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(233,30,140,0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(34,197,94,0.05) 0%, transparent 50%);
+    }
+
+    @media (max-width: 768px) {
+      .vars-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+       ANIMATION REFERENCE PAGE
+    ───────────────────────────────────────────── */
+    .anim-section {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .anim-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .anim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .anim-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .anim-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .anim-card-name {
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .anim-card-meta {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .anim-preview {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      background: var(--surface-primary);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+
+    .anim-preview-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--brand-magenta);
+    }
+
+    .anim-preview-box {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--brand-magenta);
+    }
+
+    .anim-preview-ring {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid var(--brand-magenta);
+      background: transparent;
+    }
+
+    .anim-preview-plant {
+      font-size: 1.5rem;
+    }
+
+    /* Animation keyframes for demos */
+    @keyframes animFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes animSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes animFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes animPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    @keyframes animBob {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-4px) rotate(3deg); }
+      75% { transform: translateY(4px) rotate(-3deg); }
+    }
+
+    @keyframes animHoverScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    @keyframes animDwellRing {
+      from { clip-path: polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%); }
+      to { clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+    }
+
+    @keyframes animConfetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-40px) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes animSplash {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    @keyframes animDissolve {
+      0% { opacity: 1; filter: blur(0); }
+      100% { opacity: 0; filter: blur(4px); }
+    }
+
+    .anim-demo-fadeIn { animation: animFadeIn 1.5s ease infinite; }
+    .anim-demo-slideUp { animation: animSlideUp 1.5s ease infinite; }
+    .anim-demo-float { animation: animFloat 2s ease-in-out infinite; }
+    .anim-demo-pulse { animation: animPulse 1.2s ease-in-out infinite; }
+    .anim-demo-bob { animation: animBob 2s ease-in-out infinite; }
+    .anim-demo-hoverScale { animation: animHoverScale 1.5s ease-in-out infinite; }
+    .anim-demo-dwellRing { animation: animDwellRing 3s linear infinite; background: var(--brand-magenta); }
+    .anim-demo-confetti { animation: animConfetti 1.5s ease infinite; }
+    .anim-demo-splash { animation: animSplash 1.5s ease infinite; border-radius: 50%; background: #4A90D9; width: 24px; height: 24px; }
+    .anim-demo-dissolve { animation: animDissolve 2s ease infinite; }
+
+    .anim-code {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      line-height: 1.6;
+      white-space: pre;
+      display: block;
+    }
+
+    /* ─────────────────────────────────────────────
+       ACCESSIBILITY PAGE
+    ───────────────────────────────────────────── */
+    .a11y-section {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .a11y-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .a11y-modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .a11y-mode-card {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+
+    .a11y-mode-preview {
+      height: 180px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .a11y-mode-hud {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6875rem;
+      font-family: var(--font-heading);
+      font-weight: 600;
+    }
+
+    .a11y-mode-garden {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 1.5rem;
+    }
+
+    .a11y-mode-tools {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-size: 1rem;
+    }
+
+    .a11y-mode-info {
+      padding: 14px 16px;
+      background: var(--surface-primary);
+    }
+
+    .a11y-mode-name {
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .a11y-mode-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Default mode preview */
+    .a11y-default-preview {
+      background: linear-gradient(180deg, #87CEEB, #90EE90);
+    }
+    .a11y-default-preview .a11y-mode-hud { color: #1e3a1e; }
+
+    /* Enhanced mode preview */
+    .a11y-enhanced-preview {
+      background: linear-gradient(180deg, #1a4a7a, #1a5c2a);
+    }
+    .a11y-enhanced-preview .a11y-mode-hud { color: #ffffff; }
+
+    /* High contrast mode preview */
+    .a11y-high-contrast-preview {
+      background: #111111;
+    }
+    .a11y-high-contrast-preview .a11y-mode-hud { color: #ffffff; }
+
+    .a11y-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+    }
+
+    .a11y-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .a11y-table th {
+      background: var(--surface-secondary);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .a11y-table td {
+      padding: 10px 14px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .a11y-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .a11y-check {
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .a11y-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .a11y-feature-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .a11y-feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .a11y-feature-title {
+      font-family: var(--font-heading);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .a11y-feature-body {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    @media (max-width: 768px) {
+      .a11y-modes {
+        grid-template-columns: 1fr;
+      }
+
+      .a11y-features {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+       MARKETING / LANDING PAGE
+    ───────────────────────────────────────────── */
+    .mktg-hero {
+      text-align: center;
+      padding: 48px 24px;
+      background: linear-gradient(135deg, rgba(233,30,140,0.04), rgba(123,45,142,0.06));
+      border: 1px solid rgba(233,30,140,0.12);
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
+    }
+
+    .mktg-hero-title {
+      font-family: var(--font-heading);
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .mktg-hero-sub {
+      font-size: 1.0625rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    .mktg-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 36px;
+      background: var(--brand-magenta);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+      box-shadow: 0 4px 16px rgba(233, 30, 140, 0.3);
+    }
+
+    .mktg-cta-btn:hover {
+      background: var(--brand-purple);
+      box-shadow: 0 6px 20px rgba(123, 45, 142, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .mktg-section {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mktg-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .mktg-section-text {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .mktg-stat-highlight {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--brand-magenta), var(--brand-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .mktg-pillars {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .mktg-pillar {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .mktg-pillar:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .mktg-pillar-icon {
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .mktg-pillar-title {
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .mktg-pillar-body {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .mktg-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .mktg-step {
+      text-align: center;
+      padding: 24px 16px;
+      background: var(--surface-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .mktg-step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-magenta), var(--brand-purple));
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .mktg-step-title {
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .mktg-step-body {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .mktg-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .mktg-feature {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .mktg-feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .mktg-feature-title {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .mktg-feature-body {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .mktg-testimonials {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .mktg-testimonial {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .mktg-testimonial-quote {
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .mktg-testimonial-author {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .mktg-testimonial-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .mktg-final-cta {
+      text-align: center;
+      padding: 40px 24px;
+      background: linear-gradient(135deg, rgba(233,30,140,0.04), rgba(123,45,142,0.06));
+      border: 1px solid rgba(233,30,140,0.12);
+      border-radius: var(--radius-lg);
+    }
+
+    .mktg-final-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .mktg-final-sub {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .mktg-clinician-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--brand-magenta);
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9375rem;
+      margin-top: 8px;
+      transition: color var(--transition-fast);
+    }
+
+    .mktg-clinician-link:hover {
+      color: var(--brand-purple);
+    }
+
+    @media (max-width: 768px) {
+      .mktg-pillars {
+        grid-template-columns: 1fr;
+      }
+
+      .mktg-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .mktg-features {
+        grid-template-columns: 1fr;
+      }
+
+      .mktg-hero-title {
+        font-size: 1.75rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2173,10 +3763,298 @@
             <h1 class="page-title">Screen Map</h1>
             <p class="page-description">Visual map of all game screens, state transitions, and user flow paths.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">🗺️</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Screen Map will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">game-screens.html</code> into this page.</p>
+
+          <!-- State Machine Flow -->
+          <div class="screens-flow">
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F3E0;</span>
+              <span class="screens-flow-label">Welcome</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F465;</span>
+              <span class="screens-flow-label">Player Select</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F3AE;</span>
+              <span class="screens-flow-label">Mode Select</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x270B;</span>
+              <span class="screens-flow-label">Calibration</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F4DC;</span>
+              <span class="screens-flow-label">Challenge</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F331;</span>
+              <span class="screens-flow-label">Playing</span>
+            </div>
+            <span class="screens-flow-arrow">&rarr;</span>
+            <div class="screens-flow-step">
+              <span class="screens-flow-icon">&#x1F3C6;</span>
+              <span class="screens-flow-label">Round End</span>
+            </div>
+          </div>
+
+          <!-- Screen Cards Grid -->
+          <div class="screens-grid">
+
+            <!-- Welcome -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #FFF8E1, #E8F5E9);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#2e4a3a; font-size:1.125rem;">Garden Grow</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(233,30,140,0.7);">Start Growing</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Welcome Screen</div>
+                <p class="screens-purpose">Entry point. Establishes the warm garden theme and invites the player in.</p>
+                <ul class="screens-elements">
+                  <li>Animated floating leaf particles</li>
+                  <li>re:Action Health Technologies branding</li>
+                  <li>Single large "Start Growing" button with 3-second dwell activation</li>
+                  <li>Settings gear icon in the top corner</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Player Select -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#2e4a3a;">How Many Gardeners?</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(255,140,66,0.7);">1 Player</span>
+                    <span class="screens-mockup-btn" style="background:rgba(74,144,217,0.7);">2 Players</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Player Select</div>
+                <p class="screens-purpose">Choose between solo and two-player experiences.</p>
+                <ul class="screens-elements">
+                  <li>Two large hand-hoverable option cards</li>
+                  <li>Friendly gardener iconography</li>
+                  <li>3-second dwell timer ring around each option</li>
+                  <li>Back button to return to Welcome</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Mode Select -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #C8E6C9, #A5D6A7);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#1b5e20;">Choose Your Garden</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(46,125,50,0.7);">Community</span>
+                    <span class="screens-mockup-btn" style="background:rgba(183,28,28,0.5);">Village Fair</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Mode Select</div>
+                <p class="screens-purpose">Pick the play mode: co-operative community garden or competitive village fair.</p>
+                <ul class="screens-elements">
+                  <li>Co-op card: shared garden illustration, "Community Garden"</li>
+                  <li>Competitive card: split garden illustration, "Village Fair"</li>
+                  <li>Only appears for 2-player selection</li>
+                  <li>Descriptive subtitle under each option</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Calibration -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#0d47a1;">Show Your Hands!</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(13,71,161,0.5);">Detecting...</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Calibration</div>
+                <p class="screens-purpose">MediaPipe initialises and confirms hand detection before gameplay starts.</p>
+                <ul class="screens-elements">
+                  <li>Live camera feed with hand landmark overlay</li>
+                  <li>Clear "raise your hands" prompt with animation</li>
+                  <li>Detection confidence indicator</li>
+                  <li>Auto-advances once hands are confirmed</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Challenge Intro -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #FFF3E0, #FFE0B2);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#e65100; font-size:0.9375rem;">Chapter 1: First Seedlings</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(230,81,0,0.5);">Plant 3 Seeds</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Challenge Intro</div>
+                <p class="screens-purpose">Presents the current chapter's challenge objective with a brief narrative moment.</p>
+                <ul class="screens-elements">
+                  <li>Chapter name and storyline context</li>
+                  <li>Clear single-sentence objective</li>
+                  <li>Auto-dismiss after short reading pause</li>
+                  <li>Gentle entrance animation</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Gameplay Solo/Co-op -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(180deg, #87CEEB, #90EE90);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#1a5c2a;">Solo / Co-op Gameplay</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(0,0,0,0.3);">Score: 42</span>
+                    <span class="screens-mockup-btn" style="background:rgba(0,0,0,0.3);">2:30</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Gameplay (Solo / Co-op)</div>
+                <p class="screens-purpose">The main play area with full-width garden, tools, and plant pots.</p>
+                <ul class="screens-elements">
+                  <li>Canvas rendering: sky gradient, garden bed, plant pots</li>
+                  <li>Draggable seed, watering can, fertiliser bag tools</li>
+                  <li>HUD: score, timer, challenge progress bar</li>
+                  <li>DDA adjusts silently in the background every 5 seconds</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Gameplay Competitive -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(180deg, #87CEEB, #90EE90); position:relative;">
+                <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:rgba(255,255,255,0.5);"></div>
+                <div>
+                  <div class="screens-mockup-label" style="color:#1a5c2a;">Competitive 2P</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(255,140,66,0.7);">P1: 28</span>
+                    <span class="screens-mockup-btn" style="background:rgba(74,144,217,0.7);">P2: 35</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Gameplay (Competitive)</div>
+                <p class="screens-purpose">Split-screen layout with a divider. Each player has their own garden zone.</p>
+                <ul class="screens-elements">
+                  <li>Vertical divider separates Player 1 (right) and Player 2 (left)</li>
+                  <li>Independent scores, tools, and plant pots per zone</li>
+                  <li>Rubber-band mechanic: golden watering can for trailing player</li>
+                  <li>DDA runs independently per player</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Round End Solo/Co-op -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#2e7d32; font-size:1.125rem;">Garden Complete!</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(46,125,50,0.7);">Play Again</span>
+                    <span class="screens-mockup-btn" style="background:rgba(0,0,0,0.2);">Home</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Round End (Solo / Co-op)</div>
+                <p class="screens-purpose">Celebration screen showing achievements and inviting another round.</p>
+                <ul class="screens-elements">
+                  <li>Confetti particle burst animation</li>
+                  <li>Score summary and plants harvested count</li>
+                  <li>Chapter progression indicator</li>
+                  <li>"Play Again" and "Return Home" buttons</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Round End Competitive -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: linear-gradient(135deg, #FFF3E0, #FFECB3);">
+                <div>
+                  <div class="screens-mockup-label" style="color:#e65100; font-size:1.125rem;">Village Fair Results</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(255,140,66,0.7);">Blue Ribbon</span>
+                    <span class="screens-mockup-btn" style="background:rgba(74,144,217,0.7);">Red Ribbon</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Round End (Competitive)</div>
+                <p class="screens-purpose">Both players receive ribbons. There is no loser, only different ribbon colours.</p>
+                <ul class="screens-elements">
+                  <li>Blue Ribbon (1st) and Red Ribbon (2nd) awarded</li>
+                  <li>Side-by-side score comparison</li>
+                  <li>Encouraging message for both players</li>
+                  <li>Ribbon reveal animation with confetti</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: var(--surface-secondary); border-bottom: 1px solid var(--border-light);">
+                <div>
+                  <div class="screens-mockup-label" style="color:var(--text-primary);">Settings</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:var(--border-medium);color:var(--text-primary);">Volume</span>
+                    <span class="screens-mockup-btn" style="background:var(--border-medium);color:var(--text-primary);">Timer</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Settings Panel</div>
+                <p class="screens-purpose">Overlay panel accessible from any screen via the gear icon.</p>
+                <ul class="screens-elements">
+                  <li>Master volume slider controlling Web Audio API gain</li>
+                  <li>Round timer duration selector (1-5 minutes)</li>
+                  <li>Accessibility contrast mode toggle</li>
+                  <li>Semi-transparent backdrop overlay</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="screens-card">
+              <div class="screens-mockup" style="background: #1a1a2e;">
+                <div>
+                  <div class="screens-mockup-label" style="color:#fff;">Loading Garden...</div>
+                  <div class="screens-mockup-elements">
+                    <span class="screens-mockup-btn" style="background:rgba(233,30,140,0.5);">Preparing MediaPipe</span>
+                  </div>
+                </div>
+              </div>
+              <div class="screens-body">
+                <div class="screens-name">Loading Screen</div>
+                <p class="screens-purpose">Shown while MediaPipe Hands model loads and the camera initialises.</p>
+                <ul class="screens-elements">
+                  <li>Animated progress indicator</li>
+                  <li>Garden Grow title with gentle animation</li>
+                  <li>Status text showing current loading step</li>
+                  <li>Auto-transitions once all assets are ready</li>
+                </ul>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -2187,10 +4065,136 @@
             <h1 class="page-title">Interactive Prototype</h1>
             <p class="page-description">Clickable prototype demonstrating the full game flow and UI interactions.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">🎮</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Interactive Prototype will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">prototype.html</code> into this page.</p>
+
+          <div class="proto-container">
+            <!-- Breadcrumb bar -->
+            <div class="proto-breadcrumbs" id="protoBreadcrumbs">
+              <span class="proto-crumb active" data-proto="welcome">Welcome</span>
+              <span class="proto-crumb-arrow">&#9654;</span>
+              <span class="proto-crumb" data-proto="playerSelect">Players</span>
+              <span class="proto-crumb-arrow">&#9654;</span>
+              <span class="proto-crumb" data-proto="modeSelect">Mode</span>
+              <span class="proto-crumb-arrow">&#9654;</span>
+              <span class="proto-crumb" data-proto="calibration">Calibrate</span>
+              <span class="proto-crumb-arrow">&#9654;</span>
+              <span class="proto-crumb" data-proto="gameplay">Play</span>
+              <span class="proto-crumb-arrow">&#9654;</span>
+              <span class="proto-crumb" data-proto="roundEnd">Results</span>
+            </div>
+
+            <!-- Viewport -->
+            <div class="proto-viewport" id="protoViewport">
+
+              <!-- Welcome screen -->
+              <div class="proto-screen active" id="protoScreen-welcome" style="background: linear-gradient(135deg, #FFF8E1, #E8F5E9);">
+                <div class="proto-screen-icon">&#x1F33B;</div>
+                <div class="proto-screen-title" style="color:#2e4a3a;">Garden Grow</div>
+                <div class="proto-screen-subtitle" style="color:#5a7d6a;">A therapeutic gardening experience</div>
+                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('playerSelect')">Start Growing &rarr;</button>
+              </div>
+
+              <!-- Player Select screen -->
+              <div class="proto-screen" id="protoScreen-playerSelect" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+                <div class="proto-screen-title" style="color:#2e4a3a;">How Many Gardeners?</div>
+                <div class="proto-screen-subtitle" style="color:#5a7d6a;">Hover your hand over an option to select</div>
+                <div class="proto-options-row">
+                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(255,140,66,0.5);">
+                    <span class="proto-option-icon">&#x1F9D1;</span>
+                    <span class="proto-option-label">1 Player</span>
+                  </button>
+                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('modeSelect')" style="border-color: rgba(74,144,217,0.5);">
+                    <span class="proto-option-icon">&#x1F465;</span>
+                    <span class="proto-option-label">2 Players</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Mode Select screen -->
+              <div class="proto-screen" id="protoScreen-modeSelect" style="background: linear-gradient(135deg, #C8E6C9, #A5D6A7);">
+                <div class="proto-screen-title" style="color:#1b5e20;">Choose Your Garden</div>
+                <div class="proto-screen-subtitle" style="color:#388e3c;">Select a play mode for your session</div>
+                <div class="proto-options-row">
+                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(46,125,50,0.5);">
+                    <span class="proto-option-icon">&#x1F331;</span>
+                    <span class="proto-option-label">Community Garden</span>
+                  </button>
+                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(183,28,28,0.3);">
+                    <span class="proto-option-icon">&#x1F3C6;</span>
+                    <span class="proto-option-label">Village Fair</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Calibration screen -->
+              <div class="proto-screen" id="protoScreen-calibration" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB);">
+                <div class="proto-screen-icon">&#x270B;</div>
+                <div class="proto-screen-title" style="color:#0d47a1;">Show Your Hands!</div>
+                <div class="proto-screen-subtitle" style="color:#1565c0;">Hold your hands up to the camera</div>
+                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('gameplay')" style="background:#1976D2;">Hands Detected &rarr;</button>
+              </div>
+
+              <!-- Gameplay screen -->
+              <div class="proto-screen" id="protoScreen-gameplay" style="background: linear-gradient(180deg, #87CEEB 0%, #90EE90 100%); padding:0;">
+                <div class="proto-gameplay-area">
+                  <div class="proto-hud">
+                    <div class="proto-hud-item">Score: 42</div>
+                    <div class="proto-hud-item">Chapter 1: First Seedlings</div>
+                    <div class="proto-hud-item">1:45</div>
+                  </div>
+                  <div class="proto-toolbar">
+                    <div class="proto-tool">&#x1F331;</div>
+                    <div class="proto-tool">&#x1F4A7;</div>
+                    <div class="proto-tool">&#x1F9EA;</div>
+                  </div>
+                  <div class="proto-garden">
+                    <div class="proto-pot">
+                      <span class="proto-plant">&#x1F33F;</span>
+                      <div class="proto-pot-base"></div>
+                    </div>
+                    <div class="proto-pot">
+                      <span class="proto-plant" style="animation-delay:0.3s;">&#x1F345;</span>
+                      <div class="proto-pot-base"></div>
+                    </div>
+                    <div class="proto-pot">
+                      <span class="proto-plant" style="animation-delay:0.6s;">&#x1F33B;</span>
+                      <div class="proto-pot-base"></div>
+                    </div>
+                  </div>
+                </div>
+                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('roundEnd')" style="position:absolute;bottom:16px;right:16px;font-size:0.75rem;padding:8px 16px;">End Round &rarr;</button>
+              </div>
+
+              <!-- Round End screen -->
+              <div class="proto-screen" id="protoScreen-roundEnd" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+                <div class="proto-screen-icon">&#x1F389;</div>
+                <div class="proto-screen-title" style="color:#2e7d32;">Garden Complete!</div>
+                <div class="proto-screen-subtitle" style="color:#388e3c;">Score: 42 &middot; 8 plants harvested</div>
+                <div style="display:flex;gap:8px;">
+                  <button class="proto-btn proto-btn-primary" onclick="protoNavigate('welcome')" style="background:#2e7d32;">Play Again</button>
+                  <button class="proto-btn proto-btn-secondary" onclick="protoNavigate('welcome')">Home</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Controls bar -->
+            <div class="proto-controls">
+              <div class="proto-controls-hint">Click buttons to navigate through the game flow</div>
+              <button class="proto-reset-btn" onclick="protoNavigate('welcome')">Reset</button>
+            </div>
+          </div>
+
+          <!-- Instructions -->
+          <div class="proto-instructions">
+            <h3>Navigation Guide</h3>
+            <ul class="proto-instructions-list">
+              <li><span>&#x1F3E0;</span> Welcome: Click "Start Growing"</li>
+              <li><span>&#x1F465;</span> 1 Player skips to Calibration</li>
+              <li><span>&#x1F3AE;</span> 2 Players opens Mode Select</li>
+              <li><span>&#x270B;</span> Calibration auto-advances</li>
+              <li><span>&#x1F331;</span> Gameplay: click "End Round"</li>
+              <li><span>&#x1F3C6;</span> Round End: "Play Again" or "Home"</li>
+            </ul>
           </div>
         </section>
 
@@ -2201,10 +4205,158 @@
             <h1 class="page-title">Component Library</h1>
             <p class="page-description">Reusable UI components, sticker sheet, and visual specifications for all game elements.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">🧩</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Component Library will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">component-library.html</code> into this page.</p>
+
+          <!-- Color Palette -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F3A8; Color Palette</h2>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:12px;">Brand</h3>
+            <div class="comp-swatches" style="margin-bottom:20px;">
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#E91E8C;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Magenta</div><div class="comp-swatch-hex">#E91E8C</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#7B2D8E;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Purple</div><div class="comp-swatch-hex">#7B2D8E</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#5B1D6E;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Deep Purple</div><div class="comp-swatch-hex">#5B1D6E</div></div></div>
+            </div>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:12px;">Game UI</h3>
+            <div class="comp-swatches" style="margin-bottom:20px;">
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#22C55E;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Garden Green</div><div class="comp-swatch-hex">#22C55E</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#87CEEB;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Sky Blue</div><div class="comp-swatch-hex">#87CEEB</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#FFF8E1;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Warm Cream</div><div class="comp-swatch-hex">#FFF8E1</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#1a1a2e;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Night BG</div><div class="comp-swatch-hex">#1A1A2E</div></div></div>
+            </div>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:12px;">Player Colors</h3>
+            <div class="comp-swatches" style="margin-bottom:20px;">
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#FF8C42;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Player 1 Orange</div><div class="comp-swatch-hex">#FF8C42</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#4A90D9;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Player 2 Blue</div><div class="comp-swatch-hex">#4A90D9</div></div></div>
+            </div>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:12px;">Plant Colors</h3>
+            <div class="comp-swatches">
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#FF6347;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Tomato</div><div class="comp-swatch-hex">#FF6347</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#FFD700;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Sunflower</div><div class="comp-swatch-hex">#FFD700</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#FF8C00;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Carrot</div><div class="comp-swatch-hex">#FF8C00</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#90EE90;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Lettuce</div><div class="comp-swatch-hex">#90EE90</div></div></div>
+              <div class="comp-swatch"><div class="comp-swatch-color" style="background:#4169E1;"></div><div class="comp-swatch-info"><div class="comp-swatch-name">Blueberry</div><div class="comp-swatch-hex">#4169E1</div></div></div>
+            </div>
+          </div>
+
+          <!-- Typography Scale -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F524; Typography Scale</h2>
+            <div class="comp-type-scale">
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">48px</div><div class="comp-type-use">Hero title</div></div>
+                <div class="comp-type-sample" style="font-size:48px;font-weight:700;">Garden</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">32px</div><div class="comp-type-use">Page title</div></div>
+                <div class="comp-type-sample" style="font-size:32px;font-weight:700;">Welcome</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">24px</div><div class="comp-type-use">Section head</div></div>
+                <div class="comp-type-sample" style="font-size:24px;font-weight:600;">Start Growing</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">18px</div><div class="comp-type-use">Subheading</div></div>
+                <div class="comp-type-sample" style="font-size:18px;font-weight:600;">Choose Your Garden</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">16px</div><div class="comp-type-use">Body</div></div>
+                <div class="comp-type-sample" style="font-size:16px;font-weight:400;font-family:var(--font-body);">The garden bed needs water and sunlight.</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">14px</div><div class="comp-type-use">Caption</div></div>
+                <div class="comp-type-sample" style="font-size:14px;font-weight:400;font-family:var(--font-body);color:var(--text-secondary);">Score: 42 &middot; Plants: 8</div>
+              </div>
+              <div class="comp-type-row">
+                <div class="comp-type-meta"><div class="comp-type-size">12px</div><div class="comp-type-use">Micro label</div></div>
+                <div class="comp-type-sample" style="font-size:12px;font-weight:600;font-family:var(--font-heading);text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);">CHAPTER 1</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Spacing & Radius -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F4D0; Spacing &amp; Radius</h2>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:12px;">Spacing Scale</h3>
+            <div class="comp-spacing-row">
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:4px;height:24px;"></div><div class="comp-spacing-label">4px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:8px;height:24px;"></div><div class="comp-spacing-label">8px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:12px;height:24px;"></div><div class="comp-spacing-label">12px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:16px;height:24px;"></div><div class="comp-spacing-label">16px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:24px;height:24px;"></div><div class="comp-spacing-label">24px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:32px;height:24px;"></div><div class="comp-spacing-label">32px</div></div>
+              <div class="comp-spacing-item"><div class="comp-spacing-box" style="width:48px;height:24px;"></div><div class="comp-spacing-label">48px</div></div>
+            </div>
+            <h3 style="font-family:var(--font-heading);font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin:20px 0 12px;">Border Radius</h3>
+            <div class="comp-radius-row">
+              <div class="comp-radius-item"><div class="comp-radius-box" style="border-radius:6px;"></div><div class="comp-radius-label">6px (sm)</div></div>
+              <div class="comp-radius-item"><div class="comp-radius-box" style="border-radius:10px;"></div><div class="comp-radius-label">10px (md)</div></div>
+              <div class="comp-radius-item"><div class="comp-radius-box" style="border-radius:16px;"></div><div class="comp-radius-label">16px (lg)</div></div>
+              <div class="comp-radius-item"><div class="comp-radius-box" style="border-radius:50%;"></div><div class="comp-radius-label">50% (pill)</div></div>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F518; Buttons</h2>
+            <div class="comp-buttons-row" style="margin-bottom:16px;">
+              <button class="comp-btn-demo comp-btn-primary">Primary Action</button>
+              <button class="comp-btn-demo comp-btn-secondary">Secondary</button>
+              <button class="comp-btn-demo comp-btn-game">Game Card</button>
+            </div>
+            <p style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">
+              <strong>Primary:</strong> Brand magenta, pill shape, white text. Used for main CTAs. Hover transitions to purple with elevated shadow.<br>
+              <strong>Secondary:</strong> Outlined magenta, transparent fill. Used for alternative actions. Hover adds light magenta tint.<br>
+              <strong>Game Card:</strong> Green tinted, rounded corners. Used inside the game for action confirmations.
+            </p>
+          </div>
+
+          <!-- Game Elements -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F3AE; Game Elements</h2>
+            <div class="comp-game-elements">
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1FAB4;</span>
+                <div class="comp-game-el-name">Plant Pot</div>
+                <div class="comp-game-el-spec">Trapezoid shape, #8B4513 brown<br>4 growth stages, 15% pulse on advance</div>
+              </div>
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1F331;</span>
+                <div class="comp-game-el-name">Growth Stages</div>
+                <div class="comp-game-el-spec">Seed &rarr; Sprout &rarr; Grow &rarr; Harvest<br>~8s per stage at full satisfaction</div>
+              </div>
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1F4CA;</span>
+                <div class="comp-game-el-name">Need Meters</div>
+                <div class="comp-game-el-spec">Water, Sun, Fertiliser bars<br>Coloured fill: green > yellow > red</div>
+              </div>
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1F9E4;</span>
+                <div class="comp-game-el-name">Cartoon Gloves</div>
+                <div class="comp-game-el-spec">P1: #FF8C42, P2: #4A90D9<br>Canvas-drawn with wrist and finger joints</div>
+              </div>
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1F4A7;</span>
+                <div class="comp-game-el-name">Watering Can</div>
+                <div class="comp-game-el-spec">Blue tint, draggable tool<br>Water droplet particles on pour</div>
+              </div>
+              <div class="comp-game-el">
+                <span class="comp-game-el-icon">&#x1F383;</span>
+                <div class="comp-game-el-name">Magic Pumpkin</div>
+                <div class="comp-game-el-spec">Co-op bonus, both players touch<br>Confetti burst + timer pause</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Preview -->
+          <div class="comp-section">
+            <h2 class="comp-section-title">&#x1F313; Theme Preview</h2>
+            <div class="comp-theme-toggle">
+              <button class="comp-theme-btn active" onclick="compSetTheme('light', this)">Light</button>
+              <button class="comp-theme-btn" onclick="compSetTheme('dark', this)">Dark</button>
+            </div>
+            <div class="comp-theme-preview" id="compThemePreview">
+              <div class="comp-theme-text">Garden Grow</div>
+              <div class="comp-theme-muted">Therapeutic hand-tracking gardening for dementia patients</div>
+            </div>
           </div>
         </section>
 
@@ -2215,10 +4367,86 @@
             <h1 class="page-title">Design Variations</h1>
             <p class="page-description">Welcome screen variants, theme explorations, and visual direction options.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">🎨</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">Design Variations will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">design-variations.html</code> into this page.</p>
+
+          <div class="vars-grid">
+
+            <!-- Storybook -->
+            <div class="vars-card">
+              <div class="vars-mockup vars-storybook">
+                <div>
+                  <div class="vars-mockup-title" style="font-family:Georgia,serif;">Garden Grow</div>
+                  <div class="vars-mockup-sub">A tale of seeds and sunshine</div>
+                </div>
+              </div>
+              <div class="vars-body">
+                <div class="vars-name">Storybook</div>
+                <p class="vars-desc">Warm parchment textures evoke a hand-illustrated children's book. Watercolour washes and hand-drawn letterforms create an inviting, nostalgic feel that resonates with older adults.</p>
+                <div class="vars-tags">
+                  <span class="vars-tag">Nostalgic</span>
+                  <span class="vars-tag">Hand-drawn</span>
+                  <span class="vars-tag">Warm</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modern Minimal -->
+            <div class="vars-card">
+              <div class="vars-mockup vars-modern">
+                <div>
+                  <div class="vars-mockup-title" style="letter-spacing:-0.03em;">Garden Grow</div>
+                  <div class="vars-mockup-sub" style="color:#64748b;">Therapeutic gardening, simplified</div>
+                </div>
+              </div>
+              <div class="vars-body">
+                <div class="vars-name">Modern Minimal</div>
+                <p class="vars-desc">Clean white canvas with a single line-art leaf icon. Generous whitespace and precise typography give a clinical credibility that appeals to healthcare stakeholders.</p>
+                <div class="vars-tags">
+                  <span class="vars-tag">Clean</span>
+                  <span class="vars-tag">Professional</span>
+                  <span class="vars-tag">Clinical</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Playful Garden -->
+            <div class="vars-card">
+              <div class="vars-mockup vars-playful">
+                <div>
+                  <div class="vars-mockup-title">Garden Grow!</div>
+                  <div class="vars-mockup-sub">Let's plant something wonderful</div>
+                </div>
+              </div>
+              <div class="vars-body">
+                <div class="vars-name">Playful Garden</div>
+                <p class="vars-desc">Bright sky-to-grass gradient with animated elements like a wandering bee and bouncing flowers. High energy and colourful, designed to spark immediate curiosity and joy.</p>
+                <div class="vars-tags">
+                  <span class="vars-tag">Colourful</span>
+                  <span class="vars-tag">Animated</span>
+                  <span class="vars-tag">Joyful</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Warm Garden (Current) -->
+            <div class="vars-card">
+              <div class="vars-mockup vars-warm">
+                <div>
+                  <div class="vars-mockup-title">Garden Grow</div>
+                  <div class="vars-mockup-sub">A therapeutic gardening experience</div>
+                </div>
+              </div>
+              <div class="vars-body">
+                <div class="vars-name">Warm Garden <span class="vars-current" style="font-size:0.6875rem;padding:2px 8px;border-radius:100px;">Current</span></div>
+                <p class="vars-desc">Gentle cream-to-mint gradient with floating particle effects. Strikes the ideal balance between welcoming warmth and therapeutic calm. Selected as the production design direction.</p>
+                <div class="vars-tags">
+                  <span class="vars-tag vars-current">Selected</span>
+                  <span class="vars-tag">Calming</span>
+                  <span class="vars-tag">Therapeutic</span>
+                  <span class="vars-tag">Balanced</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -2229,10 +4457,205 @@
             <h1 class="page-title">Animation Reference</h1>
             <p class="page-description">Interactive animation demos, timing curves, and motion design principles for the game.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">✨</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Animation Reference will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">animation-showcase.html</code> into this page.</p>
+
+          <!-- Screen Transitions -->
+          <div class="anim-section">
+            <h2 class="anim-section-title">&#x1F4F1; Screen Transitions</h2>
+            <div class="anim-grid">
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Fade In</div>
+                  <div class="anim-card-meta">200ms ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box anim-demo-fadeIn"></div></div>
+                <code class="anim-code">@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Slide Up</div>
+                  <div class="anim-card-meta">200ms ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box anim-demo-slideUp"></div></div>
+                <code class="anim-code">@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Dissolve</div>
+                  <div class="anim-card-meta">300ms ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box anim-demo-dissolve"></div></div>
+                <code class="anim-code">@keyframes dissolve {
+  0% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(4px); }
+}</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Element Animations -->
+          <div class="anim-section">
+            <h2 class="anim-section-title">&#x1F343; Element Animations</h2>
+            <div class="anim-grid">
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Floating Particles</div>
+                  <div class="anim-card-meta">2s ease-in-out infinite</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-dot anim-demo-float"></div></div>
+                <code class="anim-code">@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Growth Pulse</div>
+                  <div class="anim-card-meta">0.4s ease-out</div>
+                </div>
+                <div class="anim-preview"><span class="anim-preview-plant anim-demo-pulse">&#x1F33F;</span></div>
+                <code class="anim-code">@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Seed Bobbing</div>
+                  <div class="anim-card-meta">2s ease-in-out infinite</div>
+                </div>
+                <div class="anim-preview"><span class="anim-preview-plant anim-demo-bob">&#x1F331;</span></div>
+                <code class="anim-code">@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-4px) rotate(3deg); }
+  75% { transform: translateY(4px) rotate(-3deg); }
+}</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Button Interactions -->
+          <div class="anim-section">
+            <h2 class="anim-section-title">&#x1F446; Button Interactions</h2>
+            <div class="anim-grid">
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Hover Scale</div>
+                  <div class="anim-card-meta">150ms ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box anim-demo-hoverScale" style="border-radius:100px;width:80px;height:32px;"></div></div>
+                <code class="anim-code">button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Dwell Ring Fill</div>
+                  <div class="anim-card-meta">3s linear</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-ring anim-demo-dwellRing"></div></div>
+                <code class="anim-code">/* 3-second circular fill using
+   clip-path polygon animation.
+   Activates on hand hover dwell. */</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Press Feedback</div>
+                  <div class="anim-card-meta">100ms ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box" style="border-radius:100px;width:80px;height:32px;animation:animPulse 0.8s ease-in-out infinite;"></div></div>
+                <code class="anim-code">button:active {
+  transform: scale(0.96);
+  transition: transform 100ms ease;
+}</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Feedback -->
+          <div class="anim-section">
+            <h2 class="anim-section-title">&#x1F3AE; Game Feedback</h2>
+            <div class="anim-grid">
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Harvest Confetti</div>
+                  <div class="anim-card-meta">1.5s ease-out</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-dot anim-demo-confetti" style="width:12px;height:12px;background:#FFD700;"></div></div>
+                <code class="anim-code">/* 15-20 particles burst upward with
+   random rotation and spread.
+   Gravity pulls them down. */</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Water Splash</div>
+                  <div class="anim-card-meta">0.6s ease-out</div>
+                </div>
+                <div class="anim-preview"><div class="anim-demo-splash"></div></div>
+                <code class="anim-code">/* Blue circle expands outward from
+   pour point, fading to transparent.
+   3-5 droplets scatter randomly. */</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Stage Advance</div>
+                  <div class="anim-card-meta">0.4s ease-out</div>
+                </div>
+                <div class="anim-preview"><span class="anim-preview-plant anim-demo-pulse">&#x1FAB4;</span></div>
+                <code class="anim-code">/* Plant scales to 115%, holds briefly,
+   then returns to 100%. Synced with
+   a sparkle particle burst. */</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Celebrations -->
+          <div class="anim-section">
+            <h2 class="anim-section-title">&#x1F389; Celebrations</h2>
+            <div class="anim-grid">
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Round End Confetti</div>
+                  <div class="anim-card-meta">3s ease-out</div>
+                </div>
+                <div class="anim-preview">
+                  <div style="display:flex;gap:6px;">
+                    <div class="anim-preview-dot anim-demo-confetti" style="width:8px;height:8px;background:#E91E8C;animation-delay:0s;"></div>
+                    <div class="anim-preview-dot anim-demo-confetti" style="width:8px;height:8px;background:#FFD700;animation-delay:0.2s;"></div>
+                    <div class="anim-preview-dot anim-demo-confetti" style="width:8px;height:8px;background:#22C55E;animation-delay:0.4s;"></div>
+                  </div>
+                </div>
+                <code class="anim-code">/* Full-screen confetti burst. 50+
+   particles in brand colours. Falls
+   with gravity over 3 seconds. */</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Ribbon Reveal</div>
+                  <div class="anim-card-meta">0.8s ease</div>
+                </div>
+                <div class="anim-preview"><div class="anim-preview-box anim-demo-slideUp" style="width:24px;height:40px;border-radius:4px 4px 8px 8px;background:linear-gradient(180deg, #4A90D9, #1565C0);"></div></div>
+                <code class="anim-code">/* Ribbon slides up from bottom with
+   slight rotation. Blue for 1st place,
+   red for 2nd. No loser state. */</code>
+              </div>
+              <div class="anim-card">
+                <div class="anim-card-header">
+                  <div class="anim-card-name">Chapter Complete</div>
+                  <div class="anim-card-meta">1.2s ease</div>
+                </div>
+                <div class="anim-preview"><span class="anim-preview-plant" style="animation:animPulse 1.2s ease-in-out infinite;">&#x2B50;</span></div>
+                <code class="anim-code">/* Star icon scales up with golden glow.
+   Chapter title fades in below.
+   Auto-dismisses after 2 seconds. */</code>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -2243,10 +4666,157 @@
             <h1 class="page-title">Accessibility</h1>
             <p class="page-description">Contrast mode previews, accessibility guidelines, and inclusive design decisions for dementia patients.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">♿</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Accessibility section will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">accessibility-preview.html</code> into this page.</p>
+
+          <!-- Contrast Modes -->
+          <div class="a11y-section">
+            <h2 class="a11y-section-title">&#x1F313; Contrast Modes</h2>
+            <div class="a11y-modes">
+              <!-- Default -->
+              <div class="a11y-mode-card">
+                <div class="a11y-mode-preview a11y-default-preview">
+                  <div class="a11y-mode-hud"><span>Score: 42</span><span>2:30</span></div>
+                  <div class="a11y-mode-garden"><span>&#x1F33F;</span><span>&#x1F345;</span><span>&#x1F33B;</span></div>
+                  <div class="a11y-mode-tools"><span>&#x1F4A7;</span><span>&#x2600;&#xFE0F;</span><span>&#x1F9EA;</span></div>
+                </div>
+                <div class="a11y-mode-info">
+                  <div class="a11y-mode-name">Default</div>
+                  <div class="a11y-mode-desc">Standard colours with sky-to-garden gradient. Designed for typical vision.</div>
+                </div>
+              </div>
+              <!-- Enhanced Visibility -->
+              <div class="a11y-mode-card">
+                <div class="a11y-mode-preview a11y-enhanced-preview">
+                  <div class="a11y-mode-hud"><span>Score: 42</span><span>2:30</span></div>
+                  <div class="a11y-mode-garden"><span>&#x1F33F;</span><span>&#x1F345;</span><span>&#x1F33B;</span></div>
+                  <div class="a11y-mode-tools"><span>&#x1F4A7;</span><span>&#x2600;&#xFE0F;</span><span>&#x1F9EA;</span></div>
+                </div>
+                <div class="a11y-mode-info">
+                  <div class="a11y-mode-name">Enhanced Visibility</div>
+                  <div class="a11y-mode-desc">Deeper backgrounds with brighter foreground elements. Higher contrast ratio.</div>
+                </div>
+              </div>
+              <!-- High Contrast -->
+              <div class="a11y-mode-card">
+                <div class="a11y-mode-preview a11y-high-contrast-preview">
+                  <div class="a11y-mode-hud"><span>Score: 42</span><span>2:30</span></div>
+                  <div class="a11y-mode-garden"><span>&#x1F33F;</span><span>&#x1F345;</span><span>&#x1F33B;</span></div>
+                  <div class="a11y-mode-tools"><span>&#x1F4A7;</span><span>&#x2600;&#xFE0F;</span><span>&#x1F9EA;</span></div>
+                </div>
+                <div class="a11y-mode-info">
+                  <div class="a11y-mode-name">Near Black &amp; White</div>
+                  <div class="a11y-mode-desc">Maximum contrast. Near-monochrome backgrounds with vivid game elements.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WCAG Compliance -->
+          <div class="a11y-section">
+            <h2 class="a11y-section-title">&#x2705; WCAG Compliance</h2>
+            <div class="a11y-table-wrap">
+              <table class="a11y-table">
+                <thead>
+                  <tr>
+                    <th>Requirement</th>
+                    <th>WCAG Level</th>
+                    <th>Our Target</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Text size minimum</td>
+                    <td>AA</td>
+                    <td>18px+ for all game text</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                  <tr>
+                    <td>Contrast ratio (text)</td>
+                    <td>AA</td>
+                    <td>4.5:1 minimum, 7:1 in enhanced mode</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                  <tr>
+                    <td>Touch/click target size</td>
+                    <td>AAA</td>
+                    <td>48px minimum for all interactive elements</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                  <tr>
+                    <td>Timing adjustable</td>
+                    <td>AA</td>
+                    <td>Round timer configurable 1-5 minutes</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                  <tr>
+                    <td>No seizure-inducing content</td>
+                    <td>AA</td>
+                    <td>No flashing above 3Hz threshold</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                  <tr>
+                    <td>Input modality</td>
+                    <td>AA</td>
+                    <td>Camera-based, no fine motor skills required</td>
+                    <td><span class="a11y-check">Pass</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cognitive Accessibility -->
+          <div class="a11y-section">
+            <h2 class="a11y-section-title">&#x1F9E0; Cognitive Accessibility</h2>
+            <div class="a11y-features">
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F6AB;</span>
+                <div class="a11y-feature-title">No Failure States</div>
+                <div class="a11y-feature-body">Every action produces positive feedback. There is no "game over," no losing, and no punitive mechanics. Both players always receive ribbons in competitive mode.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F916;</span>
+                <div class="a11y-feature-title">Automatic Help System</div>
+                <div class="a11y-feature-body">The DDA detects idle periods (&gt;3 seconds) and struggling (&lt;2 harvests per 10 seconds), then silently adjusts speed, hit zones, and seed frequency to help.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F3AF;</span>
+                <div class="a11y-feature-title">Single Clear Objective</div>
+                <div class="a11y-feature-body">Each challenge presents one goal at a time: "Plant 3 seeds" or "Water 2 flowers." No multi-tasking, no cognitive overload, no complex decision trees.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F4A1;</span>
+                <div class="a11y-feature-title">Visual Hint Arrows</div>
+                <div class="a11y-feature-body">After idle periods, animated hint arrows gently guide the player's attention toward the next action. Non-intrusive and automatically dismissed on engagement.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Accessibility -->
+          <div class="a11y-section">
+            <h2 class="a11y-section-title">&#x270B; Motor Accessibility</h2>
+            <div class="a11y-features">
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1FA91;</span>
+                <div class="a11y-feature-title">Seated Play</div>
+                <div class="a11y-feature-body">Designed for use while seated. The camera detects hands within the frame regardless of posture. No standing, reaching, or full-body movement required.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F91A;</span>
+                <div class="a11y-feature-title">Generous Hit Zones</div>
+                <div class="a11y-feature-body">All interactive elements have oversized hit areas. The DDA dynamically increases hitbox multipliers for players who struggle, up to 2.5x normal size.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x1F91D;</span>
+                <div class="a11y-feature-title">Either Hand Works</div>
+                <div class="a11y-feature-body">Both hands are tracked independently. Players can use whichever hand is more comfortable, or switch between hands mid-session without penalty.</div>
+              </div>
+              <div class="a11y-feature-card">
+                <span class="a11y-feature-icon">&#x23F1;&#xFE0F;</span>
+                <div class="a11y-feature-title">3-Second Dwell Activation</div>
+                <div class="a11y-feature-body">Buttons activate by holding a hand over them for 3 seconds. No clicking, tapping, or pinching required. A visual ring fills to indicate progress.</div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -2572,10 +5142,143 @@
             <h1 class="page-title">Landing Page</h1>
             <p class="page-description">Marketing landing page design, copy, and stakeholder-facing materials for Garden Grow.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">🌐</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Landing Page documentation will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">landing-page.html</code> into this page.</p>
+
+          <!-- Hero -->
+          <div class="mktg-hero">
+            <h2 class="mktg-hero-title">Therapeutic Gaming for Dementia Care</h2>
+            <p class="mktg-hero-sub">A hand-tracking gardening game that turns therapeutic exercises into joyful moments of connection. No controllers, no setup, no learning curve.</p>
+            <a href="index.html" class="mktg-cta-btn">Play Now &rarr;</a>
+          </div>
+
+          <!-- Problem Statement -->
+          <div class="mktg-section">
+            <div class="mktg-stat-highlight">45%</div>
+            <h2 class="mktg-section-title">of dementia cases could be prevented or delayed</h2>
+            <p class="mktg-section-text">Research shows that physical activity, cognitive stimulation, and social engagement are three of the most impactful modifiable risk factors. Yet traditional therapeutic activities often struggle with engagement, particularly among patients with moderate cognitive impairment.</p>
+            <p class="mktg-section-text">Garden Grow addresses all three factors simultaneously through an accessible, joyful game experience that requires nothing more than a webcam and a browser.</p>
+          </div>
+
+          <!-- Four Pillars -->
+          <div class="mktg-section">
+            <h2 class="mktg-section-title">Four Pillars of Therapeutic Benefit</h2>
+            <div class="mktg-pillars">
+              <div class="mktg-pillar">
+                <span class="mktg-pillar-icon">&#x1F3CB;&#xFE0F;</span>
+                <div class="mktg-pillar-title">Physical Activity</div>
+                <div class="mktg-pillar-body">Hand tracking translates natural movements into game actions. Reaching, grasping, and pouring become gentle therapeutic exercises disguised as gardening.</div>
+              </div>
+              <div class="mktg-pillar">
+                <span class="mktg-pillar-icon">&#x1F9E9;</span>
+                <div class="mktg-pillar-title">Cognitive Stimulation</div>
+                <div class="mktg-pillar-body">Multi-step gardening tasks engage pattern recognition and sequential thinking. Plant, water, grow, harvest &mdash; simple enough to follow, complex enough to stimulate.</div>
+              </div>
+              <div class="mktg-pillar">
+                <span class="mktg-pillar-icon">&#x1F91D;</span>
+                <div class="mktg-pillar-title">Social Engagement</div>
+                <div class="mktg-pillar-body">Two-player modes encourage conversation and shared attention. A grandmother and grandson can tend a garden together, creating genuine moments of connection.</div>
+              </div>
+              <div class="mktg-pillar">
+                <span class="mktg-pillar-icon">&#x1F33F;</span>
+                <div class="mktg-pillar-title">Wellbeing</div>
+                <div class="mktg-pillar-body">Calming garden aesthetics, positive-only feedback, and celebratory endings create a safe space where every interaction produces joy, never frustration.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- How It Works -->
+          <div class="mktg-section">
+            <h2 class="mktg-section-title">How It Works</h2>
+            <div class="mktg-steps">
+              <div class="mktg-step">
+                <div class="mktg-step-number">1</div>
+                <div class="mktg-step-title">Open Your Browser</div>
+                <div class="mktg-step-body">No downloads, no installations. Works on any device with a webcam and a modern browser.</div>
+              </div>
+              <div class="mktg-step">
+                <div class="mktg-step-number">2</div>
+                <div class="mktg-step-title">Show Your Hands</div>
+                <div class="mktg-step-body">MediaPipe AI detects hands instantly. No calibration hardware, no wearables, no controllers needed.</div>
+              </div>
+              <div class="mktg-step">
+                <div class="mktg-step-number">3</div>
+                <div class="mktg-step-title">Start Growing</div>
+                <div class="mktg-step-body">Plant seeds, water flowers, and harvest your garden. The AI adapts to each player's ability in real time.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Features Grid -->
+          <div class="mktg-section">
+            <h2 class="mktg-section-title">Built for Care Settings</h2>
+            <div class="mktg-features">
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x1F9E0;</span>
+                <div class="mktg-feature-title">Dynamic Difficulty</div>
+                <div class="mktg-feature-body">AI monitors each player independently and adjusts speed, hit zones, and seed frequency every 5 seconds.</div>
+              </div>
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x1F465;</span>
+                <div class="mktg-feature-title">Multiplayer</div>
+                <div class="mktg-feature-body">Solo, co-operative, and competitive modes. Two players share one screen with one webcam.</div>
+              </div>
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x1F6AB;</span>
+                <div class="mktg-feature-title">No Failure States</div>
+                <div class="mktg-feature-body">Every action produces positive feedback. No game over, no losing, no punitive mechanics.</div>
+              </div>
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x267F;</span>
+                <div class="mktg-feature-title">Fully Accessible</div>
+                <div class="mktg-feature-body">Seated play, generous hit zones, 3-second dwell activation, multiple contrast modes.</div>
+              </div>
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x1F3B5;</span>
+                <div class="mktg-feature-title">Synthesised Audio</div>
+                <div class="mktg-feature-body">All sounds generated with Web Audio API. Zero file dependencies, instant loading, adjustable volume.</div>
+              </div>
+              <div class="mktg-feature">
+                <span class="mktg-feature-icon">&#x26A1;</span>
+                <div class="mktg-feature-title">Zero Setup</div>
+                <div class="mktg-feature-body">Open a URL and play. No app store, no account, no downloads. Under 30 seconds from link to gameplay.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- For Clinicians -->
+          <div class="mktg-section">
+            <h2 class="mktg-section-title">For Clinicians &amp; Care Teams</h2>
+            <p class="mktg-section-text">Garden Grow silently tracks motor engagement, session duration, difficulty adaptation curves, and social interaction patterns. All data stays local and GDPR-compliant. Use the built-in clinical dashboard to monitor patient progress over time.</p>
+            <p class="mktg-section-text">Generate progress reports, set therapeutic goals, and track outcomes across your entire patient roster &mdash; all from within the documentation portal.</p>
+            <a href="#dashboard" class="mktg-clinician-link">Explore the Clinical Dashboard &rarr;</a>
+          </div>
+
+          <!-- Testimonials -->
+          <div class="mktg-section">
+            <h2 class="mktg-section-title">What Care Professionals Say</h2>
+            <div class="mktg-testimonials">
+              <div class="mktg-testimonial">
+                <p class="mktg-testimonial-quote">"Margaret hadn't engaged with any activities in weeks. Within two minutes of trying Garden Grow, she was smiling and reaching for the watering can. It was the most animated I'd seen her in months."</p>
+                <div class="mktg-testimonial-author">Dr. Sarah Mitchell</div>
+                <div class="mktg-testimonial-role">Occupational Therapist, Sunrise Care Home</div>
+              </div>
+              <div class="mktg-testimonial">
+                <p class="mktg-testimonial-quote">"The adaptive difficulty is remarkable. My patients with different cognitive abilities can play together without either one feeling frustrated or bored. It genuinely brings people together."</p>
+                <div class="mktg-testimonial-author">James Okafor</div>
+                <div class="mktg-testimonial-role">Activities Coordinator, Meadow View Centre</div>
+              </div>
+              <div class="mktg-testimonial">
+                <p class="mktg-testimonial-quote">"Zero setup is not an exaggeration. I opened the link on our ward tablet, and a patient was playing within 30 seconds. No IT support needed, no training required. This is how therapeutic tools should work."</p>
+                <div class="mktg-testimonial-author">Nurse Rachel Pham</div>
+                <div class="mktg-testimonial-role">Dementia Ward Lead, Riverside Residence</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final CTA -->
+          <div class="mktg-final-cta">
+            <h2 class="mktg-final-title">Ready to Start Growing?</h2>
+            <p class="mktg-final-sub">Open the game in your browser and experience therapeutic gardening today.</p>
+            <a href="index.html" class="mktg-cta-btn">Play Now &rarr;</a>
           </div>
         </section>
 
@@ -3455,6 +6158,53 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
+
+  /* ═══════════════════════════════════════════════
+     INTERACTIVE PROTOTYPE — Scoped Navigation
+  ══════════════════════════════════════════════ */
+  const protoSteps = ['welcome', 'playerSelect', 'modeSelect', 'calibration', 'gameplay', 'roundEnd'];
+  let protoVisited = new Set(['welcome']);
+
+  function protoNavigate(screenId) {
+    // Hide all proto screens
+    document.querySelectorAll('#protoViewport .proto-screen').forEach(s => {
+      s.classList.remove('active');
+    });
+    // Show target screen
+    const target = document.getElementById('protoScreen-' + screenId);
+    if (target) {
+      target.classList.remove('proto-screen');
+      void target.offsetWidth;
+      target.classList.add('proto-screen');
+      target.classList.add('active');
+    }
+    // Track visited
+    protoVisited.add(screenId);
+    if (screenId === 'welcome') {
+      protoVisited = new Set(['welcome']);
+    }
+    // Update breadcrumbs
+    document.querySelectorAll('#protoBreadcrumbs .proto-crumb').forEach(crumb => {
+      const id = crumb.dataset.proto;
+      crumb.classList.remove('active', 'visited');
+      if (id === screenId) {
+        crumb.classList.add('active');
+      } else if (protoVisited.has(id)) {
+        crumb.classList.add('visited');
+      }
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     COMPONENT LIBRARY — Theme Toggle
+  ══════════════════════════════════════════════ */
+  function compSetTheme(theme, btn) {
+    const preview = document.getElementById('compThemePreview');
+    if (!preview) return;
+    preview.classList.toggle('dark', theme === 'dark');
+    document.querySelectorAll('.comp-theme-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
 </script>
 
 </body>
