@@ -1140,6 +1140,46 @@ class UIManager {
     }
 
     /**
+     * Show a garden-themed achievement toast notification
+     */
+    showToast(achievement) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <span class="toast-icon">${achievement.icon}</span>
+            <div class="toast-content">
+                <span class="toast-label">Achievement Unlocked</span>
+                <span class="toast-name">${achievement.name}</span>
+                <span class="toast-desc">${achievement.description}</span>
+            </div>
+        `;
+        container.appendChild(toast);
+        if (window.audioManager) audioManager.play('harvest');
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    /**
+     * Update the session leaderboard on round-end screens
+     */
+    updateLeaderboard(entries) {
+        ['', '2P'].forEach(suffix => {
+            const section = document.getElementById('leaderboardSection' + suffix);
+            const list = document.getElementById('leaderboardList' + suffix);
+            if (!list || !entries || entries.length === 0) return;
+            if (section) section.style.display = 'block';
+            list.innerHTML = entries.slice(0, 5).map((entry, i) => `
+                <div class="leaderboard-entry ${i === 0 ? 'leaderboard-gold' : ''}">
+                    <span class="leaderboard-rank">${i + 1}</span>
+                    <span class="leaderboard-name">${entry.playerName}</span>
+                    <span class="leaderboard-score">${entry.score}</span>
+                </div>
+            `).join('');
+        });
+    }
+
+    /**
      * Cleanup
      */
     destroy() {

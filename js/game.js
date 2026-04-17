@@ -61,6 +61,9 @@ class Game {
 
         // Achievement tracking
         this.achievementManager = new AchievementManager();
+
+        // Session leaderboard (persists for the lifetime of the session)
+        this.leaderboard = []; // { playerName, score, mode, timestamp }
     }
 
     /**
@@ -700,6 +703,24 @@ class Game {
                 this.pendingChapterComplete = completedChapter;
             }
         }
+
+        // Update session leaderboard
+        if (this.gameMode === 'competitive') {
+            this.leaderboard.push(
+                { playerName: 'Player 1', score: this.player1Score, mode: 'competitive', timestamp: Date.now() },
+                { playerName: 'Player 2', score: this.player2Score, mode: 'competitive', timestamp: Date.now() }
+            );
+        } else {
+            const score = this.currentChallenge ? this.currentChallenge.score : 0;
+            this.leaderboard.push({
+                playerName: this.playerCount === 2 ? 'Team' : 'Player 1',
+                score: score,
+                mode: this.gameMode || 'solo',
+                timestamp: Date.now()
+            });
+        }
+        this.leaderboard.sort((a, b) => b.score - a.score);
+        if (this.leaderboard.length > 10) this.leaderboard = this.leaderboard.slice(0, 10);
     }
 
     /**
@@ -774,6 +795,11 @@ class Game {
                     chapterCompleteSection.style.display = 'none';
                 }
             }
+        }
+
+        // Update leaderboard display on round-end screen
+        if (typeof uiManager !== 'undefined' && uiManager.updateLeaderboard) {
+            uiManager.updateLeaderboard(this.leaderboard);
         }
     }
 

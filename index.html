@@ -246,6 +246,10 @@
                             <p class="chapter-complete-unlock"></p>
                         </div>
                     </div>
+                    <div class="leaderboard-section" id="leaderboardSection" style="display:none">
+                        <h3 class="leaderboard-title">Session Leaderboard</h3>
+                        <div class="leaderboard-list" id="leaderboardList"></div>
+                    </div>
                     <div class="end-buttons">
                         <button id="nextLevelBtn" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
                             <span>Keep Growing</span>
@@ -285,6 +289,10 @@
                         </div>
                     </div>
                     <p id="encouragementText2P" class="encouragement-text">Both gardens are blooming beautifully!</p>
+                    <div class="leaderboard-section" id="leaderboardSection2P" style="display:none">
+                        <h3 class="leaderboard-title">Session Leaderboard</h3>
+                        <div class="leaderboard-list" id="leaderboardList2P"></div>
+                    </div>
                     <div class="end-buttons">
                         <button id="nextLevelBtn2P" class="big-button primary hoverable has-border-progress" data-hover-action="nextLevel">
                             <span>Keep Growing</span>
@@ -305,6 +313,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="toast-container"></div>
 
         <!-- Settings Button (always visible) -->
         <button id="settingsBtn" class="settings-button hoverable" data-hover-action="openSettings">
