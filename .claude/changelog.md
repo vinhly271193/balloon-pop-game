@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-04-17 — Achievement wiring, leaderboard persistence, print CSS
+
+### Achievement fixes
+- **Tool use tracking wired**: `recordToolUse()` now fires for watering can, fertilizer, and sun (both held-hand and free-hand paths) in garden-bed.js — the "Tool Expert" badge can now unlock
+- **Magic Pumpkin trigger wired**: `recordMagicPumpkin()` fires when both players touch the pumpkin simultaneously — the "Garden Friends" badge can now unlock
+- **growTime plumbed through harvest data**: `plantSeed()` now records `plantedAt` timestamp on PlantPot; all `harvestedPlants.push()` calls include `growTime` calculated from `plantedAt` — the "Speed Grower" badge can now unlock with real data
+
+### Leaderboard persistence
+- **localStorage save/load**: Leaderboard now persists across page reloads via `gardenGrow_leaderboard` key. Graceful fallback on parse errors or full quota.
+
+### Dashboard print support
+- **Print button**: "Print" button added to the Reports tab next to the "Exportable" badge
+- **@media print CSS**: Hides sidebar, navigation, tabs, and all non-report content. Formats report card and therapeutic goals for clean A4 printing with preserved goal-bar colors.
+
+### Files changed
+- `js/garden/garden-bed.js` — 6 achievement trigger insertions, growTime in harvestedPlants
+- `js/garden/plant-pot.js` — `plantedAt = Date.now()` in `plantSeed()`
+- `js/game.js` — localStorage leaderboard load/save
+- `docs.html` — Print button, @media print CSS block
+
+---
+
 ## 2026-04-17 — Documentation SPA overhaul + competitive game features
 
 ### Documentation overhaul
