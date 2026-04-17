@@ -58,6 +58,9 @@ class Game {
 
         // Pending chapter complete (shown after round end)
         this.pendingChapterComplete = null;
+
+        // Achievement tracking
+        this.achievementManager = new AchievementManager();
     }
 
     /**
@@ -479,6 +482,9 @@ class Game {
                     // DDA: Record harvest
                     ddaEngine.recordHarvest(playerId, isTargetPlant);
 
+                    // Achievements: Record harvest (growTime not tracked in harvest data; default 30s)
+                    this.achievementManager.recordHarvest(plantKey, harvestData.growTime || 30);
+
                     // Audio: Play for specific player
                     audioManager.playForPlayer('harvest', playerId);
 
@@ -598,6 +604,9 @@ class Game {
         // Reset DDA engine
         ddaEngine.reset();
 
+        // Reset round-scoped achievement stats
+        this.achievementManager.startSession();
+
         // Update HUD
         uiManager.updateChallengeText(this.currentChallenge.getMiniDisplayText());
         if (this.gameMode === 'competitive') {
@@ -662,6 +671,10 @@ class Game {
             if (rubberBandApplied) {
                 console.log('Rubber-banding applied to balance competitive scores');
             }
+
+            // Achievements: Record competitive round result
+            const winnerId = this.player1Score >= this.player2Score ? 1 : 2;
+            this.achievementManager.recordCompetitiveEnd(this.player1Score, this.player2Score, winnerId);
         }
 
         // Record challenge completion
@@ -817,6 +830,13 @@ class Game {
 
         // Update and render based on state
         if (this.state === GameState.PLAYING) {
+            // Update achievement session timer and consume any pending toasts
+            this.achievementManager.updateSessionTime();
+            const toast = this.achievementManager.consumeToast();
+            if (toast && typeof uiManager !== 'undefined' && uiManager.showToast) {
+                uiManager.showToast(toast);
+            }
+
             // Update DDA engine
             ddaEngine.update(deltaTime, this.gameMode);
 
