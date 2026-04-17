@@ -1913,227 +1913,6 @@
       margin-bottom: 24px;
     }
 
-    .proto-breadcrumbs {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 12px 20px;
-      background: var(--surface-secondary);
-      border-bottom: 1px solid var(--border-light);
-      font-size: 0.75rem;
-      font-family: var(--font-heading);
-      font-weight: 500;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-    }
-
-    .proto-crumb {
-      padding: 2px 10px;
-      border-radius: 100px;
-      background: var(--border-light);
-      color: var(--text-secondary);
-      transition: background var(--transition-fast), color var(--transition-fast);
-    }
-
-    .proto-crumb.active {
-      background: var(--brand-magenta);
-      color: #fff;
-    }
-
-    .proto-crumb.visited {
-      background: rgba(233, 30, 140, 0.12);
-      color: var(--brand-magenta);
-    }
-
-    .proto-crumb-arrow {
-      color: var(--text-muted);
-      font-size: 0.625rem;
-    }
-
-    .proto-viewport {
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      aspect-ratio: 16 / 9;
-      background: #1a1a2e;
-      overflow: hidden;
-    }
-
-    .proto-screen {
-      display: none;
-      position: absolute;
-      inset: 0;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-      animation: fadeInUp 200ms ease both;
-    }
-
-    .proto-screen.active {
-      display: flex;
-    }
-
-    .proto-screen-title {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 8px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .proto-screen-subtitle {
-      font-size: 0.875rem;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 20px;
-      max-width: 400px;
-    }
-
-    .proto-screen-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
-    }
-
-    .proto-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 24px;
-      border: none;
-      border-radius: 100px;
-      font-family: var(--font-heading);
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-      margin: 4px;
-    }
-
-    .proto-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .proto-btn-primary {
-      background: var(--brand-magenta);
-      color: #fff;
-    }
-
-    .proto-btn-secondary {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      backdrop-filter: blur(4px);
-    }
-
-    .proto-btn-option {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 14px 20px;
-      min-width: 140px;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .proto-btn-option:hover {
-      background: rgba(255,255,255,0.2);
-      border-color: rgba(255,255,255,0.4);
-    }
-
-    .proto-option-icon {
-      font-size: 1.5rem;
-    }
-
-    .proto-option-label {
-      font-size: 0.8125rem;
-    }
-
-    .proto-options-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .proto-gameplay-area {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .proto-hud {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 16px;
-      background: rgba(0,0,0,0.3);
-    }
-
-    .proto-hud-item {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.8);
-      font-family: var(--font-heading);
-      font-weight: 600;
-    }
-
-    .proto-garden {
-      flex: 1;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 24px;
-      padding-bottom: 20px;
-    }
-
-    .proto-pot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .proto-plant {
-      font-size: 2rem;
-      animation: protoBob 2s ease-in-out infinite;
-    }
-
-    @keyframes protoBob {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    .proto-pot-base {
-      width: 48px;
-      height: 28px;
-      background: #8B4513;
-      border-radius: 4px 4px 8px 8px;
-    }
-
-    .proto-toolbar {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .proto-tool {
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.1);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.125rem;
-    }
-
     .proto-controls {
       padding: 16px 20px;
       background: var(--surface-secondary);
@@ -4186,137 +3965,35 @@
           <div class="page-header">
             <div class="page-tag"><span class="page-tag-dot"></span>Product</div>
             <h1 class="page-title">Interactive Prototype</h1>
-            <p class="page-description">Clickable prototype demonstrating the full game flow and UI interactions.</p>
+            <p class="page-description">Live, playable build of Garden Grow. Requires a webcam for hand tracking.</p>
           </div>
 
           <div class="proto-container">
-            <!-- Breadcrumb bar -->
-            <div class="proto-breadcrumbs" id="protoBreadcrumbs">
-              <span class="proto-crumb active" data-proto="welcome">Welcome</span>
-              <span class="proto-crumb-arrow">&#9654;</span>
-              <span class="proto-crumb" data-proto="playerSelect">Players</span>
-              <span class="proto-crumb-arrow">&#9654;</span>
-              <span class="proto-crumb" data-proto="modeSelect">Mode</span>
-              <span class="proto-crumb-arrow">&#9654;</span>
-              <span class="proto-crumb" data-proto="calibration">Calibrate</span>
-              <span class="proto-crumb-arrow">&#9654;</span>
-              <span class="proto-crumb" data-proto="gameplay">Play</span>
-              <span class="proto-crumb-arrow">&#9654;</span>
-              <span class="proto-crumb" data-proto="roundEnd">Results</span>
-            </div>
-
-            <!-- Viewport -->
-            <div class="proto-viewport" id="protoViewport">
-
-              <!-- Welcome screen -->
-              <div class="proto-screen active" id="protoScreen-welcome" style="background: linear-gradient(135deg, #FFF8E1, #E8F5E9);">
-                <div class="proto-screen-icon">&#x1F33B;</div>
-                <div class="proto-screen-title" style="color:#2e4a3a;">Garden Grow</div>
-                <div class="proto-screen-subtitle" style="color:#5a7d6a;">A therapeutic gardening experience</div>
-                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('playerSelect')">Start Growing &rarr;</button>
-              </div>
-
-              <!-- Player Select screen -->
-              <div class="proto-screen" id="protoScreen-playerSelect" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
-                <div class="proto-screen-title" style="color:#2e4a3a;">How Many Gardeners?</div>
-                <div class="proto-screen-subtitle" style="color:#5a7d6a;">Hover your hand over an option to select</div>
-                <div class="proto-options-row">
-                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(255,140,66,0.5);">
-                    <span class="proto-option-icon">&#x1F9D1;</span>
-                    <span class="proto-option-label">1 Player</span>
-                  </button>
-                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('modeSelect')" style="border-color: rgba(74,144,217,0.5);">
-                    <span class="proto-option-icon">&#x1F465;</span>
-                    <span class="proto-option-label">2 Players</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Mode Select screen -->
-              <div class="proto-screen" id="protoScreen-modeSelect" style="background: linear-gradient(135deg, #C8E6C9, #A5D6A7);">
-                <div class="proto-screen-title" style="color:#1b5e20;">Choose Your Garden</div>
-                <div class="proto-screen-subtitle" style="color:#388e3c;">Select a play mode for your session</div>
-                <div class="proto-options-row">
-                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(46,125,50,0.5);">
-                    <span class="proto-option-icon">&#x1F331;</span>
-                    <span class="proto-option-label">Community Garden</span>
-                  </button>
-                  <button class="proto-btn proto-btn-option" onclick="protoNavigate('calibration')" style="border-color: rgba(183,28,28,0.3);">
-                    <span class="proto-option-icon">&#x1F3C6;</span>
-                    <span class="proto-option-label">Village Fair</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Calibration screen -->
-              <div class="proto-screen" id="protoScreen-calibration" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB);">
-                <div class="proto-screen-icon">&#x270B;</div>
-                <div class="proto-screen-title" style="color:#0d47a1;">Show Your Hands!</div>
-                <div class="proto-screen-subtitle" style="color:#1565c0;">Hold your hands up to the camera</div>
-                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('gameplay')" style="background:#1976D2;">Hands Detected &rarr;</button>
-              </div>
-
-              <!-- Gameplay screen -->
-              <div class="proto-screen" id="protoScreen-gameplay" style="background: linear-gradient(180deg, #87CEEB 0%, #90EE90 100%); padding:0;">
-                <div class="proto-gameplay-area">
-                  <div class="proto-hud">
-                    <div class="proto-hud-item">Score: 42</div>
-                    <div class="proto-hud-item">Chapter 1: First Seedlings</div>
-                    <div class="proto-hud-item">1:45</div>
-                  </div>
-                  <div class="proto-toolbar">
-                    <div class="proto-tool">&#x1F331;</div>
-                    <div class="proto-tool">&#x1F4A7;</div>
-                    <div class="proto-tool">&#x1F9EA;</div>
-                  </div>
-                  <div class="proto-garden">
-                    <div class="proto-pot">
-                      <span class="proto-plant">&#x1F33F;</span>
-                      <div class="proto-pot-base"></div>
-                    </div>
-                    <div class="proto-pot">
-                      <span class="proto-plant" style="animation-delay:0.3s;">&#x1F345;</span>
-                      <div class="proto-pot-base"></div>
-                    </div>
-                    <div class="proto-pot">
-                      <span class="proto-plant" style="animation-delay:0.6s;">&#x1F33B;</span>
-                      <div class="proto-pot-base"></div>
-                    </div>
-                  </div>
-                </div>
-                <button class="proto-btn proto-btn-primary" onclick="protoNavigate('roundEnd')" style="position:absolute;bottom:16px;right:16px;font-size:0.75rem;padding:8px 16px;">End Round &rarr;</button>
-              </div>
-
-              <!-- Round End screen -->
-              <div class="proto-screen" id="protoScreen-roundEnd" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
-                <div class="proto-screen-icon">&#x1F389;</div>
-                <div class="proto-screen-title" style="color:#2e7d32;">Garden Complete!</div>
-                <div class="proto-screen-subtitle" style="color:#388e3c;">Score: 42 &middot; 8 plants harvested</div>
-                <div style="display:flex;gap:8px;">
-                  <button class="proto-btn proto-btn-primary" onclick="protoNavigate('welcome')" style="background:#2e7d32;">Play Again</button>
-                  <button class="proto-btn proto-btn-secondary" onclick="protoNavigate('welcome')">Home</button>
-                </div>
-              </div>
-
-            </div>
-
             <!-- Controls bar -->
-            <div class="proto-controls">
-              <div class="proto-controls-hint">Click buttons to navigate through the game flow</div>
-              <button class="proto-reset-btn" onclick="protoNavigate('welcome')">Reset</button>
+            <div class="proto-controls" style="margin-bottom:0;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:1px solid var(--border);">
+              <div class="proto-controls-hint">Live game &mdash; allow camera access when prompted</div>
+              <div style="display:flex;gap:8px;">
+                <button class="proto-reset-btn" onclick="document.getElementById('protoGameFrame').src = document.getElementById('protoGameFrame').src;">Reload</button>
+                <a href="index.html" target="_blank" class="proto-reset-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Open Fullscreen</a>
+              </div>
+            </div>
+
+            <!-- Embedded game iframe -->
+            <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border);border-top:none;">
+              <iframe id="protoGameFrame" src="index.html" allow="camera;microphone" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe>
             </div>
           </div>
 
           <!-- Instructions -->
           <div class="proto-instructions">
-            <h3>Navigation Guide</h3>
+            <h3>How to Play</h3>
             <ul class="proto-instructions-list">
-              <li><span>&#x1F3E0;</span> Welcome: Click "Start Growing"</li>
-              <li><span>&#x1F465;</span> 1 Player skips to Calibration</li>
-              <li><span>&#x1F3AE;</span> 2 Players opens Mode Select</li>
-              <li><span>&#x270B;</span> Calibration auto-advances</li>
-              <li><span>&#x1F331;</span> Gameplay: click "End Round"</li>
-              <li><span>&#x1F3C6;</span> Round End: "Play Again" or "Home"</li>
+              <li><span>&#x1F4F7;</span> Allow camera access when the browser asks</li>
+              <li><span>&#x270B;</span> Hold your hands up in front of the webcam</li>
+              <li><span>&#x1F331;</span> Hover over tools to pick them up, then over pots to use them</li>
+              <li><span>&#x1F33B;</span> Grow plants through all 4 stages to harvest them</li>
+              <li><span>&#x1F3C6;</span> Try competitive mode for split-screen and power-ups</li>
+              <li><span>&#x1F4BB;</span> Click "Open Fullscreen" above for the best experience</li>
             </ul>
           </div>
         </section>
@@ -6282,42 +5959,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
-
-  /* ═══════════════════════════════════════════════
-     INTERACTIVE PROTOTYPE — Scoped Navigation
-  ══════════════════════════════════════════════ */
-  const protoSteps = ['welcome', 'playerSelect', 'modeSelect', 'calibration', 'gameplay', 'roundEnd'];
-  let protoVisited = new Set(['welcome']);
-
-  function protoNavigate(screenId) {
-    // Hide all proto screens
-    document.querySelectorAll('#protoViewport .proto-screen').forEach(s => {
-      s.classList.remove('active');
-    });
-    // Show target screen
-    const target = document.getElementById('protoScreen-' + screenId);
-    if (target) {
-      target.classList.remove('proto-screen');
-      void target.offsetWidth;
-      target.classList.add('proto-screen');
-      target.classList.add('active');
-    }
-    // Track visited
-    protoVisited.add(screenId);
-    if (screenId === 'welcome') {
-      protoVisited = new Set(['welcome']);
-    }
-    // Update breadcrumbs
-    document.querySelectorAll('#protoBreadcrumbs .proto-crumb').forEach(crumb => {
-      const id = crumb.dataset.proto;
-      crumb.classList.remove('active', 'visited');
-      if (id === screenId) {
-        crumb.classList.add('active');
-      } else if (protoVisited.has(id)) {
-        crumb.classList.add('visited');
-      }
-    });
-  }
 
   /* ═══════════════════════════════════════════════
      COMPONENT LIBRARY — Theme Toggle
