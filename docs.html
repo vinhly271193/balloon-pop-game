@@ -493,6 +493,463 @@
       margin-top: 12px;
     }
 
+    /* ─────────────────────────────────────────────
+       HOME PAGE — Hero
+    ───────────────────────────────────────────── */
+    .home-hero {
+      text-align: center;
+      padding: 48px 24px 40px;
+      margin-bottom: 40px;
+    }
+
+    .home-hero-logo {
+      width: 180px;
+      height: auto;
+      display: block;
+      margin: 0 auto 24px;
+      object-fit: contain;
+    }
+
+    .home-hero-title {
+      font-family: var(--font-heading);
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--brand-magenta), var(--brand-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .home-hero-tagline {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 560px;
+      margin: 0 auto 28px;
+    }
+
+    .home-hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 36px;
+      background: var(--brand-magenta);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+      box-shadow: 0 4px 16px rgba(233, 30, 140, 0.3);
+    }
+
+    .home-hero-btn:hover {
+      background: var(--brand-purple);
+      box-shadow: 0 6px 20px rgba(123, 45, 142, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* Home — Quick Stats */
+    .home-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .home-stat-card {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 24px 16px;
+      text-align: center;
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .home-stat-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .home-stat-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .home-stat-label {
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .home-stat-desc {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Home — Section Cards */
+    .home-sections {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .home-section-card {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      text-decoration: none;
+      display: block;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .home-section-card:hover {
+      border-color: var(--brand-magenta);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .home-section-group {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--brand-magenta);
+      margin-bottom: 8px;
+    }
+
+    .home-section-title {
+      font-family: var(--font-heading);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .home-section-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .home-footer {
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ─────────────────────────────────────────────
+       GDD — General Section Styling
+    ───────────────────────────────────────────── */
+    .gdd-section {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gdd-section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-magenta), var(--brand-purple));
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .gdd-section-heading {
+      font-family: var(--font-heading);
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      letter-spacing: -0.01em;
+    }
+
+    .gdd-subsection-heading {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--brand-purple);
+      margin: 20px 0 10px;
+    }
+
+    .gdd-text {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .gdd-text:last-child {
+      margin-bottom: 0;
+    }
+
+    .gdd-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px;
+    }
+
+    .gdd-list li {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      padding-left: 20px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .gdd-list li::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand-magenta);
+    }
+
+    /* GDD — Card grids (2x2, 3-col) */
+    .gdd-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .gdd-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .gdd-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .gdd-card-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .gdd-card-title {
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .gdd-card-body {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* GDD — Tables */
+    .gdd-table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .gdd-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .gdd-table th {
+      background: var(--surface-secondary);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .gdd-table td {
+      padding: 10px 14px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .gdd-table tr:nth-child(even) td {
+      background: var(--surface-secondary);
+    }
+
+    .gdd-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* GDD — Flow diagram */
+    .gdd-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      padding: 24px 16px;
+      background: var(--surface-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+    }
+
+    .gdd-flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--surface-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      min-width: 80px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .gdd-flow-step-icon {
+      font-size: 1.5rem;
+    }
+
+    .gdd-flow-step-label {
+      font-family: var(--font-heading);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .gdd-flow-arrow {
+      font-size: 1.25rem;
+      color: var(--brand-magenta);
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    /* GDD — Prominent data section */
+    .gdd-section-highlight {
+      background: linear-gradient(135deg, rgba(233, 30, 140, 0.04), rgba(123, 45, 142, 0.06));
+      border: 1px solid rgba(233, 30, 140, 0.18);
+    }
+
+    .gdd-section-highlight .gdd-section-heading {
+      color: var(--brand-purple);
+    }
+
+    /* GDD — CTA button */
+    .gdd-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--brand-magenta);
+      color: #fff;
+      font-family: var(--font-heading);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+      box-shadow: 0 3px 12px rgba(233, 30, 140, 0.25);
+      margin-top: 16px;
+    }
+
+    .gdd-cta-btn:hover {
+      background: var(--brand-purple);
+      box-shadow: 0 4px 16px rgba(123, 45, 142, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* GDD — Color swatch inline */
+    .gdd-color-swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: 4px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* ─────────────────────────────────────────────
+       RESPONSIVE — Home & GDD Mobile
+    ───────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .home-hero-title {
+        font-size: 2rem;
+      }
+
+      .home-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .home-sections {
+        grid-template-columns: 1fr;
+      }
+
+      .gdd-grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .gdd-grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .gdd-flow {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .gdd-flow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .gdd-section {
+        padding: 24px 18px;
+      }
+    }
+
     /* Status badge */
     .badge {
       display: inline-flex;
@@ -629,22 +1086,66 @@
 
         <!-- ─────────── HOME ─────────── -->
         <section id="page-home" class="docs-page" hidden>
-          <div class="page-header">
-            <div class="page-tag"><span class="page-tag-dot"></span>Product</div>
-            <h1 class="page-title">Garden Grow</h1>
-            <p class="page-description">
-              A therapeutic hand-tracking gardening game designed for dementia patients.
-              Explore the full documentation, design system, clinical tools, and marketing materials below.
-            </p>
+
+          <!-- Hero Banner -->
+          <div class="home-hero">
+            <img src="assets/images/logo.png" alt="re:Action Health Technologies" class="home-hero-logo">
+            <h1 class="home-hero-title">Garden Grow</h1>
+            <p class="home-hero-tagline">Therapeutic hand-tracking gardening game for people living with dementia and their companions</p>
+            <a href="index.html" class="home-hero-btn">Play Now &rarr;</a>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;">
-            <span class="badge badge-green">&#x2714; Live on GitHub Pages</span>
-            <span class="badge badge-purple">v1.0 — April 2026</span>
-            <span class="badge badge-orange">Therapeutic Tool</span>
+
+          <!-- Quick Stats -->
+          <div class="home-stats">
+            <div class="home-stat-card">
+              <span class="home-stat-icon">&#x1F4F7;</span>
+              <div class="home-stat-label">Camera Only</div>
+              <div class="home-stat-desc">No controllers needed</div>
+            </div>
+            <div class="home-stat-card">
+              <span class="home-stat-icon">&#x1F465;</span>
+              <div class="home-stat-label">1-2 Players</div>
+              <div class="home-stat-desc">Solo, co-op, or competitive</div>
+            </div>
+            <div class="home-stat-card">
+              <span class="home-stat-icon">&#x1F9E0;</span>
+              <div class="home-stat-label">Adaptive AI</div>
+              <div class="home-stat-desc">Dynamic difficulty adjustment</div>
+            </div>
+            <div class="home-stat-card">
+              <span class="home-stat-icon">&#x1F4CA;</span>
+              <div class="home-stat-label">Clinical Data</div>
+              <div class="home-stat-desc">Real-time outcome tracking</div>
+            </div>
           </div>
-          <div class="info-grid" id="homeGrid">
-            <!-- Populated by JS -->
+
+          <!-- Section Cards -->
+          <div class="home-sections">
+            <a href="#gdd" class="home-section-card">
+              <div class="home-section-group">Product</div>
+              <div class="home-section-title">Game Design</div>
+              <div class="home-section-desc">Core mechanics, modes, and storyline</div>
+            </a>
+            <a href="#components" class="home-section-card">
+              <div class="home-section-group">Design</div>
+              <div class="home-section-title">Visual System</div>
+              <div class="home-section-desc">Components, animations, and accessibility</div>
+            </a>
+            <a href="#dashboard" class="home-section-card">
+              <div class="home-section-group">Clinical</div>
+              <div class="home-section-title">Data &amp; Dashboard</div>
+              <div class="home-section-desc">Real-time metrics and clinical outcomes</div>
+            </a>
+            <a href="#landing" class="home-section-card">
+              <div class="home-section-group">Marketing</div>
+              <div class="home-section-title">For Care Facilities</div>
+              <div class="home-section-desc">Benefits, setup, and testimonials</div>
+            </a>
           </div>
+
+          <!-- Footer -->
+          <div class="home-footer">Built by re:Action Health Technologies &middot; v2.0 &middot; April 2026</div>
+
         </section>
 
         <!-- ─────────── GAME DESIGN DOCUMENT ─────────── -->
@@ -654,11 +1155,342 @@
             <h1 class="page-title">Game Design Document</h1>
             <p class="page-description">Full design specification: mechanics, player flows, scoring, DDA, and therapeutic goals.</p>
           </div>
-          <div class="coming-soon-card">
-            <span class="coming-soon-icon">📋</span>
-            <div class="coming-soon-title">Content coming soon</div>
-            <p class="coming-soon-body">The Game Design Document will be migrated from <code style="font-family:var(--font-mono);font-size:0.875em;background:var(--surface-secondary);padding:2px 6px;border-radius:var(--radius-sm);">game-design-document.html</code> into this page.</p>
+
+          <!-- 1. Overview -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">1</span>Overview</h2>
+            <p class="gdd-text">Garden Grow is a 2-player motion-based gardening game using webcam hand tracking. Players restore a garden together, with invisible AI ensuring both a grandmother with dementia and her teenage grandson stay engaged and challenged.</p>
+            <h3 class="gdd-subsection-heading">Key Differentiators</h3>
+            <ul class="gdd-list">
+              <li>Camera-based input &mdash; no controllers, no wearables, no special hardware</li>
+              <li>Real-time Dynamic Difficulty Adjustment (DDA) per player independently</li>
+              <li>Co-op and competitive modes on a single shared screen</li>
+              <li>Fully synthesized audio &mdash; zero file dependencies</li>
+              <li>Runs in any modern browser &mdash; hosted on GitHub Pages for instant play</li>
+            </ul>
+            <h3 class="gdd-subsection-heading">Core Values</h3>
+            <ul class="gdd-list">
+              <li>No failure states &mdash; every action produces positive feedback</li>
+              <li>Gentle, intuitive controls that feel natural and forgiving</li>
+              <li>Social connection through shared play experiences</li>
+              <li>Therapeutic benefit embedded in every interaction</li>
+              <li>Adaptive difficulty that meets each player where they are</li>
+            </ul>
           </div>
+
+          <!-- 2. Design Pillars -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">2</span>Design Pillars</h2>
+            <div class="gdd-grid-2">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F3CB;&#xFE0F;</span>
+                <div class="gdd-card-title">Physical Activity</div>
+                <div class="gdd-card-body">Hand tracking exercises map to therapeutic movements &mdash; reaching, grasping, pouring, and hovering. Every gardening action doubles as a gentle physical exercise.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F9E9;</span>
+                <div class="gdd-card-title">Cognitive Stimulation</div>
+                <div class="gdd-card-body">Multi-step tasks (plant, nurture, harvest) engage pattern recognition, sequential actions, and short-term memory in a low-pressure context.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F91D;</span>
+                <div class="gdd-card-title">Social Engagement</div>
+                <div class="gdd-card-body">2-player modes encourage conversation, shared attention, and helping behaviors. Playing together strengthens bonds between generations.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F33F;</span>
+                <div class="gdd-card-title">Wellbeing Support</div>
+                <div class="gdd-card-body">Calming garden theme, positive reinforcement, celebratory endings, and zero failure states create a safe, joyful experience.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Target Audience -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">3</span>Target Audience</h2>
+            <div class="gdd-grid-3">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F475;</span>
+                <div class="gdd-card-title">Primary: Person Living with Dementia</div>
+                <div class="gdd-card-body">Mild to moderate cognitive impairment. Benefits from repetitive positive actions. The game must be self-evident &mdash; no instructions needed to start playing.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F466;</span>
+                <div class="gdd-card-title">Secondary: Companion</div>
+                <div class="gdd-card-body">Teenager, family member, or caregiver playing alongside. Provides encouragement and shares the experience. The game keeps them engaged too.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1FA7A;</span>
+                <div class="gdd-card-title">Tertiary: Clinical Staff</div>
+                <div class="gdd-card-body">Uses the game in care settings. Needs minimal setup (&lt;30 seconds). Values observable engagement metrics and session data for care plans.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Core Loop -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">4</span>Core Loop</h2>
+
+            <div class="gdd-flow">
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F331;</span>
+                <span class="gdd-flow-step-label">Plant</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4A7;</span>
+                <span class="gdd-flow-step-label">Nurture</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F33F;</span>
+                <span class="gdd-flow-step-label">Grow</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F33E;</span>
+                <span class="gdd-flow-step-label">Harvest</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F504;</span>
+                <span class="gdd-flow-step-label">Repeat</span>
+              </div>
+            </div>
+
+            <h3 class="gdd-subsection-heading">Plant Types</h3>
+            <div class="gdd-table-wrap">
+              <table class="gdd-table">
+                <thead>
+                  <tr><th>Plant</th><th>Icon</th><th>Seed Color</th><th>Plant Color</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Tomato</td><td>&#x1F345;</td><td><span class="gdd-color-swatch" style="background:#8B0000"></span>#8B0000</td><td><span class="gdd-color-swatch" style="background:#FF6347"></span>#FF6347</td></tr>
+                  <tr><td>Sunflower</td><td>&#x1F33B;</td><td><span class="gdd-color-swatch" style="background:#8B4513"></span>#8B4513</td><td><span class="gdd-color-swatch" style="background:#FFD700"></span>#FFD700</td></tr>
+                  <tr><td>Carrot</td><td>&#x1F955;</td><td><span class="gdd-color-swatch" style="background:#D2691E"></span>#D2691E</td><td><span class="gdd-color-swatch" style="background:#FF8C00"></span>#FF8C00</td></tr>
+                  <tr><td>Lettuce</td><td>&#x1F96C;</td><td><span class="gdd-color-swatch" style="background:#556B2F"></span>#556B2F</td><td><span class="gdd-color-swatch" style="background:#90EE90"></span>#90EE90</td></tr>
+                  <tr><td>Blueberry</td><td>&#x1FAD0;</td><td><span class="gdd-color-swatch" style="background:#483D8B"></span>#483D8B</td><td><span class="gdd-color-swatch" style="background:#4169E1"></span>#4169E1</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gdd-subsection-heading">Needs System</h3>
+            <div class="gdd-grid-3">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F4A7;</span>
+                <div class="gdd-card-title">Water</div>
+                <div class="gdd-card-body">Touch the watering can, then hold over the plant. The can pours water with a gentle audio cue.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x2600;&#xFE0F;</span>
+                <div class="gdd-card-title">Sunlight</div>
+                <div class="gdd-card-body">Hover your hand over the sun area to direct light toward the plant. A warm glow indicates success.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F9EA;</span>
+                <div class="gdd-card-title">Fertiliser</div>
+                <div class="gdd-card-body">Touch the fertilizer bag, then hold over the plant. Sparkles appear as nutrients are absorbed.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Game Modes -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">5</span>Game Modes</h2>
+            <div class="gdd-grid-3">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F9D1;</span>
+                <div class="gdd-card-title">Solo Mode</div>
+                <div class="gdd-card-body">Full-width garden with 2&ndash;3 plant pots. Standard challenge progression. One player, one hand, full therapeutic benefit.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F331;</span>
+                <div class="gdd-card-title">Community Garden (Co-op)</div>
+                <div class="gdd-card-body">Shared garden with a shared goal. The Magic Pumpkin bonus triggers when both players touch it simultaneously &mdash; confetti burst and timer pause.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F3C6;</span>
+                <div class="gdd-card-title">Village Fair (Competitive)</div>
+                <div class="gdd-card-body">Split zones with individual scoring. Rubber-band mechanic keeps it fair. Blue and Red ribbons awarded &mdash; never a &ldquo;game over.&rdquo;</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Fair Play DDA System -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">6</span>Fair Play DDA System</h2>
+            <p class="gdd-text">The AI monitors each player independently every 5 seconds. It adjusts game parameters silently so that both players &mdash; regardless of ability &mdash; feel engaged and successful.</p>
+
+            <h3 class="gdd-subsection-heading">Adjustment Parameters</h3>
+            <div class="gdd-table-wrap">
+              <table class="gdd-table">
+                <thead>
+                  <tr><th>Parameter</th><th>Range</th><th>Effect</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>seedSpeed</td><td>0.4x &ndash; 1.8x</td><td>How quickly new seeds appear</td></tr>
+                  <tr><td>hitBoxMultiplier</td><td>0.8x &ndash; 2.0x</td><td>Size of interactive touch zones</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gdd-subsection-heading">Struggling Player Support</h3>
+            <ul class="gdd-list">
+              <li>Fewer than 2 harvests per 10 seconds: needs deplete 40% slower</li>
+              <li>Idle for more than 3 seconds: hit boxes grow up to 70% larger</li>
+              <li>Auto-hint arrows appear pointing toward the next action</li>
+            </ul>
+
+            <h3 class="gdd-subsection-heading">Rubber-Band Mechanic</h3>
+            <p class="gdd-text">When the score gap exceeds 20% in competitive mode, the trailing player receives a <strong>Golden Watering Can</strong> that instantly maxes all plant needs &mdash; a gentle catch-up boost that feels like a reward, not a consolation.</p>
+          </div>
+
+          <!-- 7. Data Collection & Clinical Value -->
+          <div class="gdd-section gdd-section-highlight">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">7</span>Data Collection &amp; Clinical Value</h2>
+            <p class="gdd-text">Every game session generates structured data that transforms play into clinically meaningful insights. This is what makes Garden Grow a therapeutic tool &mdash; not just a game.</p>
+
+            <h3 class="gdd-subsection-heading">What We Collect</h3>
+            <div class="gdd-table-wrap">
+              <table class="gdd-table">
+                <thead>
+                  <tr><th>Category</th><th>Metric</th><th>Clinical Relevance</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Motor</td><td>Hand tracking precision</td><td>Fine motor assessment</td></tr>
+                  <tr><td>Motor</td><td>Reaction time</td><td>Processing speed</td></tr>
+                  <tr><td>Motor</td><td>Range of motion</td><td>Upper limb mobility</td></tr>
+                  <tr><td>Motor</td><td>Hold duration</td><td>Hand strength proxy</td></tr>
+                  <tr><td>Engagement</td><td>Session duration</td><td>Attention span tracking</td></tr>
+                  <tr><td>Engagement</td><td>Task completion rate</td><td>Cognitive engagement</td></tr>
+                  <tr><td>Engagement</td><td>Idle time frequency</td><td>Fatigue indicators</td></tr>
+                  <tr><td>Engagement</td><td>Hint usage</td><td>Assistance needs</td></tr>
+                  <tr><td>Clinical</td><td>DDA difficulty over time</td><td>Improvement trajectory</td></tr>
+                  <tr><td>Clinical</td><td>Session comparison</td><td>Progress measurement</td></tr>
+                  <tr><td>Clinical</td><td>Goal completion rates</td><td>Therapeutic milestones</td></tr>
+                  <tr><td>Clinical</td><td>Social interaction</td><td>Social engagement</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="gdd-subsection-heading">Why It Matters</h3>
+            <p class="gdd-text"><strong>Objective measurement replaces subjective observation.</strong> Instead of relying on &ldquo;she seemed engaged today,&rdquo; clinicians get timestamped, quantified data on motor performance, attention, and task completion.</p>
+            <p class="gdd-text"><strong>Longitudinal tracking across weeks and months.</strong> Each session adds to a patient's history, revealing trends that are invisible in any single visit &mdash; gradual improvement, emerging decline, or response to medication changes.</p>
+            <p class="gdd-text"><strong>Evidence-based care plan adjustments.</strong> Data flows directly into clinical reports, giving care teams the evidence they need to refine therapy goals, justify interventions, and demonstrate outcomes to families.</p>
+
+            <h3 class="gdd-subsection-heading">Data Pipeline</h3>
+            <div class="gdd-flow">
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F3AE;</span>
+                <span class="gdd-flow-step-label">Game Session</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4E1;</span>
+                <span class="gdd-flow-step-label">Real-Time Collection</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4BE;</span>
+                <span class="gdd-flow-step-label">Local Storage</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4CA;</span>
+                <span class="gdd-flow-step-label">Dashboard</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4C4;</span>
+                <span class="gdd-flow-step-label">Clinical Reports</span>
+              </div>
+              <span class="gdd-flow-arrow">&rarr;</span>
+              <div class="gdd-flow-step">
+                <span class="gdd-flow-step-icon">&#x1F4CB;</span>
+                <span class="gdd-flow-step-label">Care Plans</span>
+              </div>
+            </div>
+
+            <a href="#dashboard" class="gdd-cta-btn">See the Dashboard &rarr;</a>
+          </div>
+
+          <!-- 8. Accessibility -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">8</span>Accessibility</h2>
+            <div class="gdd-grid-3">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F441;&#xFE0F;</span>
+                <div class="gdd-card-title">Visual</div>
+                <div class="gdd-card-body">Minimum 32px text, WCAG AA contrast ratios, color-independent indicators, no rapid flashing, and 70px+ hit zones for all interactive elements.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x270B;</span>
+                <div class="gdd-card-title">Motor</div>
+                <div class="gdd-card-body">Both hands tracked with generous timing windows. Seated play fully supported. No fine motor precision required &mdash; broad gestures work.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F9E0;</span>
+                <div class="gdd-card-title">Cognitive</div>
+                <div class="gdd-card-body">Single visible objective at a time. Consistent, predictable UI patterns. No penalties for mistakes. Auto-help system guides without judgment.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. Story & Progression -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">9</span>Story &amp; Progression</h2>
+            <div class="gdd-grid-3">
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F4D6;</span>
+                <div class="gdd-card-title">Chapter 1: The Forgotten Garden</div>
+                <div class="gdd-card-body">Levels 1&ndash;3. Plant your first seeds and discover the overgrown garden. Learn the basics of watering and nurturing.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F338;</span>
+                <div class="gdd-card-title">Chapter 2: Spring Awakening</div>
+                <div class="gdd-card-body">Levels 4&ndash;6. Grow different plant types. The garden begins to flourish with sunflowers, carrots, and more.</div>
+              </div>
+              <div class="gdd-card">
+                <span class="gdd-card-icon">&#x1F3E1;</span>
+                <div class="gdd-card-title">Chapter 3: The Greenhouse</div>
+                <div class="gdd-card-body">Levels 7&ndash;10. Master the greenhouse. All plant types, all needs, full challenge &mdash; and a celebratory garden reveal at the end.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 10. Technical Architecture -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">10</span>Technical Architecture</h2>
+            <div class="gdd-table-wrap">
+              <table class="gdd-table">
+                <thead>
+                  <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Runtime</td><td>Modern Browser</td><td>Zero install &mdash; works on any device with a webcam</td></tr>
+                  <tr><td>Language</td><td>Vanilla JavaScript</td><td>No build step, no framework overhead, instant edits</td></tr>
+                  <tr><td>Hand Tracking</td><td>MediaPipe Hands</td><td>Real-time webcam hand detection via CDN</td></tr>
+                  <tr><td>Rendering</td><td>HTML5 Canvas</td><td>Single canvas element, mirrored for natural movement</td></tr>
+                  <tr><td>Audio</td><td>Web Audio API</td><td>All sounds synthesized in-browser, zero file deps</td></tr>
+                  <tr><td>Storage</td><td>localStorage</td><td>Session data persisted locally for dashboard use</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 11. Future Roadmap -->
+          <div class="gdd-section">
+            <h2 class="gdd-section-heading"><span class="gdd-section-number">11</span>Future Roadmap</h2>
+            <ul class="gdd-list">
+              <li>4-hand tracking via MediaPipe tasks-vision upgrade</li>
+              <li>Web Worker offloading for smoother performance on low-end devices</li>
+              <li>Social interaction metrics &mdash; head-turn detection, speech activity sensing</li>
+              <li>Free Play sandbox mode with no timer and no objectives</li>
+              <li>Additional game themes: cooking, workshop, aquarium</li>
+              <li>Platform expansion: tablet, smart TV, Progressive Web App (PWA)</li>
+            </ul>
+          </div>
+
         </section>
 
         <!-- ─────────── SCREEN MAP ─────────── -->
@@ -830,38 +1662,10 @@
   });
 
   /* ═══════════════════════════════════════════════
-     BUILD HOME GRID
+     BUILD HOME GRID (now static HTML — no-op kept for compatibility)
   ══════════════════════════════════════════════ */
   function buildHomeGrid() {
-    const grid = document.getElementById('homeGrid');
-    if (!grid) return;
-    PAGES.forEach(g => {
-      g.items.forEach(item => {
-        if (item.id === 'home') return; // skip self
-        const descriptions = {
-          gdd:           'Full game mechanics, scoring, DDA, and therapeutic design rationale.',
-          screens:       'State machine diagram and screen-by-screen flow map.',
-          prototype:     'Clickable walkthrough of the full player experience.',
-          components:    'Canvas UI components, color swatches, and typography scale.',
-          variations:    'Welcome screen variants and visual direction explorations.',
-          animations:    'Motion timing, easing curves, and particle system demos.',
-          accessibility: 'Contrast ratios, large-target design, and inclusivity decisions.',
-          dashboard:     'Session monitoring and patient progress analytics for clinicians.',
-          data:          'Session data schema, metrics glossary, and export formats.',
-          landing:       'Marketing page design and stakeholder-facing materials.',
-        };
-        const card = document.createElement('a');
-        card.className = 'info-card';
-        card.href = '#' + item.id;
-        card.innerHTML = `
-          <span class="info-card-icon">${item.icon}</span>
-          <div class="info-card-label">${item.label}</div>
-          <div class="info-card-desc">${descriptions[item.id] || 'Coming soon.'}</div>
-          <div class="info-card-group">${g.group}</div>
-        `;
-        grid.appendChild(card);
-      });
-    });
+    // Home page content is now static HTML — nothing to generate
   }
 
   /* ═══════════════════════════════════════════════
