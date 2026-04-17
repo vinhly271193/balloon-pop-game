@@ -62,8 +62,12 @@ class Game {
         // Achievement tracking
         this.achievementManager = new AchievementManager();
 
-        // Session leaderboard (persists for the lifetime of the session)
-        this.leaderboard = []; // { playerName, score, mode, timestamp }
+        // Session leaderboard (persists across page reloads via localStorage)
+        try {
+            this.leaderboard = JSON.parse(localStorage.getItem('gardenGrow_leaderboard') || '[]');
+        } catch (e) {
+            this.leaderboard = [];
+        }
     }
 
     /**
@@ -721,6 +725,13 @@ class Game {
         }
         this.leaderboard.sort((a, b) => b.score - a.score);
         if (this.leaderboard.length > 10) this.leaderboard = this.leaderboard.slice(0, 10);
+
+        // Persist leaderboard to localStorage
+        try {
+            localStorage.setItem('gardenGrow_leaderboard', JSON.stringify(this.leaderboard));
+        } catch (e) {
+            // localStorage may be full or unavailable
+        }
     }
 
     /**
