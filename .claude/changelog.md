@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-04-17 — Embed live game in Interactive Prototype
+
+### What changed
+- **Interactive Prototype page**: Replaced the static clickable mockup with the actual live game embedded via iframe. Users can now play Garden Grow directly inside the docs page.
+- **Controls bar**: Added "Reload" button (reloads iframe) and "Open Fullscreen" link (opens game in new tab) above the embedded game.
+- **Updated instructions**: Replaced step-by-step mockup navigation guide with real gameplay instructions (camera access, hand tracking, tool usage).
+- **Dead code cleanup**: Removed ~360 lines of unused proto-mockup CSS and JS (`protoNavigate`, breadcrumbs, mock screens, gameplay area styles).
+
+### Files changed
+- `docs.html` — Replaced `#page-prototype` HTML, removed dead proto CSS + JS
+
+---
+
 ## 2026-04-17 — Achievement wiring, leaderboard persistence, print CSS
 
 ### Achievement fixes
