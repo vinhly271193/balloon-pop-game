@@ -19,6 +19,9 @@ class DDAEngine {
         // Rubber-band state (competitive only)
         this.goldenWateringCanActive = { 1: false, 2: false };
         this.goldenWateringCanTimer = { 1: 0, 2: 0 };
+
+        // Garden bed reference — set externally after both are created
+        this.gardenBed = null;
     }
 
     createPlayerMetrics() {
@@ -111,6 +114,23 @@ class DDAEngine {
                 this.goldenWateringCanTimer[id] -= deltaTime;
                 if (this.goldenWateringCanTimer[id] <= 0) {
                     this.goldenWateringCanActive[id] = false;
+                }
+            }
+        }
+
+        // Power-up spawning — competitive mode only
+        if (gameMode === 'competitive' && this.gardenBed) {
+            if (this.gardenBed.powerUpCooldown <= 0) {
+                const now = performance.now();
+                const recentCutoff = now - 10000;
+                for (const pid of [1, 2]) {
+                    const player = this.players[pid];
+                    const harvestRate = player.recentHarvests.filter(t => t > recentCutoff).length;
+                    if (harvestRate < 2 && !this.gardenBed.activePowerUps.has(pid)) {
+                        this.gardenBed.showPowerUp(pid);
+                        this.gardenBed.powerUpCooldown = 15; // 15-second cooldown
+                        break; // one power-up spawn per frame cycle
+                    }
                 }
             }
         }

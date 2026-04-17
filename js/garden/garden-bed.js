@@ -87,6 +87,10 @@ class GardenBed {
         // Golden watering cans (competitive mode)
         this.goldenWateringCans = new Map();
 
+        // Power-ups (competitive mode — DDA-driven spawning)
+        this.activePowerUps = new Map(); // key: playerId (1 or 2), value: PowerUp instance
+        this.powerUpCooldown = 0;        // seconds until next power-up can spawn
+
         // Confetti particles
         this.confettiParticles = [];
 
@@ -487,6 +491,25 @@ class GardenBed {
     }
 
     /**
+     * Spawn a random power-up in the given player's zone (competitive only)
+     * @param {number} playerId - 1 or 2
+     */
+    showPowerUp(playerId) {
+        if (this.activePowerUps.has(playerId)) return; // already one active for this player
+
+        const types = [InstantGrowth, DoublePoints, RainShower];
+        const PowerUpClass = types[Math.floor(Math.random() * types.length)];
+
+        // Place in the correct half of the competitive layout
+        const zoneX = playerId === 1
+            ? this.canvas.width * 0.75   // right zone (Player 1)
+            : this.canvas.width * 0.25;  // left zone  (Player 2)
+        const y = this.canvas.height * 0.3 + Math.random() * this.canvas.height * 0.3;
+
+        this.activePowerUps.set(playerId, new PowerUpClass(zoneX, y, this.canvas));
+    }
+
+    /**
      * Spawn confetti particles
      */
     spawnConfetti(x, y, count = 50) {
@@ -553,6 +576,13 @@ class GardenBed {
 
         // Update golden watering cans
         this.goldenWateringCans.forEach(can => can.update(deltaTime));
+
+        // Update power-ups (competitive mode)
+        this.activePowerUps.forEach((pu, pid) => {
+            pu.update(deltaTime);
+            if (!pu.active) this.activePowerUps.delete(pid);
+        });
+        if (this.powerUpCooldown > 0) this.powerUpCooldown -= deltaTime;
 
         // Update magic pumpkin (co-op only)
         if (this.magicPumpkin) {
@@ -760,6 +790,26 @@ class GardenBed {
                     goldenCan.pickup();
                     heldItem = goldenCan;
                     this.heldItemsMap.set(zoneKey, heldItem);
+                }
+            }
+        }
+
+        // Check for power-up collection (competitive only, uses index fingertip)
+        if (this.gameMode === 'competitive' && handPos.landmarkIndex === 8) {
+            const powerUp = this.activePowerUps.get(zoneKey);
+            if (powerUp && powerUp.active && !powerUp.collected) {
+                if (powerUp.isPointOver(handPos.x, handPos.y)) {
+                    powerUp.applyEffect(this, zoneKey);
+                    // If instant effect already deactivated it, remove from map
+                    if (!powerUp.active) {
+                        this.activePowerUps.delete(zoneKey);
+                    }
+                    if (typeof audioManager !== 'undefined') audioManager.play('harvest');
+                    // Notify achievement manager if present
+                    if (typeof game !== 'undefined' && game.achievementManager) {
+                        game.achievementManager.recordPowerUp();
+                    }
+                    return harvested;
                 }
             }
         }
@@ -1097,6 +1147,9 @@ class GardenBed {
         // Draw golden watering cans
         this.goldenWateringCans.forEach(can => can.draw(ctx));
 
+        // Draw active power-ups
+        this.activePowerUps.forEach(pu => pu.draw(ctx));
+
         // Draw needs panels (vertically centered, per zone)
         const needsPanelHeight = 150; // spacing(40) * 3 + 30
         const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
@@ -1298,6 +1351,10 @@ class GardenBed {
 
         this.hintArrows.forEach(arrow => arrow.reset());
         this.hintPlayerIdleTime.clear();
+
+        // Clear power-ups
+        this.activePowerUps.clear();
+        this.powerUpCooldown = 0;
     }
 
     // Compatibility methods

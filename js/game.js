@@ -81,6 +81,9 @@ class Game {
         // Initialize garden bed (seed spawner)
         this.gardenBed = new GardenBed(this.canvas);
 
+        // Wire DDA engine to garden bed so it can spawn power-ups
+        ddaEngine.gardenBed = this.gardenBed;
+
         // Initialize UI
         uiManager.init({
             onStart: () => this.onStartClick(),
@@ -456,10 +459,18 @@ class Game {
 
                     // Track per-player scores
                     if (this.gameMode === 'competitive') {
+                        let points = isTargetPlant ? 100 : 50;
+
+                        // Check for active DoublePoints power-up for this player
+                        const activePU = this.gardenBed?.activePowerUps?.get(playerId);
+                        if (activePU && activePU.type === 'doublePoints' && activePU.isActive()) {
+                            points *= 2;
+                        }
+
                         if (playerId === 1) {
-                            this.player1Score += isTargetPlant ? 100 : 50;
+                            this.player1Score += points;
                         } else if (playerId === 2) {
-                            this.player2Score += isTargetPlant ? 100 : 50;
+                            this.player2Score += points;
                         }
 
                         // Update 2P HUD
