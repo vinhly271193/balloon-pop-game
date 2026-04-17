@@ -3968,34 +3968,19 @@
             <p class="page-description">Live, playable build of Garden Grow. Requires a webcam for hand tracking.</p>
           </div>
 
-          <!-- Game preview card -->
-          <div class="proto-container" style="position:relative;overflow:hidden;cursor:pointer;" onclick="window.open('index.html','_blank')">
-            <!-- Garden scene placeholder -->
-            <div style="background:linear-gradient(180deg,#FFE4B5 0%,#E8F5E9 40%,#A5D6A7 70%,#6D4C41 85%,#5D4037 100%);padding:60px 40px 80px;text-align:center;position:relative;min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-              <!-- Decorative seeds -->
-              <div style="position:absolute;top:20px;left:30px;font-size:1.5rem;opacity:0.3;">&#x1F33F;</div>
-              <div style="position:absolute;top:60px;right:50px;font-size:1.2rem;opacity:0.25;">&#x1F33E;</div>
-              <div style="position:absolute;bottom:120px;left:60px;font-size:1.3rem;opacity:0.2;">&#x1F343;</div>
-              <div style="position:absolute;bottom:140px;right:40px;font-size:1.1rem;opacity:0.2;">&#x1F33B;</div>
-
-              <!-- Logo area -->
-              <div style="margin-bottom:12px;">
-                <img src="assets/images/logo.png" alt="re:Action Health Technologies" style="height:48px;opacity:0.85;">
+          <div class="proto-container">
+            <!-- Controls bar -->
+            <div class="proto-controls" style="margin-bottom:0;border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:1px solid var(--border);">
+              <div class="proto-controls-hint">Live game &mdash; allow camera access when prompted</div>
+              <div style="display:flex;gap:8px;">
+                <button class="proto-reset-btn" onclick="document.getElementById('protoGameFrame').src = document.getElementById('protoGameFrame').src;">Reload</button>
+                <a href="index.html" target="_blank" class="proto-reset-btn" style="text-decoration:none;display:inline-flex;align-items:center;">Open Fullscreen</a>
               </div>
+            </div>
 
-              <!-- Title -->
-              <div style="font-family:var(--font-heading);font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#FF6B6B,#FFD93D,#6BCB77,#4D96FF,#9B59B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">Garden Grow!</div>
-              <div style="font-family:var(--font-body);font-size:1.125rem;color:#5a7d6a;margin-bottom:8px;">Use your hands to help plants grow</div>
-
-              <!-- Sprout -->
-              <div style="font-size:4rem;margin:16px 0;">&#x1F331;</div>
-
-              <div style="font-family:var(--font-body);font-size:0.95rem;color:#6B9E7A;margin-bottom:24px;">A therapeutic hand-tracking gardening experience</div>
-
-              <!-- Play button -->
-              <a href="index.html" target="_blank" onclick="event.stopPropagation();" style="display:inline-flex;align-items:center;gap:8px;padding:16px 48px;background:linear-gradient(135deg,#4CAF50,#2E7D32);color:#fff;font-family:var(--font-heading);font-size:1.25rem;font-weight:700;border-radius:100px;text-decoration:none;box-shadow:0 4px 16px rgba(46,125,50,0.4);transition:transform 0.2s,box-shadow 0.2s;">
-                Start Growing &#x2192;
-              </a>
+            <!-- Embedded game iframe — fixed 600px height, game fills innerWidth x innerHeight -->
+            <div style="width:100%;height:600px;border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border);border-top:none;">
+              <iframe id="protoGameFrame" src="index.html" allow="camera;microphone" style="width:100%;height:100%;border:none;"></iframe>
             </div>
           </div>
 
