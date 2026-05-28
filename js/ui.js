@@ -169,6 +169,29 @@ class UIManager {
             if (this.callbacks.onRetryLevel) this.callbacks.onRetryLevel();
         });
 
+        // Mouse click fallback for dwell-activated buttons (player select, mode select).
+        // The dwell-hover system is the primary path. These ensure the page is still usable
+        // when hand tracking is unavailable or partly broken.
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-hover-action]');
+            if (!target) return;
+            const action = target.dataset.hoverAction;
+            const map = {
+                start: this.callbacks.onStart,
+                nextLevel: this.callbacks.onNextLevel,
+                playAgain: this.callbacks.onPlayAgain,
+                retryLevel: this.callbacks.onRetryLevel,
+                selectOnePlayer: this.callbacks.onSelectOnePlayer,
+                selectTwoPlayers: this.callbacks.onSelectTwoPlayers,
+                selectCoop: this.callbacks.onSelectCoop,
+                selectCompetitive: this.callbacks.onSelectCompetitive,
+                openSettings: () => this.openSettings(),
+                closeSettings: () => this.closeSettings(),
+            };
+            const fn = map[action];
+            if (typeof fn === 'function') fn();
+        });
+
         // Settings button click
         this.settingsBtn?.addEventListener('click', () => this.openSettings());
         this.closeSettingsBtn?.addEventListener('click', () => this.closeSettings());
