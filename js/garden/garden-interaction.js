@@ -148,9 +148,8 @@ class GardenInteraction {
             });
 
             // Check magic pumpkin in co-op (both players must touch simultaneously).
-            const gardenBedRef = typeof gardenBed !== 'undefined' ? gardenBed : null;
-            if (gardenBedRef && gardenBedRef.magicPumpkin) {
-                const mp = gardenBedRef.magicPumpkin;
+            if (gardenState.magicPumpkin) {
+                const mp = gardenState.magicPumpkin;
                 if (mp.visible && !mp.active) {
                     mp.playerstouching.clear();
                     handPositions.forEach(hand => {
@@ -161,10 +160,10 @@ class GardenInteraction {
 
                     if (mp.playerstouching.size >= 2) {
                         mp.activate();
-                        gardenBedRef.pumpkinActivated = true;
-                        gardenBedRef.timerPaused = true;
-                        gardenBedRef.timerPauseDuration = 3;
-                        gardenBedRef.spawnConfetti(mp.x, mp.y, 80);
+                        gardenState.pumpkinActivated = true;
+                        gardenState.timerPaused = true;
+                        gardenState.timerPauseDuration = 3;
+                        this._spawnConfetti(mp.x, mp.y, 80);
                         if (typeof achievementManager !== 'undefined') achievementManager.recordMagicPumpkin();
                     }
                 } else if (!mp.visible) {
@@ -238,13 +237,13 @@ class GardenInteraction {
         // Check for power-up collection (competitive only, uses index fingertip).
         if (gardenState.mode === 'competitive' && handPos.landmarkIndex === 8) {
             const puPlayerId = zoneKey === 'p1' ? 1 : 2;
-            const gardenBedRef = typeof gardenBed !== 'undefined' ? gardenBed : null;
-            const powerUp = gardenBedRef && gardenBedRef.activePowerUps.get(puPlayerId);
+            const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
+            const powerUp = gb && gb.activePowerUps.get(puPlayerId);
             if (powerUp && powerUp.active && !powerUp.collected) {
                 if (powerUp.isPointOver(handPos.x, handPos.y)) {
-                    powerUp.applyEffect(gardenBedRef, puPlayerId);
+                    powerUp.applyEffect(gb, puPlayerId);
                     if (!powerUp.active) {
-                        gardenBedRef.activePowerUps.delete(puPlayerId);
+                        gb.activePowerUps.delete(puPlayerId);
                     }
                     if (typeof audioManager !== 'undefined') audioManager.play('harvest');
                     if (typeof game !== 'undefined' && game.achievementManager) {
@@ -541,6 +540,18 @@ class GardenInteraction {
 
         zone.heldItem = null;
         zone.heldItemHand = null;
+    }
+
+    /**
+     * Spawn confetti particles into gardenState.confettiParticles.
+     * @param {number} x
+     * @param {number} y
+     * @param {number} count
+     */
+    _spawnConfetti(x, y, count = 50) {
+        for (let i = 0; i < count; i++) {
+            gardenState.confettiParticles.push(new ConfettiParticle(x, y));
+        }
     }
 }
 

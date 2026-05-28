@@ -36,6 +36,31 @@ class GardenState {
 
         // Round generation counter - guards stale setTimeout callbacks
         this.roundGeneration = 0;
+
+        // Animation and hint state that the renderer reads from
+        this.returnBeaconPulse = 0;
+        this.confettiParticles = [];
+
+        // Timer pause state (co-op magic pumpkin effect)
+        this.timerPaused = false;
+        this.timerPauseDuration = 0;
+
+        // Magic pumpkin (co-op 2-player)
+        this.magicPumpkin = null;
+        this.pumpkinActivated = false;
+        this.pumpkinSpawnTimer = 0;
+        this.pumpkinSpawnInterval = 35;
+
+        // Hint arrow system
+        this.hintArrows = new Map();
+        this.hintArrows.set('shared', new HintArrow());
+        this.hintArrows.set('p1', new HintArrow());
+        this.hintArrows.set('p2', new HintArrow());
+        this.hintIdleThreshold = 5;
+        this.hintPlayerIdleTime = new Map();
+
+        // Cached deltaTime passed into gardenInteraction.process
+        this.lastDeltaTime = 0.016;
     }
 
     /**

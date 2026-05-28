@@ -22,8 +22,9 @@ class GardenRenderer {
     /**
      * Draw the full garden scene.
      * @param {CanvasRenderingContext2D} ctx
+     * @param {number} [deltaTime] seconds since last frame (used to tick hint arrows)
      */
-    draw(ctx) {
+    draw(ctx, deltaTime = 0) {
         // Sky gradient
         if (typeof sunCycle !== 'undefined') {
             ctx.save();
@@ -85,15 +86,16 @@ class GardenRenderer {
         this._drawReturnBeacons(ctx);
 
         // Magic pumpkin (co-op only)
-        if (gardenBed.magicPumpkin) {
-            gardenBed.magicPumpkin.draw(ctx);
+        if (gardenState.magicPumpkin) {
+            gardenState.magicPumpkin.draw(ctx);
         }
 
         // Confetti particles
-        gardenBed.confettiParticles.forEach(particle => particle.draw(ctx));
+        gardenState.confettiParticles.forEach(particle => particle.draw(ctx));
 
-        // Hint arrows
-        gardenBed.hintArrows.forEach(arrow => arrow.draw(ctx));
+        // Hint arrows: tick state then draw
+        this._updateHints(deltaTime);
+        gardenState.hintArrows.forEach(arrow => arrow.draw(ctx));
 
         // Instructions
         this._drawInstructions(ctx);
@@ -183,7 +185,7 @@ class GardenRenderer {
 
             const hx = heldItem.homeX;
             const hy = heldItem.homeY;
-            const pulse = 0.5 + 0.5 * Math.sin(gardenBed.returnBeaconPulse);
+            const pulse = 0.5 + 0.5 * Math.sin(gardenState.returnBeaconPulse);
 
             ctx.save();
 
@@ -243,6 +245,72 @@ class GardenRenderer {
         }
 
         ctx.restore();
+    }
+
+    /**
+     * Tick hint arrows based on player idle times and show the most useful hint.
+     * Called each frame from draw() so it stays in sync with rendering.
+     * @param {number} deltaTime
+     */
+    _updateHints(deltaTime) {
+        const zoneKeys = gardenState.mode === 'competitive' ? ['p1', 'p2'] : ['shared'];
+        for (const zk of zoneKeys) {
+            const arrow = gardenState.hintArrows.get(zk);
+            if (!arrow) continue;
+
+            let idleTime;
+            if (gardenState.mode === 'competitive') {
+                idleTime = gardenState.hintPlayerIdleTime.get(zk === 'p1' ? 1 : 2) || 0;
+            } else {
+                const times = [...gardenState.hintPlayerIdleTime.values()];
+                idleTime = times.length > 0 ? Math.min(...times) : 0;
+            }
+
+            if (idleTime >= gardenState.hintIdleThreshold) {
+                const hint = this._determineHintForZone(zk);
+                if (hint) arrow.show(hint.fromX, hint.fromY, hint.toX, hint.toY, hint.hintType);
+                else arrow.hide();
+            } else {
+                arrow.hide();
+            }
+            arrow.update(deltaTime);
+        }
+    }
+
+    /**
+     * Determine which tool-to-destination hint is most useful for a zone.
+     * @param {string} zoneKey
+     * @returns {{fromX, fromY, toX, toY, hintType}|null}
+     */
+    _determineHintForZone(zoneKey) {
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return null;
+        const pot = gardenState.mode === 'competitive' ? zone.pots[0] : zone.pots.find(p => p.growthStage !== undefined);
+        if (!pot) return null;
+        const seed = zone.tools.seed;
+        const wateringCan = zone.tools.wateringCan;
+        const fertilizerBag = zone.tools.fertilizerBag;
+        const needs = zone.needs;
+
+        if (pot.growthStage === GrowthStage.EMPTY && seed && !seed.isPlanted) {
+            return { fromX: seed.homeX, fromY: seed.homeY, toX: pot.x, toY: pot.y, hintType: 'seed_to_pot' };
+        }
+        if (pot.growthStage === GrowthStage.HARVESTABLE) {
+            return { fromX: pot.x, fromY: pot.y, toX: pot.x, toY: pot.y, hintType: 'harvest' };
+        }
+        if (pot.growthStage !== GrowthStage.EMPTY && needs) {
+            const candidates = [
+                { type: 'water_to_pot', value: needs.water, tool: wateringCan },
+                { type: 'food_to_pot', value: needs.food, tool: fertilizerBag },
+            ].filter(n => n.value < 0.5 && n.tool).sort((a, b) => a.value - b.value);
+            if (candidates.length > 0) {
+                const c = candidates[0];
+                const toolX = c.tool.homeX != null ? c.tool.homeX : c.tool.x;
+                const toolY = c.tool.homeY != null ? c.tool.homeY : c.tool.y;
+                return { fromX: toolX, fromY: toolY, toX: pot.x, toY: pot.y, hintType: c.type };
+            }
+        }
+        return null;
     }
 }
 
