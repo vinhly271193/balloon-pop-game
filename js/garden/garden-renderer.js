@@ -145,7 +145,8 @@ class GardenRenderer {
      * @param {CanvasRenderingContext2D} ctx
      */
     _drawNeedsBars(ctx) {
-        const needsPanelHeight = 150;
+        // Panel height = spacing * 2 + 30, where spacing = 40 (two bars: water + fertiliser).
+        const needsPanelHeight = 110;
         const needsY = Math.round(ctx.canvas.height / 2 - needsPanelHeight / 2 + 20);
         const needsXPositions = gardenState.mode === 'competitive'
             ? { p1: ctx.canvas.width - 250, p2: 30 }

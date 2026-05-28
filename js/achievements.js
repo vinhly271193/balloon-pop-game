@@ -10,7 +10,7 @@ const ACHIEVEMENTS = [
     { id: 'first_win',         name: 'Village Champion',      icon: '🏆', description: 'Win a competitive round' },
     { id: 'close_match',       name: 'Photo Finish',          icon: '📸', description: 'Finish within 10 points' },
     { id: 'all_plants',        name: 'Master Gardener',       icon: '👨‍🌾', description: 'Grow all 5 plant types' },
-    { id: 'all_tools',         name: 'Tool Expert',           icon: '🧰', description: 'Use all 3 tools in one round' },
+    { id: 'all_tools',         name: 'Tool Expert',           icon: '🧰', description: 'Use both tools in one round' },
     { id: 'coop_magic',        name: 'Garden Friends',        icon: '🤝', description: 'Trigger the Magic Pumpkin' },
     { id: 'power_up',          name: 'Power Player',          icon: '🌟', description: 'Collect your first power-up' },
     { id: 'long_session',      name: 'Dedicated Gardener',    icon: '🌻', description: 'Play for 5 minutes' },
@@ -26,7 +26,7 @@ class AchievementManager {
             // Session-scoped (reset on page reload but not on round restart)
             totalHarvests: 0,           // all-time this session
             plantTypesGrown: new Set(), // all plant types grown this session
-            toolsUsedThisRound: new Set(), // watering_can, fertilizer, sun — reset per round
+            toolsUsedThisRound: new Set(), // watering_can, fertilizer — reset per round
             sessionStartTime: Date.now(),
             sessionElapsed: 0,          // seconds, incremented in updateSessionTime()
             // Round-scoped (reset per round)
@@ -73,7 +73,9 @@ class AchievementManager {
 
     /**
      * Record use of a tool in the current round.
-     * @param {string} toolType - 'watering_can' | 'fertilizer' | 'sun'
+     * @param {string} toolType - 'watering_can' | 'fertilizer'
+     *   Note: 'seed' is also recorded via this method but is not counted
+     *   toward the all_tools threshold — only the two hand tools count.
      */
     recordToolUse(toolType) {
         if (toolType) {
@@ -179,8 +181,10 @@ class AchievementManager {
             this._unlock('all_plants');
         }
 
-        // all_tools — used all 3 tools in one round
-        if (!this.unlocked.has('all_tools') && s.toolsUsedThisRound.size >= 3) {
+        // all_tools — used both tools (watering_can + fertilizer) in one round.
+        // 'seed' is tracked in toolsUsedThisRound but not counted toward this threshold.
+        const toolCount = [...s.toolsUsedThisRound].filter(t => t === 'watering_can' || t === 'fertilizer').length;
+        if (!this.unlocked.has('all_tools') && toolCount >= 2) {
             this._unlock('all_tools');
         }
 

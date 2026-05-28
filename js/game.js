@@ -637,6 +637,9 @@ class Game {
      * Start a game round
      */
     startRound() {
+        // Reset per-frame sun-cycle accumulator
+        this.roundElapsedSec = 0;
+
         // Reset timer
         this.timeRemaining = this.currentChallenge.timeLimit;
         uiManager.updateTimer(this.timeRemaining);
@@ -934,11 +937,13 @@ class Game {
                 this.gardenBed.setPlayerIdleTime(2, ddaEngine.players[2].idleTime);
             }
 
-            // Advance sun cycle (sunrise at round start, sunset at round end)
+            // Advance sun cycle (sunrise at round start, sunset at round end).
+            // Use a per-frame accumulator rather than the integer timeRemaining counter
+            // so the sun arcs smoothly instead of jumping in one-second steps.
             if (typeof sunCycle !== 'undefined' && this.currentChallenge) {
+                this.roundElapsedSec = (this.roundElapsedSec || 0) + deltaTime;
                 const roundDuration = this.currentChallenge.timeLimit || 60;
-                const elapsed = roundDuration - (this.timeRemaining || 0);
-                sunCycle.update(elapsed, roundDuration);
+                sunCycle.update(this.roundElapsedSec, roundDuration);
             }
 
             // Update garden (handles needs, growth, etc.)
