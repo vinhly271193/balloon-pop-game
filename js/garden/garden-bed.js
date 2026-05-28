@@ -20,9 +20,6 @@ class GardenBed {
         this.pumpkinSpawnTimer = 0;
         this.pumpkinSpawnInterval = 35;
 
-        // Golden watering cans (competitive mode) — also mirrored into zone.goldenWateringCan
-        this.goldenWateringCans = new Map();
-
         // Power-ups (competitive mode — DDA-driven spawning)
         // dda.js reads these directly so they stay on this.
         this.activePowerUps = new Map();
@@ -43,8 +40,8 @@ class GardenBed {
         // Hint arrow system
         this.hintArrows = new Map();
         this.hintArrows.set('shared', new HintArrow());
-        this.hintArrows.set(1, new HintArrow());
-        this.hintArrows.set(2, new HintArrow());
+        this.hintArrows.set('p1', new HintArrow());
+        this.hintArrows.set('p2', new HintArrow());
         this.hintIdleThreshold = 5;
         this.hintPlayerIdleTime = new Map();
 
@@ -60,7 +57,9 @@ class GardenBed {
     // ── Proxy accessors for mode state ──────────────────────────────
 
     get gameMode()       { return gardenState.mode; }
+    set gameMode(v)      { gardenState.mode = v; }
     get playerCount()    { return gardenState.playerCount; }
+    set playerCount(v)   { gardenState.playerCount = v; }
     get dividerX()       { return gardenState.dividerX; }
     set dividerX(v)      { gardenState.dividerX = v; }
     get roundGeneration(){ return gardenState.roundGeneration; }
@@ -69,7 +68,7 @@ class GardenBed {
 
     /** Returns zone keys for the current game mode */
     getZoneKeys() {
-        return gardenState.mode === 'competitive' ? [1, 2] : ['shared'];
+        return gardenState.mode === 'competitive' ? ['p1', 'p2'] : ['shared'];
     }
 
     /** Get plant needs for a zone */
@@ -160,7 +159,7 @@ class GardenBed {
         const p1Fertilizer = new FertilizerBag(divX + 80, canvasHeight - 150, this.canvas);
         const p1Sun = new SunArea(this.canvas.width - 100, 200);
 
-        gardenState.initZone(1, {
+        gardenState.initZone('p1', {
             pots: [p1Pot],
             tools: { seed: null, wateringCan: p1WateringCan, fertilizerBag: p1Fertilizer, sunArea: p1Sun },
             needs: p1Needs,
@@ -174,14 +173,14 @@ class GardenBed {
         const p2Fertilizer = new FertilizerBag(divX - 80, canvasHeight - 150, this.canvas);
         const p2Sun = new SunArea(100, 200);
 
-        gardenState.initZone(2, {
+        gardenState.initZone('p2', {
             pots: [p2Pot],
             tools: { seed: null, wateringCan: p2WateringCan, fertilizerBag: p2Fertilizer, sunArea: p2Sun },
             needs: p2Needs,
         });
 
-        this.spawnNewSeed(1);
-        this.spawnNewSeed(2);
+        this.spawnNewSeed('p1');
+        this.spawnNewSeed('p2');
     }
 
     // ── Configuration ──────────────────────────────────────────
@@ -194,9 +193,6 @@ class GardenBed {
         gardenState.reset();                                    // increments roundGeneration, clears zones
         gardenState.setMode(gameMode || 'coop', playerCount || 1);
         gardenState.dividerX = dividerX || null;
-
-        // Clear competitive-mode collections
-        this.goldenWateringCans.clear();
 
         if (gardenState.mode === 'competitive' && gardenState.dividerX) {
             this._setupCompetitiveZones();
@@ -230,9 +226,9 @@ class GardenBed {
 
         if (gardenState.mode === 'competitive') {
             const divX = gardenState.dividerX;
-            if (zoneKey === 1) {
+            if (zoneKey === 'p1') {
                 seedX = divX + (this.canvas.width - divX) / 2;
-            } else if (zoneKey === 2) {
+            } else if (zoneKey === 'p2') {
                 seedX = divX / 2;
             }
             seedY = 100;
@@ -254,7 +250,7 @@ class GardenBed {
     applyDDA(playerId, { seedSpeed, hitBoxMultiplier }) {
         this.ddaModifiers.set(playerId, { seedSpeed, hitBoxMultiplier });
 
-        const zoneKey = gardenState.mode === 'competitive' ? playerId : 'shared';
+        const zoneKey = gardenState.mode === 'competitive' ? ('p' + playerId) : 'shared';
         if (gardenState.mode !== 'competitive' && playerId !== 1) return;
 
         const pot = this.getZonePot(zoneKey);
@@ -353,7 +349,9 @@ class GardenBed {
 
             let idleTime;
             if (gardenState.mode === 'competitive') {
-                idleTime = this.hintPlayerIdleTime.get(zone) || 0;
+                // hintPlayerIdleTime is keyed by integer player id (1 or 2); zone keys are 'p1'/'p2'
+                const playerId = zone === 'p1' ? 1 : 2;
+                idleTime = this.hintPlayerIdleTime.get(playerId) || 0;
             } else {
                 const times = [...this.hintPlayerIdleTime.values()];
                 idleTime = times.length > 0 ? Math.min(...times) : 0;
@@ -380,6 +378,12 @@ class GardenBed {
     showGoldenWateringCan(playerId) {
         if (gardenState.mode !== 'competitive') return;
 
+        const zoneKey = 'p' + playerId;
+        const zone = gardenState.getZone(zoneKey);
+
+        // Only spawn one at a time per zone
+        if (zone && zone.goldenWateringCan) return;
+
         let goldenCanX, goldenCanY;
 
         if (playerId === 1) {
@@ -392,10 +396,6 @@ class GardenBed {
         }
 
         const goldenCan = new WateringCan(goldenCanX, goldenCanY, this.canvas, true);
-        this.goldenWateringCans.set(playerId, goldenCan);
-
-        // Mirror into zone state
-        const zone = gardenState.getZone(playerId);
         if (zone) zone.goldenWateringCan = goldenCan;
     }
 
@@ -481,8 +481,11 @@ class GardenBed {
             this.getZoneWateringCan(zk).update(deltaTime);
         }
 
-        // Update golden watering cans
-        this.goldenWateringCans.forEach(can => can.update(deltaTime));
+        // Update golden watering cans (zone-level source of truth)
+        for (const zk of gardenState.getAllZoneKeys()) {
+            const can = gardenState.getZone(zk).goldenWateringCan;
+            if (can) can.update(deltaTime);
+        }
 
         // Update power-ups (competitive mode)
         this.activePowerUps.forEach((pu, pid) => {
@@ -558,17 +561,17 @@ class GardenBed {
         if (gardenState.mode === 'competitive') {
             handsByPlayer.forEach((hands, playerId) => {
                 hands.forEach(hand => {
-                    const zoneOwner = this.getZoneOwner(hand.x);
-                    const effectivePlayerId = zoneOwner;
+                    const ownerPlayerId = this.getZoneOwner(hand.x); // integer 1 or 2
+                    const zoneKey = 'p' + ownerPlayerId;
 
-                    const result = this.processHandInteraction(hand, effectivePlayerId);
+                    const result = this.processHandInteraction(hand, zoneKey);
                     if (result) {
                         const isTargetPlant = typeof challengeManager !== 'undefined' &&
                             challengeManager.currentChallenge &&
                             challengeManager.getTargetPlants().includes(result);
-                        const zone = gardenState.getZone(effectivePlayerId);
+                        const zone = gardenState.getZone(zoneKey);
                         const targetPotComp = zone ? zone.pots[0] : null;
-                        harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId, isTargetPlant, growTime: targetPotComp && targetPotComp.plantedAt ? (Date.now() - targetPotComp.plantedAt) / 1000 : 30 });
+                        harvestedPlants.push({ plantKey: result, playerId: ownerPlayerId, isTargetPlant, growTime: targetPotComp && targetPotComp.plantedAt ? (Date.now() - targetPotComp.plantedAt) / 1000 : 30 });
                     }
                 });
             });
@@ -701,7 +704,7 @@ class GardenBed {
 
         // Check golden watering can (competitive only)
         if (gardenState.mode === 'competitive') {
-            const goldenCan = this.goldenWateringCans.get(zoneKey);
+            const goldenCan = zone.goldenWateringCan;
             if (goldenCan && goldenCan.isPointOver(handPos.x, handPos.y)) {
                 if (!heldItem) {
                     goldenCan.pickup();
@@ -811,7 +814,6 @@ class GardenBed {
                 }
             } else if (heldItem.isGolden && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 getPlantNeeds().maxAll();
-                this.goldenWateringCans.delete(zoneKey);
                 zone.goldenWateringCan = null;
                 zone.heldItem = null;
 
@@ -908,7 +910,6 @@ class GardenBed {
             }
 
             if (heldItem.isGolden) {
-                this.goldenWateringCans.delete(zoneKey);
                 zone.goldenWateringCan = null;
             }
 
@@ -991,8 +992,11 @@ class GardenBed {
             this.getZoneFertilizer(zk).draw(ctx);
         }
 
-        // Draw golden watering cans
-        this.goldenWateringCans.forEach(can => can.draw(ctx));
+        // Draw golden watering cans (zone-level source of truth)
+        for (const zk of gardenState.getAllZoneKeys()) {
+            const can = gardenState.getZone(zk).goldenWateringCan;
+            if (can) can.draw(ctx);
+        }
 
         // Draw active power-ups
         this.activePowerUps.forEach(pu => pu.draw(ctx));
@@ -1001,7 +1005,7 @@ class GardenBed {
         const needsPanelHeight = 150;
         const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
         const needsXPositions = gardenState.mode === 'competitive'
-            ? { 1: this.canvas.width - 250, 2: 30 }
+            ? { p1: this.canvas.width - 250, p2: 30 }
             : { shared: 30 };
 
         for (const zk of this.getZoneKeys()) {
@@ -1172,7 +1176,6 @@ class GardenBed {
 
         this.activePowerUps.clear();
         this.powerUpCooldown = 0;
-        this.goldenWateringCans.clear();
     }
 
     // ── Compatibility methods ──────────────────────────────────────

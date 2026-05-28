@@ -199,8 +199,8 @@ class InstantGrowth extends PowerUp {
      * @param {number}    playerId   - competitive zone (1 or 2); ignored in coop
      */
     applyEffect(gardenBed, playerId) {
-        // Resolve zone key: competitive uses numeric player id, coop uses 'shared'
-        const zoneKey = gardenBed.gameMode === 'competitive' ? playerId : 'shared';
+        // Resolve zone key: competitive uses string zone id ('p1'/'p2'), coop uses 'shared'
+        const zoneKey = gardenBed.gameMode === 'competitive' ? ('p' + playerId) : 'shared';
         const pot = gardenBed.getZonePot(zoneKey);
 
         if (pot && pot.growthStage !== GrowthStage.EMPTY && pot.growthStage !== GrowthStage.HARVESTABLE) {
@@ -284,7 +284,7 @@ class RainShower extends PowerUp {
     applyEffect(gardenBed, playerId) {
         if (gardenBed.gameMode === 'competitive') {
             // Only the collecting player's zone
-            const needs = gardenBed.getZoneNeeds(playerId);
+            const needs = gardenBed.getZoneNeeds('p' + playerId);
             if (needs) {
                 needs.water = 1;
                 needs.displayWater = 1;

@@ -5,7 +5,7 @@
  *
  * Zone keys:
  *   'shared' — used for solo and coop modes
- *   1, 2     — used for competitive mode (player ids matching existing callers)
+ *   'p1', 'p2' — used for competitive mode
  *
  * ZoneState shape:
  *   pots: PlantPot[]
@@ -19,6 +19,9 @@
  *   heldItem: DraggableSeed | WateringCan | FertilizerBag | null
  *   heldItemHand: string | null
  *   goldenWateringCan: WateringCan | null
+ *   score: number
+ *   droopTimers: Map
+ *   bounceTimers: Map
  *   interactionTimers: { water: number, food: number, sun: number }
  */
 
@@ -28,9 +31,9 @@ class GardenState {
         this.zones = new Map();
 
         // Mode fields
-        this.mode = 'coop';      // 'solo' | 'coop' | 'competitive'
+        this.mode = 'solo';      // 'solo' | 'coop' | 'competitive'
         this.playerCount = 1;
-        this.dividerX = null;
+        this.dividerX = 0.5;
 
         // Round generation counter — guards stale setTimeout callbacks
         this.roundGeneration = 0;
@@ -41,7 +44,7 @@ class GardenState {
 
     /**
      * Create or replace a zone.
-     * @param {string|number} zoneKey
+     * @param {string} zoneKey  — 'shared', 'p1', or 'p2'
      * @param {{ pots: PlantPot[], tools: object, needs: PlantNeeds }} config
      */
     initZone(zoneKey, { pots, tools, needs }) {
@@ -52,6 +55,9 @@ class GardenState {
             heldItem: null,
             heldItemHand: null,
             goldenWateringCan: null,
+            score: 0,
+            droopTimers: new Map(),
+            bounceTimers: new Map(),
             interactionTimers: { water: 0, food: 0, sun: 0 },
         });
     }
@@ -61,7 +67,7 @@ class GardenState {
         return this.zones.get(zoneKey);
     }
 
-    /** @returns {Array<string|number>} */
+    /** @returns {Array<string>} */
     getAllZoneKeys() {
         return Array.from(this.zones.keys());
     }
