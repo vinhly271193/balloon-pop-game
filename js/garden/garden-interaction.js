@@ -505,36 +505,45 @@ class GardenInteraction {
         const targetPot = zone.pots && zone.pots.find(p => p.isPointOver(point.x, point.y));
 
         if (targetPot) {
-            if (held instanceof DraggableSeed &&
-                typeof targetPot.isEmpty === 'function' && targetPot.isEmpty()) {
-                if (typeof targetPot.plantSeed === 'function') targetPot.plantSeed(held.plantType);
-                if (typeof held.plant === 'function') held.plant();
-                zone.heldItem = null;
-                zone.heldItemHand = null;
-                if (typeof audioManager !== 'undefined') audioManager.play('plant');
-                // Reset needs and spawn a new seed.
-                zone.needs = new PlantNeeds();
-                const gen = gardenState.roundGeneration;
-                const zoneKeys = Array.from(gardenState.zones.entries())
-                    .filter(([, z]) => z === zone)
-                    .map(([k]) => k);
-                const zk = zoneKeys[0] || 'shared';
-                setTimeout(() => {
-                    if (gardenState.roundGeneration === gen) {
-                        const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
-                        if (gb) gb.spawnNewSeed(zk);
+            if (held instanceof DraggableSeed && typeof targetPot.plantSeed === 'function') {
+                const planted = targetPot.plantSeed(held.plantType);
+                if (planted) {
+                    if (typeof held.plant === 'function') held.plant();
+                    zone.heldItem = null;
+                    zone.heldItemHand = null;
+                    if (typeof audioManager !== 'undefined') audioManager.play('plant');
+                    if (typeof achievementManager !== 'undefined' && typeof achievementManager.recordToolUse === 'function') {
+                        achievementManager.recordToolUse('seed');
                     }
-                }, 1000);
-                return;
+                    // Reset needs and spawn a new seed.
+                    zone.needs = new PlantNeeds();
+                    const gen = gardenState.roundGeneration;
+                    const zoneKeys = Array.from(gardenState.zones.entries())
+                        .filter(([, z]) => z === zone)
+                        .map(([k]) => k);
+                    const zk = zoneKeys[0] || 'shared';
+                    setTimeout(() => {
+                        if (gardenState.roundGeneration === gen) {
+                            const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
+                            if (gb) gb.spawnNewSeed(zk);
+                        }
+                    }, 1000);
+                    return;
+                }
+                // Pot was not empty: fall through to release the seed without applying.
             }
             if (held instanceof WateringCan) {
                 if (zone.needs && typeof zone.needs.addWater === 'function') zone.needs.addWater();
-                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('watering_can');
                 if (typeof audioManager !== 'undefined') audioManager.play('water');
+                if (typeof achievementManager !== 'undefined' && typeof achievementManager.recordToolUse === 'function') {
+                    achievementManager.recordToolUse('watering_can');
+                }
             } else if (held instanceof FertilizerBag) {
                 if (zone.needs && typeof zone.needs.addFood === 'function') zone.needs.addFood();
-                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('fertilizer');
                 if (typeof audioManager !== 'undefined') audioManager.play('plant');
+                if (typeof achievementManager !== 'undefined' && typeof achievementManager.recordToolUse === 'function') {
+                    achievementManager.recordToolUse('fertilizer');
+                }
             } else if (held.isGolden) {
                 if (zone.needs && typeof zone.needs.maxAll === 'function') zone.needs.maxAll();
                 zone.goldenWateringCan = null;
