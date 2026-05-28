@@ -229,9 +229,12 @@ class HandTracker {
                 ];
 
                 collisionPoints.forEach(({ point, landmarkIndex }) => {
-                    // Convert normalized coordinates to canvas coordinates
-                    const x = point.x * this.canvas.width;
-                    const y = point.y * this.canvas.height;
+                    // Convert normalized coordinates to canvas coordinates via play zone mapping
+                    const mapped = (typeof playZone !== 'undefined')
+                        ? playZone.mapPoint(point.x, point.y, this.canvas.width, this.canvas.height)
+                        : { x: point.x * this.canvas.width, y: point.y * this.canvas.height };
+                    const x = mapped.x;
+                    const y = mapped.y;
 
                     this.handPositions.push({
                         x,

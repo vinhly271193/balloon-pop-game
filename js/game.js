@@ -275,6 +275,7 @@ class Game {
                 this.calibrationWaveDetected = false;
                 this.calibrationStartTime = Date.now();
                 this.calibrationHandsDetectedTime = 0;
+                this._calibrationSamples = [];
                 this.updateCalibrationProgress(0, 'calibrationProgressFill');
                 break;
 
@@ -284,6 +285,7 @@ class Game {
                 this.calibrationWaveDetected = false;
                 this.calibrationStartTime = Date.now();
                 this.calibrationHandsDetectedTime = 0;
+                this._calibrationSamples = [];
                 this.updateCalibrationProgress(0, 'calibrationP2ProgressFill');
                 break;
 
@@ -389,6 +391,8 @@ class Game {
                     handsReady = data.rightDetected && data.positions.some(pos => pos.x > this.canvas.width / 2);
                 }
 
+                if (!this._calibrationSamples) this._calibrationSamples = [];
+
                 if (handsReady) {
                     if (!this.calibrationHandsDetectedTime) {
                         this.calibrationHandsDetectedTime = Date.now();
@@ -397,7 +401,17 @@ class Game {
                     const progress = Math.min(elapsed / 2000, 1);
                     this.updateCalibrationProgress(progress, 'calibrationProgressFill');
 
+                    if (handTracker.hands && handTracker.hands.length > 0) {
+                        for (const h of handTracker.hands) {
+                            if (h.landmarks && h.landmarks[0]) {
+                                this._calibrationSamples.push({ x: h.landmarks[0].x, y: h.landmarks[0].y });
+                            }
+                        }
+                    }
+
                     if (progress >= 1) {
+                        playZone.calibrate(this._calibrationSamples || []);
+                        this._calibrationSamples = [];
                         this.calibrationWaveDetected = true;
                         setTimeout(() => {
                             if (this.state === GameState.CALIBRATION) {
@@ -424,6 +438,8 @@ class Game {
                 const hasLeftHand = data.positions.some(pos => pos.x <= this.canvas.width / 2);
                 const hasTwoHands = data.positions.length >= 2;
 
+                if (!this._calibrationSamples) this._calibrationSamples = [];
+
                 if (hasLeftHand && hasTwoHands) {
                     if (!this.calibrationHandsDetectedTime) {
                         this.calibrationHandsDetectedTime = Date.now();
@@ -432,7 +448,17 @@ class Game {
                     const progress = Math.min(elapsed / 2000, 1);
                     this.updateCalibrationProgress(progress, 'calibrationP2ProgressFill');
 
+                    if (handTracker.hands && handTracker.hands.length > 0) {
+                        for (const h of handTracker.hands) {
+                            if (h.landmarks && h.landmarks[0]) {
+                                this._calibrationSamples.push({ x: h.landmarks[0].x, y: h.landmarks[0].y });
+                            }
+                        }
+                    }
+
                     if (progress >= 1) {
+                        playZone.calibrate(this._calibrationSamples || []);
+                        this._calibrationSamples = [];
                         this.calibrationWaveDetected = true;
                         setTimeout(() => {
                             if (this.state === GameState.CALIBRATION_P2) {
