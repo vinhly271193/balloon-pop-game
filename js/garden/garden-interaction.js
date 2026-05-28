@@ -260,56 +260,24 @@ class GardenInteraction {
         const isIndexFinger = handPos.landmarkIndex === 8;
 
         if (heldItem && isIndexFinger) {
-            heldItem.moveTo(handPos.x, handPos.y);
-
-            // Reset watering can state if held but not confirmed over a pot.
-            if (heldItem === wateringCan) {
-                const overPot = targetPot && targetPot.isPointOver(handPos.x, handPos.y);
-                if (!overPot) {
-                    wateringCan.isOverPot = false;
-                    wateringCan.pourProgress = 0;
-                    wateringCan.targetPotRef = null;
-                    if (targetPot) {
-                        targetPot.isBeingWatered = false;
-                        targetPot.waterPourProgress = 0;
-                    }
-                    timers.water = 0;
+            // Held watering can over a pot triggers the tilt and pour-particle visual.
+            // Water is still applied only on open-hand release via _tryRelease.
+            if (heldItem instanceof WateringCan && !heldItem.isGolden) {
+                const can = heldItem;
+                const overPot = (zone.pots || []).find(p => p.isPointOver(handPos.x, handPos.y));
+                if (overPot) {
+                    can.isOverPot = true;
+                    can.targetPotRef = overPot;
+                } else {
+                    can.isOverPot = false;
+                    can.targetPotRef = null;
+                    can.pourProgress = 0;
                 }
             }
 
-            // Drop seed onto a pot.
-            if (heldItem === seed && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                if (targetPot.plantSeed(seed.plantType)) {
-                    seed.plant();
-                    zone.heldItem = null;
-                    zone.heldItemHand = null;
+            heldItem.moveTo(handPos.x, handPos.y);
 
-                    if (typeof audioManager !== 'undefined') {
-                        audioManager.play('plant');
-                    }
-
-                    // Reset needs for the new plant.
-                    zone.needs = new PlantNeeds();
-
-                    // Spawn new seed after a short delay (guarded by generation counter).
-                    const gen = gardenState.roundGeneration;
-                    const zk = zoneKey;
-                    setTimeout(() => {
-                        if (gardenState.roundGeneration === gen) {
-                            const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
-                            if (gb) gb.spawnNewSeed(zk);
-                        }
-                    }, 1000);
-                }
-            } else if (heldItem.isGolden && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                getPlantNeeds().maxAll();
-                zone.goldenWateringCan = null;
-                zone.heldItem = null;
-
-                if (typeof audioManager !== 'undefined') {
-                    audioManager.play('water');
-                }
-            } else if (heldItem.homeX != null && heldItem.homeY != null) {
+            if (heldItem.homeX != null && heldItem.homeY != null) {
                 const distToHome = Math.sqrt(
                     Math.pow(handPos.x - heldItem.homeX, 2) +
                     Math.pow(handPos.y - heldItem.homeY, 2)
@@ -439,8 +407,6 @@ class GardenInteraction {
         const zoneKey = gardenState.mode === 'competitive'
             ? (hand.playerId === 1 ? 'p1' : 'p2')
             : 'shared';
-        const zone = gardenState.getZone(zoneKey);
-        if (!zone) return;
 
         // Use landmark 8 (index fingertip) as the interaction point.
         const tip = hand.landmarks[8];
@@ -449,9 +415,9 @@ class GardenInteraction {
         const point = playZone.mapPoint(tip.x, tip.y, canvas.width, canvas.height);
 
         if (event === 'grab') {
-            this._tryPickup(zone, point);
+            this._tryPickup(zoneKey, point);
         } else if (event === 'release') {
-            this._tryRelease(zone, point);
+            this._tryRelease(zoneKey, point);
         }
     }
 
@@ -459,10 +425,12 @@ class GardenInteraction {
      * Attempt to pick up a tool at the given canvas point.
      * Sets zone.heldItem if a tool is found under the point.
      *
-     * @param {ZoneState} zone
+     * @param {string} zoneKey
      * @param {{ x: number, y: number }} point
      */
-    _tryPickup(zone, point) {
+    _tryPickup(zoneKey, point) {
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return;
         if (zone.heldItem) return;
         // Seed
         const seed = zone.tools.seed;
@@ -494,10 +462,12 @@ class GardenInteraction {
      * Release the currently held item. If the release point is over a plant pot,
      * apply the tool; otherwise the tool flies home.
      *
-     * @param {ZoneState} zone
+     * @param {string} zoneKey
      * @param {{ x: number, y: number }} point
      */
-    _tryRelease(zone, point) {
+    _tryRelease(zoneKey, point) {
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return;
         const held = zone.heldItem;
         if (!held) return;
 
@@ -518,19 +488,23 @@ class GardenInteraction {
                     // Reset needs and spawn a new seed.
                     zone.needs = new PlantNeeds();
                     const gen = gardenState.roundGeneration;
-                    const zoneKeys = Array.from(gardenState.zones.entries())
-                        .filter(([, z]) => z === zone)
-                        .map(([k]) => k);
-                    const zk = zoneKeys[0] || 'shared';
                     setTimeout(() => {
                         if (gardenState.roundGeneration === gen) {
                             const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
-                            if (gb) gb.spawnNewSeed(zk);
+                            if (gb) gb.spawnNewSeed(zoneKey);
                         }
                     }, 1000);
                     return;
                 }
                 // Pot was not empty: fall through to release the seed without applying.
+            }
+            if (held.isGolden) {
+                if (zone.needs && typeof zone.needs.maxAll === 'function') zone.needs.maxAll();
+                zone.goldenWateringCan = null;
+                zone.heldItem = null;
+                zone.heldItemHand = null;
+                if (typeof audioManager !== 'undefined') audioManager.play('water');
+                return;
             }
             if (held instanceof WateringCan) {
                 if (zone.needs && typeof zone.needs.addWater === 'function') zone.needs.addWater();
@@ -544,13 +518,6 @@ class GardenInteraction {
                 if (typeof achievementManager !== 'undefined' && typeof achievementManager.recordToolUse === 'function') {
                     achievementManager.recordToolUse('fertilizer');
                 }
-            } else if (held.isGolden) {
-                if (zone.needs && typeof zone.needs.maxAll === 'function') zone.needs.maxAll();
-                zone.goldenWateringCan = null;
-                zone.heldItem = null;
-                zone.heldItemHand = null;
-                if (typeof audioManager !== 'undefined') audioManager.play('water');
-                return;
             }
         }
 
