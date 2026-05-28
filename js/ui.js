@@ -259,20 +259,12 @@ class UIManager {
         if (!canvas) return;
 
         let foundHover = false;
-        const debug = window._handHoverDebug;
-        if (debug) {
-            console.log('[hover] positions:', handPositions.length, 'first:', handPositions[0]?.x?.toFixed(0), handPositions[0]?.y?.toFixed(0), 'canvas:', canvas.width, canvas.height, 'window:', window.innerWidth, window.innerHeight);
-            console.log('[hover] hoverable count:', this.hoverableElements.length, 'visible screens:', Object.entries(this.screens).filter(([, s]) => s?.classList.contains('active')).map(([k]) => k));
-        }
 
         // Check each hoverable element
         for (const element of this.hoverableElements) {
             if (!this.isElementVisible(element)) continue;
 
             const rect = element.getBoundingClientRect();
-            if (debug) {
-                console.log('[hover] el:', element.dataset.hoverAction, 'rect:', rect.left.toFixed(0), rect.top.toFixed(0), rect.right.toFixed(0), rect.bottom.toFixed(0));
-            }
 
             // Check if any hand position is over this element
             for (const pos of handPositions) {
@@ -286,7 +278,6 @@ class UIManager {
                 const actualX = screenX * scaleX;
                 const actualY = screenY * scaleY;
 
-                if (debug) console.log('[hover]   pos canvas:', pos.x.toFixed(0), pos.y.toFixed(0), '-> screen:', actualX.toFixed(0), actualY.toFixed(0));
                 if (this.isPointInRect(actualX, actualY, rect)) {
                     foundHover = true;
                     this.handleHover(element);

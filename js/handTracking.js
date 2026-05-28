@@ -5,7 +5,8 @@
 
 class HandTracker {
     constructor() {
-        this.hands = null;
+        // MediaPipe Hands model instance (set in init()).
+        this.handsModel = null;
         this.camera = null;
         this.videoElement = null;
         this.canvas = null;
@@ -27,8 +28,9 @@ class HandTracker {
         this.leftHandDetected = false;
         this.rightHandDetected = false;
 
-        // Per-hand landmark arrays for pose-driven interaction (Task 7).
+        // Per-hand landmark arrays for pose-driven interaction (Phase 5 Task 7).
         // Each entry: { handId: string, playerId: number, landmarks: Array }
+        // External callers (garden-interaction.js, game.js) read this as `handTracker.hands`.
         this.hands = [];
 
         // Visual feedback settings
@@ -65,14 +67,14 @@ class HandTracker {
 
         try {
             // Create MediaPipe Hands instance
-            this.hands = new Hands({
+            this.handsModel = new Hands({
                 locateFile: (file) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
                 }
             });
 
             // Configure hand tracking with Phase 9 optimizations
-            this.hands.setOptions({
+            this.handsModel.setOptions({
                 maxNumHands: 2,
                 modelComplexity: 0, // Lower complexity for performance
                 minDetectionConfidence: 0.5, // Lower threshold for performance
@@ -80,7 +82,7 @@ class HandTracker {
             });
 
             // Set up results callback
-            this.hands.onResults((results) => this.onResults(results));
+            this.handsModel.onResults((results) => this.onResults(results));
 
             this.isInitialized = true;
             console.log('Hand tracking initialized');
@@ -121,8 +123,8 @@ class HandTracker {
             // Set up camera feed to MediaPipe with optimized resolution
             this.camera = new Camera(this.videoElement, {
                 onFrame: async () => {
-                    if (this.isRunning) {
-                        await this.hands.send({ image: this.videoElement });
+                    if (this.isRunning && this.handsModel) {
+                        await this.handsModel.send({ image: this.videoElement });
                     }
                 },
                 width: 640, // Lower resolution for performance
