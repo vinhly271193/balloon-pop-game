@@ -38,6 +38,13 @@ class PlantPot {
 
         // Growth stage pulse effect (1 = full pulse, decays to 0)
         this.growthPulse = 0;
+
+        // Droop and bounce animation state
+        this.droopAmount = 0;   // 0 to 1, current droop level
+        this.bouncePulse = 0;   // 0 to 1, decays after a top-up
+
+        // Leaf desaturation factor: set each frame in drawPlant, read by drawSmallLeaf/drawLeaf.
+        this._leafFade = 1;
     }
 
     /**
@@ -128,9 +135,11 @@ class PlantPot {
     }
 
     /**
-     * Update water level and overflow particles
+     * Update water level, overflow particles, and droop/bounce animation.
+     * @param {number} deltaTime seconds since last frame
+     * @param {PlantNeeds|null} [needs] current plant needs; used to drive droop animation
      */
-    update(deltaTime) {
+    update(deltaTime, needs) {
         // Decay growth pulse (fast decay over ~0.4s)
         if (this.growthPulse > 0) {
             this.growthPulse = Math.max(0, this.growthPulse - deltaTime * 2.5);
@@ -165,6 +174,17 @@ class PlantPot {
             p.alpha -= deltaTime * 1.5;
         });
         this.overflowParticles = this.overflowParticles.filter(p => p.alpha > 0);
+
+        // Droop: lean the plant when needs are critically low; bounce when they recover.
+        const sat = needs ? needs.getAverageSatisfaction() : 1;
+        const targetDroop = sat < 0.3 ? Math.min(1, (0.3 - sat) / 0.3) : 0;
+        this.droopAmount += (targetDroop - this.droopAmount) * Math.min(1, 3 * deltaTime);
+
+        // Trigger a bounce when satisfaction recovers above 0.6 from a drooped state.
+        if (sat > 0.6 && this.droopAmount > 0.05 && this.bouncePulse < 0.05) {
+            this.bouncePulse = 1;
+        }
+        this.bouncePulse = Math.max(0, this.bouncePulse - deltaTime * 2);
     }
 
     /**
@@ -172,6 +192,17 @@ class PlantPot {
      */
     draw(ctx) {
         ctx.save();
+
+        // Compose droop lean and bounce scale into the top-level transform.
+        // The growth pulse is applied inside drawPlant around the plant only;
+        // droop and bounce affect the whole pot + plant together.
+        const droopAngle = this.droopAmount * -0.35; // lean up to ~20 degrees when fully drooped
+        const bounceScale = 1 + Math.sin(this.bouncePulse * Math.PI) * 0.15;
+
+        ctx.translate(this.x, this.y);
+        ctx.rotate(droopAngle);
+        ctx.scale(bounceScale, bounceScale);
+        ctx.translate(-this.x, -this.y);
 
         // Draw pot
         this.drawPot(ctx);
@@ -410,6 +441,11 @@ class PlantPot {
 
         if (!plant) return;
 
+        // Leaf desaturation: compute fade factor from droop level.
+        // Stored on the instance so drawSmallLeaf and drawLeaf can read it without
+        // threading an extra argument through every call.
+        this._leafFade = 1 - this.droopAmount * 0.4;
+
         // Apply growth pulse scale effect (centered on plant base)
         if (this.growthPulse > 0) {
             const pulseScale = 1 + this.growthPulse * 0.15; // max 15% larger
@@ -434,7 +470,7 @@ class PlantPot {
                 ctx.beginPath();
                 ctx.moveTo(x, baseY);
                 ctx.quadraticCurveTo(x + 5, baseY - sproutHeight / 2, x, baseY - sproutHeight);
-                ctx.strokeStyle = '#90EE90';
+                ctx.strokeStyle = this._tintHex('#90EE90', this._leafFade);
                 ctx.lineWidth = 4;
                 ctx.lineCap = 'round';
                 ctx.stroke();
@@ -513,7 +549,7 @@ class PlantPot {
 
         ctx.beginPath();
         ctx.ellipse(size / 2, 0, size, size / 2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#90EE90';
+        ctx.fillStyle = this._tintHex('#90EE90', this._leafFade);
         ctx.fill();
 
         ctx.restore();
@@ -530,8 +566,8 @@ class PlantPot {
         ctx.quadraticCurveTo(0, -height * 0.7, 0, 0);
 
         const gradient = ctx.createLinearGradient(0, 0, width, -height);
-        gradient.addColorStop(0, '#228B22');
-        gradient.addColorStop(1, '#90EE90');
+        gradient.addColorStop(0, this._tintHex('#228B22', this._leafFade));
+        gradient.addColorStop(1, this._tintHex('#90EE90', this._leafFade));
         ctx.fillStyle = gradient;
         ctx.fill();
 
@@ -549,7 +585,7 @@ class PlantPot {
                 ctx.rotate(angle);
                 ctx.beginPath();
                 ctx.ellipse(0, -25, 8, 20, 0, 0, Math.PI * 2);
-                ctx.fillStyle = plant.plantColor;
+                ctx.fillStyle = this._tintHex(plant.plantColor, this._leafFade);
                 ctx.fill();
                 ctx.restore();
             }
@@ -563,7 +599,7 @@ class PlantPot {
             ctx.arc(x, y, 25, 0, Math.PI * 2);
             const gradient = ctx.createRadialGradient(x - 8, y - 8, 0, x, y, 25);
             gradient.addColorStop(0, '#fff');
-            gradient.addColorStop(0.3, plant.plantColor);
+            gradient.addColorStop(0.3, this._tintHex(plant.plantColor, this._leafFade));
             gradient.addColorStop(1, plant.seedColor);
             ctx.fillStyle = gradient;
             ctx.fill();
@@ -576,5 +612,30 @@ class PlantPot {
             ctx.lineWidth = 3;
             ctx.stroke();
         }
+    }
+
+    /**
+     * Scale an RGB hex colour by a fade factor (0 to 1).
+     * Used to desaturate leaf and bloom colours when the plant is drooping.
+     * Pot, rim, soil, and structural colours are not passed through this method.
+     * @param {string} hex six-digit hex string, e.g. '#90EE90'
+     * @param {number} fade 0 = black, 1 = full colour
+     * @returns {string} rgb() colour string
+     */
+    _tintHex(hex, fade) {
+        // Strip leading '#' and handle both '#RGB' (3-digit) and '#RRGGBB' (6-digit).
+        const clean = hex.replace('#', '');
+        let r, g, b;
+        if (clean.length === 3) {
+            r = parseInt(clean[0] + clean[0], 16);
+            g = parseInt(clean[1] + clean[1], 16);
+            b = parseInt(clean[2] + clean[2], 16);
+        } else {
+            r = parseInt(clean.slice(0, 2), 16);
+            g = parseInt(clean.slice(2, 4), 16);
+            b = parseInt(clean.slice(4, 6), 16);
+        }
+        const f = fade !== undefined ? fade : 1;
+        return `rgb(${Math.round(r * f)}, ${Math.round(g * f)}, ${Math.round(b * f)})`;
     }
 }
