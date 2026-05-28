@@ -4,8 +4,8 @@
  * GardenBed delegates all data reads and writes here.
  *
  * Zone keys:
- *   'shared' — used for solo and coop modes
- *   'p1', 'p2' — used for competitive mode
+ *   'shared' - used for solo and coop modes
+ *   'p1', 'p2' - used for competitive mode
  *
  * ZoneState shape:
  *   pots: PlantPot[]
@@ -35,7 +35,7 @@ class GardenState {
         this.playerCount = 1;
         this.dividerX = 0.5;
 
-        // Round generation counter — guards stale setTimeout callbacks
+        // Round generation counter - guards stale setTimeout callbacks
         this.roundGeneration = 0;
 
         // Sun area legacy field (Phase 5 removes this; kept to preserve behaviour)
@@ -44,7 +44,7 @@ class GardenState {
 
     /**
      * Create or replace a zone.
-     * @param {string} zoneKey  — 'shared', 'p1', or 'p2'
+     * @param {string} zoneKey  - 'shared', 'p1', or 'p2'
      * @param {{ pots: PlantPot[], tools: object, needs: PlantNeeds }} config
      */
     initZone(zoneKey, { pots, tools, needs }) {

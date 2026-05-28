@@ -20,7 +20,7 @@ class GardenBed {
         this.pumpkinSpawnTimer = 0;
         this.pumpkinSpawnInterval = 35;
 
-        // Power-ups (competitive mode — DDA-driven spawning)
+        // Power-ups (competitive mode - DDA-driven spawning)
         // dda.js reads these directly so they stay on this.
         this.activePowerUps = new Map();
         this.powerUpCooldown = 0;
@@ -50,7 +50,6 @@ class GardenBed {
 
         // Default single player setup (configure() overwrites this before first round)
         gardenState.setMode('coop', 1);
-        gardenState.dividerX = null;
         this._setupCoopZone(1);
     }
 
@@ -381,9 +380,6 @@ class GardenBed {
         const zoneKey = 'p' + playerId;
         const zone = gardenState.getZone(zoneKey);
 
-        // Only spawn one at a time per zone
-        if (zone && zone.goldenWateringCan) return;
-
         let goldenCanX, goldenCanY;
 
         if (playerId === 1) {
@@ -576,7 +572,7 @@ class GardenBed {
                 });
             });
         } else {
-            // Solo/co-op — group all collision points by hand
+            // Solo/co-op - group all collision points by hand
             const handGroups = new Map();
             handPositions.forEach(pos => {
                 const handKey = pos.isLeft ? 'left' : 'right';
@@ -716,12 +712,13 @@ class GardenBed {
 
         // Check for power-up collection (competitive only, uses index fingertip)
         if (gardenState.mode === 'competitive' && handPos.landmarkIndex === 8) {
-            const powerUp = this.activePowerUps.get(zoneKey);
+            const puPlayerId = zoneKey === 'p1' ? 1 : 2;
+            const powerUp = this.activePowerUps.get(puPlayerId);
             if (powerUp && powerUp.active && !powerUp.collected) {
                 if (powerUp.isPointOver(handPos.x, handPos.y)) {
-                    powerUp.applyEffect(this, zoneKey);
+                    powerUp.applyEffect(this, puPlayerId);
                     if (!powerUp.active) {
-                        this.activePowerUps.delete(zoneKey);
+                        this.activePowerUps.delete(puPlayerId);
                     }
                     if (typeof audioManager !== 'undefined') audioManager.play('harvest');
                     if (typeof game !== 'undefined' && game.achievementManager) {
