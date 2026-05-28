@@ -12,8 +12,7 @@
  *   tools: {
  *     seed: DraggableSeed | null,
  *     wateringCan: WateringCan,
- *     fertilizerBag: FertilizerBag,
- *     sunArea: SunArea
+ *     fertilizerBag: FertilizerBag
  *   }
  *   needs: PlantNeeds
  *   heldItem: DraggableSeed | WateringCan | FertilizerBag | null
@@ -22,7 +21,7 @@
  *   score: number
  *   droopTimers: Map
  *   bounceTimers: Map
- *   interactionTimers: { water: number, food: number, sun: number }
+ *   interactionTimers: { water: number, food: number }
  */
 
 class GardenState {
@@ -37,9 +36,6 @@ class GardenState {
 
         // Round generation counter - guards stale setTimeout callbacks
         this.roundGeneration = 0;
-
-        // Sun area legacy field (Phase 5 removes this; kept to preserve behaviour)
-        this.sunArea = null;
     }
 
     /**
@@ -58,7 +54,7 @@ class GardenState {
             score: 0,
             droopTimers: new Map(),
             bounceTimers: new Map(),
-            interactionTimers: { water: 0, food: 0, sun: 0 },
+            interactionTimers: { water: 0, food: 0 },
         });
     }
 

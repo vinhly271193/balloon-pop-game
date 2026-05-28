@@ -64,9 +64,12 @@ class PlantPot {
     }
 
     /**
-     * Update plant growth based on needs satisfaction
+     * Update plant growth based on needs satisfaction and sun multiplier.
+     * @param {number} needsSatisfied average need level 0-1
+     * @param {number} deltaTime seconds since last frame
+     * @param {number} [growthMultiplier=1] sun cycle growth multiplier (0.5 at dawn/dusk, 1.5 at midday)
      */
-    updateGrowth(needsSatisfied, deltaTime) {
+    updateGrowth(needsSatisfied, deltaTime, growthMultiplier = 1) {
         if (this.growthStage === GrowthStage.EMPTY || this.growthStage === GrowthStage.HARVESTABLE) {
             return;
         }
@@ -74,7 +77,7 @@ class PlantPot {
         // Only grow if needs are satisfied (average > 40%)
         if (needsSatisfied > 0.4) {
             const growthRate = 0.25 * needsSatisfied; // ~8s per stage at full satisfaction, 4 stages = ~32s
-            this.growthProgress += growthRate * deltaTime;
+            this.growthProgress += growthRate * deltaTime * growthMultiplier;
 
             // Update growth stage
             if (this.growthProgress >= 1) {

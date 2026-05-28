@@ -209,7 +209,6 @@ class GardenInteraction {
         const seed = zone.tools.seed;
         const wateringCan = zone.tools.wateringCan;
         const fertilizerBag = zone.tools.fertilizerBag;
-        const sunArea = zone.tools.sunArea;
         const timers = zone.interactionTimers;
         // Read plantNeeds fresh each time to avoid stale reference after seed planting.
         const getPlantNeeds = () => zone.needs;
@@ -293,20 +292,6 @@ class GardenInteraction {
         }
 
         if (!heldItem) {
-            // Sun hover (accumulated dwell, no pickup required).
-            if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
-                const sunTime = timers.sun;
-                const newSunTime = sunTime + deltaTime;
-
-                if (newSunTime > 0.2) {
-                    getPlantNeeds().addSun();
-                    timers.sun = 0;
-                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
-                } else {
-                    timers.sun = newSunTime;
-                }
-            }
-
             // Check for harvest.
             if (targetPot && targetPot.growthStage === GrowthStage.HARVESTABLE &&
                 targetPot.isPointOver(handPos.x, handPos.y)) {
@@ -343,16 +328,6 @@ class GardenInteraction {
     _processFreeHand(handPos, deltaTime) {
         const zone = gardenState.getZone('shared');
         if (!zone) return null;
-
-        const sunArea = zone.tools.sunArea;
-        if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
-            zone.interactionTimers.sun += deltaTime;
-            if (zone.interactionTimers.sun > 0.2) {
-                if (zone.needs) zone.needs.addSun();
-                zone.interactionTimers.sun = 0;
-                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
-            }
-        }
 
         let targetPot = null;
         let minDist = Infinity;

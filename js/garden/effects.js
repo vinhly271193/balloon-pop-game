@@ -183,7 +183,6 @@ class HintArrow {
         this.colors = {
             seed_to_pot: '#F5DEB3',   // warm wheat
             water_to_pot: '#87CEEB',  // light blue
-            sun_to_pot: '#FFD700',    // soft gold
             food_to_pot: '#90EE90',   // light green
             harvest: '#FFDAB9'        // soft peach
         };
@@ -192,7 +191,6 @@ class HintArrow {
         this.tooltips = {
             seed_to_pot: 'Grab the seed and place it in the pot!',
             water_to_pot: 'Your plant is thirsty! Use the watering can!',
-            sun_to_pot: 'Your plant needs sunlight! Touch the sun!',
             food_to_pot: 'Feed your plant! Grab the fertilizer!',
             harvest: 'Your plant is ready! Touch it to harvest!'
         };

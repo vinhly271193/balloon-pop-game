@@ -4,20 +4,18 @@
  * Writes nothing back.
  *
  * Draw order (back to front):
+ *  0. Sky gradient + sun sprite (sunCycle)
  *  1. Competitive divider (when mode === 'competitive')
- *  2. Sun areas per zone
- *  3. Plant pots and plants per zone
- *  4. Seeds and tools at home positions per zone
- *  5. Golden watering cans per zone
- *  6. Active power-ups
- *  7. Needs bars per zone (only when a pot is growing)
- *  8. Return-to-home beacons for held items
- *  9. Magic pumpkin (co-op only)
- * 10. Confetti particles
- * 11. Hint arrows
- * 12. Instructions
- *
- * Phase 5 will replace steps 2 and 12 once sunCycle is fully wired.
+ *  2. Plant pots and plants per zone
+ *  3. Seeds and tools at home positions per zone
+ *  4. Golden watering cans per zone
+ *  5. Active power-ups
+ *  6. Needs bars per zone (only when a pot is growing)
+ *  7. Return-to-home beacons for held items
+ *  8. Magic pumpkin (co-op only)
+ *  9. Confetti particles
+ * 10. Hint arrows
+ * 11. Instructions
  */
 
 class GardenRenderer {
@@ -26,14 +24,33 @@ class GardenRenderer {
      * @param {CanvasRenderingContext2D} ctx
      */
     draw(ctx) {
-        if (gardenState.mode === 'competitive' && gardenState.dividerX) {
-            this._drawDivider(ctx);
+        // Sky gradient
+        if (typeof sunCycle !== 'undefined') {
+            ctx.save();
+            ctx.fillStyle = sunCycle.getSkyGradient(ctx, ctx.canvas.width, ctx.canvas.height);
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.restore();
+
+            // Sun sprite
+            const sun = sunCycle.getSunPosition(ctx.canvas.width, ctx.canvas.height);
+            ctx.save();
+            const grad = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.radius * 2);
+            grad.addColorStop(0, 'rgba(255, 240, 180, 0.95)');
+            grad.addColorStop(0.5, 'rgba(255, 210, 120, 0.6)');
+            grad.addColorStop(1, 'rgba(255, 180, 80, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(sun.x, sun.y, sun.radius * 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 240, 180, 1)';
+            ctx.beginPath();
+            ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         }
 
-        // Sun areas (per zone)
-        for (const zk of gardenBed.getZoneKeys()) {
-            const sunArea = gardenBed.getZoneSunArea(zk);
-            if (sunArea) sunArea.draw(ctx);
+        if (gardenState.mode === 'competitive' && gardenState.dividerX) {
+            this._drawDivider(ctx);
         }
 
         // Plant pots (all zones)
@@ -221,7 +238,7 @@ class GardenRenderer {
         } else if (anyPotHarvestable) {
             drawUnmirroredText(ctx, 'Your plant is ready! Touch it to harvest!', ctx.canvas.width / 2, instructionY);
         } else {
-            drawUnmirroredText(ctx, 'Keep your plant healthy - water it, give it sun and food!', ctx.canvas.width / 2, instructionY);
+            drawUnmirroredText(ctx, 'Keep your plant healthy - water it and give it food!', ctx.canvas.width / 2, instructionY);
         }
 
         ctx.restore();

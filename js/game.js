@@ -934,6 +934,13 @@ class Game {
                 this.gardenBed.setPlayerIdleTime(2, ddaEngine.players[2].idleTime);
             }
 
+            // Advance sun cycle (sunrise at round start, sunset at round end)
+            if (typeof sunCycle !== 'undefined' && this.currentChallenge) {
+                const roundDuration = this.currentChallenge.timeLimit || 60;
+                const elapsed = roundDuration - (this.timeRemaining || 0);
+                sunCycle.update(elapsed, roundDuration);
+            }
+
             // Update garden (handles needs, growth, etc.)
             this.gardenBed.update(deltaTime);
 

@@ -104,12 +104,6 @@ class GardenBed {
         return zone ? zone.tools.fertilizerBag : null;
     }
 
-    /** Get sun area for a zone */
-    getZoneSunArea(zoneKey) {
-        const zone = gardenState.getZone(zoneKey);
-        return zone ? zone.tools.sunArea : null;
-    }
-
     // ── Internal zone setup helpers ───────────────────────────────
 
     /**
@@ -132,11 +126,10 @@ class GardenBed {
         const needs = new PlantNeeds();
         const wateringCan = new WateringCan(canvasWidth - 150, canvasHeight - 150, this.canvas);
         const fertilizerBag = new FertilizerBag(150, canvasHeight - 150, this.canvas);
-        const sunArea = new SunArea(canvasWidth - 150, 200);
 
         gardenState.initZone('shared', {
             pots,
-            tools: { seed: null, wateringCan, fertilizerBag, sunArea },
+            tools: { seed: null, wateringCan, fertilizerBag },
             needs,
         });
 
@@ -156,11 +149,10 @@ class GardenBed {
         const p1Needs = new PlantNeeds();
         const p1WateringCan = new WateringCan(this.canvas.width - 100, canvasHeight - 150, this.canvas);
         const p1Fertilizer = new FertilizerBag(divX + 80, canvasHeight - 150, this.canvas);
-        const p1Sun = new SunArea(this.canvas.width - 100, 200);
 
         gardenState.initZone('p1', {
             pots: [p1Pot],
-            tools: { seed: null, wateringCan: p1WateringCan, fertilizerBag: p1Fertilizer, sunArea: p1Sun },
+            tools: { seed: null, wateringCan: p1WateringCan, fertilizerBag: p1Fertilizer },
             needs: p1Needs,
         });
 
@@ -170,11 +162,10 @@ class GardenBed {
         const p2Needs = new PlantNeeds();
         const p2WateringCan = new WateringCan(100, canvasHeight - 150, this.canvas);
         const p2Fertilizer = new FertilizerBag(divX - 80, canvasHeight - 150, this.canvas);
-        const p2Sun = new SunArea(100, 200);
 
         gardenState.initZone('p2', {
             pots: [p2Pot],
-            tools: { seed: null, wateringCan: p2WateringCan, fertilizerBag: p2Fertilizer, sunArea: p2Sun },
+            tools: { seed: null, wateringCan: p2WateringCan, fertilizerBag: p2Fertilizer },
             needs: p2Needs,
         });
 
@@ -261,16 +252,12 @@ class GardenBed {
         const fertilizer = this.getZoneFertilizer(zoneKey);
         if (fertilizer) fertilizer.hitRadius = 50 * hitBoxMultiplier;
 
-        const sunArea = this.getZoneSunArea(zoneKey);
-        if (sunArea) sunArea.radius = 120 * hitBoxMultiplier;
-
         const seed = this.getZoneSeed(zoneKey);
         if (seed) seed.hitRadius = 50 * hitBoxMultiplier;
 
         const needs = this.getZoneNeeds(zoneKey);
         if (needs) {
             needs.waterDepleteRate = 0.03 * seedSpeed;
-            needs.sunDepleteRate = 0.02 * seedSpeed;
             needs.foodDepleteRate = 0.025 * seedSpeed;
         }
     }
@@ -292,7 +279,6 @@ class GardenBed {
         const seed = this.getZoneSeed(zoneKey);
         const wateringCan = this.getZoneWateringCan(zoneKey);
         const fertilizerBag = this.getZoneFertilizer(zoneKey);
-        const sunArea = this.getZoneSunArea(zoneKey);
         const needs = this.getZoneNeeds(zoneKey);
 
         if (pot.growthStage === GrowthStage.EMPTY && seed && !seed.isPlanted) {
@@ -315,7 +301,6 @@ class GardenBed {
             const needLevels = [
                 { type: 'water_to_pot', value: needs.water, tool: wateringCan },
                 { type: 'food_to_pot', value: needs.food, tool: fertilizerBag },
-                { type: 'sun_to_pot', value: needs.sun, tool: sunArea }
             ];
 
             const critical = needLevels
@@ -437,6 +422,8 @@ class GardenBed {
         }
 
         // Update needs and plant growth
+        const growthMult = typeof sunCycle !== 'undefined' ? sunCycle.getGrowthMultiplier() : 1;
+
         if (gardenState.mode === 'competitive') {
             for (const zk of this.getZoneKeys()) {
                 const zone = gardenState.getZone(zk);
@@ -447,7 +434,7 @@ class GardenBed {
                 if (pot.growthStage !== GrowthStage.EMPTY && needs) {
                     needs.update(deltaTime);
                     const satisfaction = needs.getAverageSatisfaction();
-                    pot.updateGrowth(satisfaction, deltaTime);
+                    pot.updateGrowth(satisfaction, deltaTime, growthMult);
                     pot.waterLevelTarget = needs.water;
                 }
                 pot.update(deltaTime);
@@ -463,7 +450,7 @@ class GardenBed {
                             needsUpdated = true;
                         }
                         const satisfaction = zone.needs.getAverageSatisfaction();
-                        pot.updateGrowth(satisfaction, deltaTime);
+                        pot.updateGrowth(satisfaction, deltaTime, growthMult);
                         pot.waterLevelTarget = zone.needs.water;
                     }
                     pot.update(deltaTime);
@@ -471,9 +458,8 @@ class GardenBed {
             }
         }
 
-        // Update sun areas and watering cans (per zone)
+        // Update watering cans (per zone)
         for (const zk of this.getZoneKeys()) {
-            this.getZoneSunArea(zk).update(deltaTime);
             this.getZoneWateringCan(zk).update(deltaTime);
         }
 
@@ -578,7 +564,6 @@ class GardenBed {
             const needs = this.getZoneNeeds(zk);
             if (needs) {
                 needs.waterDepleteRate = 0.03 * modifier;
-                needs.sunDepleteRate = 0.02 * modifier;
                 needs.foodDepleteRate = 0.025 * modifier;
             }
         }
