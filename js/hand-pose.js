@@ -13,10 +13,15 @@ const HandPose = {
 
     /**
      * Classify a single hand as 'open' or 'closed' from its 21-landmark array.
-     * landmarks[0] is the wrist. Fingertips are 4, 8, 12, 16, 20. MCP joints are 5, 9, 13, 17.
+     * landmarks[0] is the wrist. Landmark 9 is the palm centre (middle-finger MCP).
+     * Fingertips are 4, 8, 12, 16, 20. MCP joints are 5, 9, 13, 17.
      *
-     * Strategy: average fingertip-to-palm distance, normalised by palm width.
-     * Open hand: ratio > OPEN_RATIO. Closed hand: ratio < CLOSED_RATIO. In between: stay where you were.
+     * Strategy: average fingertip-to-palm-centre distance, normalised by palm width.
+     * The thumb (landmark 4) is excluded because its distance to the palm centre
+     * barely changes between an open hand and a closed fist.
+     *
+     * Open hand: ratio > OPEN_RATIO. Closed hand: ratio < CLOSED_RATIO.
+     * Inside the band: stay where you were (hysteresis).
      *
      * @param {Array<{x:number,y:number,z:number}>} landmarks
      * @param {'open'|'closed'|null} prev previous classification for hysteresis
@@ -24,16 +29,17 @@ const HandPose = {
      */
     classify(landmarks, prev) {
         if (!landmarks || landmarks.length < 21) return prev || 'open';
-        const wrist = landmarks[0];
+        const palm = landmarks[9];
         const indexMCP = landmarks[5];
         const pinkyMCP = landmarks[17];
+        // Floor at 0.001 so a degenerate frame (both MCPs collapsed) does not divide by zero.
         const palmWidth = Math.hypot(indexMCP.x - pinkyMCP.x, indexMCP.y - pinkyMCP.y) || 0.001;
 
         const tipIds = [8, 12, 16, 20];
         let sum = 0;
         for (const id of tipIds) {
             const tip = landmarks[id];
-            const d = Math.hypot(tip.x - wrist.x, tip.y - wrist.y);
+            const d = Math.hypot(tip.x - palm.x, tip.y - palm.y);
             sum += d;
         }
         const avgTipDist = sum / tipIds.length;
