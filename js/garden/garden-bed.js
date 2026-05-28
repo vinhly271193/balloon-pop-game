@@ -437,7 +437,7 @@ class GardenBed {
                     pot.updateGrowth(satisfaction, deltaTime, growthMult);
                     pot.waterLevelTarget = needs.water;
                 }
-                pot.update(deltaTime);
+                pot.update(deltaTime, zone.needs);
             }
         } else {
             const zone = gardenState.getZone('shared');
@@ -453,7 +453,7 @@ class GardenBed {
                         pot.updateGrowth(satisfaction, deltaTime, growthMult);
                         pot.waterLevelTarget = zone.needs.water;
                     }
-                    pot.update(deltaTime);
+                    pot.update(deltaTime, zone.needs);
                 }
             }
         }
