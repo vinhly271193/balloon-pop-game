@@ -1,95 +1,37 @@
 /**
  * Garden System - Garden Bed
- * Main Garden manager that coordinates all garden elements
+ * Main Garden manager that coordinates all garden elements.
+ * State fields are held on gardenState; this class delegates reads and writes.
  */
 
-
-/**
- * Main Garden manager - coordinates all garden elements
- */
 class GardenBed {
     constructor(canvas) {
         this.canvas = canvas;
 
-        // Round generation counter — prevents stale setTimeout callbacks after round ends
-        this.roundGeneration = 0;
-
         // Cached deltaTime for use in collision handlers (which don't receive deltaTime)
         this.lastDeltaTime = 0.016;
 
-        // Multi-player configuration
-        this.playerCount = 1;
-        this.gameMode = 'coop'; // 'coop' or 'competitive'
-        this.dividerX = null;
-
-        // Position elements (default single player / co-op layout)
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height - 150; // Bottom toolbar row
-
-        // Plant pots (will be configured based on mode)
-        this.plantPots = [];
-        this.plantPot = new PlantPot(centerX, centerY, canvas); // Default for single player
-        this.plantPots.push(this.plantPot);
-
-        // Plant needs (per player in competitive, shared in co-op)
-        this.plantNeedsMap = new Map();
-        this.plantNeeds = new PlantNeeds(); // Default for single player
-        this.plantNeedsMap.set('shared', this.plantNeeds);
-
-        // Tools and seeds (per zone in competitive, shared in co-op)
-        this.seedsMap = new Map();
-        this.wateringCansMap = new Map();
-        this.fertilizerBagsMap = new Map();
-        this.sunAreasMap = new Map();
-
-        // Default shared tools
-        this.seed = null;
-        this.wateringCan = new WateringCan(canvas.width - 150, canvas.height - 150, canvas);
-        this.fertilizerBag = new FertilizerBag(150, canvas.height - 150, canvas);
-        this.sunArea = new SunArea(canvas.width - 150, 200); // Just below progress bar
-
-        this.wateringCansMap.set('shared', this.wateringCan);
-        this.fertilizerBagsMap.set('shared', this.fertilizerBag);
-        this.sunAreasMap.set('shared', this.sunArea);
-
-        // Currently held items (per player)
-        this.heldItemsMap = new Map();
-        this.heldItem = null; // Default for single player
-        this.heldItemHand = null; // Track which physical hand holds the item
-
-        // Available seeds
-        this.availableSeeds = [];
+        // Available seeds rotation index
         this.currentSeedIndex = 0;
-
-        // Spawn initial seed
-        this.spawnNewSeed('shared');
-
-        // Interaction timers (per player)
-        this.sunInteractionTimeMap = new Map();
-        this.waterInteractionTimeMap = new Map();
-        this.foodInteractionTimeMap = new Map();
-
-        this.sunInteractionTime = 0;
-        this.waterInteractionTime = 0;
-        this.foodInteractionTime = 0;
-
-        // DDA modifiers per player
-        this.ddaModifiers = new Map();
-        this.ddaModifiers.set(1, { seedSpeed: 1, hitBoxMultiplier: 1 });
-        this.ddaModifiers.set(2, { seedSpeed: 1, hitBoxMultiplier: 1 });
 
         // Magic pumpkin (co-op only)
         this.magicPumpkin = null;
         this.pumpkinActivated = false;
         this.pumpkinSpawnTimer = 0;
-        this.pumpkinSpawnInterval = 35; // 35 seconds average
+        this.pumpkinSpawnInterval = 35;
 
-        // Golden watering cans (competitive mode)
+        // Golden watering cans (competitive mode) — also mirrored into zone.goldenWateringCan
         this.goldenWateringCans = new Map();
 
         // Power-ups (competitive mode — DDA-driven spawning)
-        this.activePowerUps = new Map(); // key: playerId (1 or 2), value: PowerUp instance
-        this.powerUpCooldown = 0;        // seconds until next power-up can spawn
+        // dda.js reads these directly so they stay on this.
+        this.activePowerUps = new Map();
+        this.powerUpCooldown = 0;
+
+        // DDA modifiers per player
+        this.ddaModifiers = new Map();
+        this.ddaModifiers.set(1, { seedSpeed: 1, hitBoxMultiplier: 1 });
+        this.ddaModifiers.set(2, { seedSpeed: 1, hitBoxMultiplier: 1 });
 
         // Confetti particles
         this.confettiParticles = [];
@@ -103,82 +45,167 @@ class GardenBed {
         this.hintArrows.set('shared', new HintArrow());
         this.hintArrows.set(1, new HintArrow());
         this.hintArrows.set(2, new HintArrow());
-        this.hintIdleThreshold = 5; // seconds before showing tooltip hints
+        this.hintIdleThreshold = 5;
         this.hintPlayerIdleTime = new Map();
 
         // Return-to-home drop beacon animation timer
         this.returnBeaconPulse = 0;
+
+        // Default single player setup (configure() overwrites this before first round)
+        gardenState.setMode('coop', 1);
+        gardenState.dividerX = null;
+        this._setupCoopZone(1);
     }
+
+    // ── Proxy accessors for mode state ──────────────────────────────
+
+    get gameMode()       { return gardenState.mode; }
+    get playerCount()    { return gardenState.playerCount; }
+    get dividerX()       { return gardenState.dividerX; }
+    set dividerX(v)      { gardenState.dividerX = v; }
+    get roundGeneration(){ return gardenState.roundGeneration; }
 
     // ── Zone abstraction helpers ──────────────────────────────────
 
     /** Returns zone keys for the current game mode */
     getZoneKeys() {
-        return this.gameMode === 'competitive' ? [1, 2] : ['shared'];
+        return gardenState.mode === 'competitive' ? [1, 2] : ['shared'];
     }
 
     /** Get plant needs for a zone */
     getZoneNeeds(zoneKey) {
-        return this.plantNeedsMap.get(zoneKey) || this.plantNeeds;
+        const zone = gardenState.getZone(zoneKey);
+        return zone ? zone.needs : null;
     }
 
     /** Get plant pot for a zone */
     getZonePot(zoneKey) {
-        if (this.gameMode === 'competitive') return this.plantPots[zoneKey - 1];
-        return this.plantPots[0];
+        if (gardenState.mode === 'competitive') {
+            const zone = gardenState.getZone(zoneKey);
+            return zone ? zone.pots[0] : null;
+        }
+        const zone = gardenState.getZone('shared');
+        return zone ? zone.pots[0] : null;
     }
 
     /** Get seed for a zone */
     getZoneSeed(zoneKey) {
-        return this.seedsMap.get(zoneKey) || this.seed;
+        const zone = gardenState.getZone(zoneKey);
+        return zone ? zone.tools.seed : null;
     }
 
     /** Get watering can for a zone */
     getZoneWateringCan(zoneKey) {
-        return this.wateringCansMap.get(zoneKey) || this.wateringCan;
+        const zone = gardenState.getZone(zoneKey);
+        return zone ? zone.tools.wateringCan : null;
     }
 
     /** Get fertilizer bag for a zone */
     getZoneFertilizer(zoneKey) {
-        return this.fertilizerBagsMap.get(zoneKey) || this.fertilizerBag;
+        const zone = gardenState.getZone(zoneKey);
+        return zone ? zone.tools.fertilizerBag : null;
     }
 
     /** Get sun area for a zone */
     getZoneSunArea(zoneKey) {
-        return this.sunAreasMap.get(zoneKey) || this.sunArea;
+        const zone = gardenState.getZone(zoneKey);
+        return zone ? zone.tools.sunArea : null;
+    }
+
+    // ── Internal zone setup helpers ───────────────────────────────
+
+    /**
+     * Set up the 'shared' zone used by coop and solo modes.
+     * @param {number} playerCount
+     */
+    _setupCoopZone(playerCount) {
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
+
+        const potCount = playerCount === 2 ? 2 : 3;
+        const spacing = canvasWidth / (potCount + 1);
+        const potY = canvasHeight - 150;
+
+        const pots = [];
+        for (let i = 0; i < potCount; i++) {
+            pots.push(new PlantPot(spacing * (i + 1), potY, this.canvas));
+        }
+
+        const needs = new PlantNeeds();
+        const wateringCan = new WateringCan(canvasWidth - 150, canvasHeight - 150, this.canvas);
+        const fertilizerBag = new FertilizerBag(150, canvasHeight - 150, this.canvas);
+        const sunArea = new SunArea(canvasWidth - 150, 200);
+
+        gardenState.initZone('shared', {
+            pots,
+            tools: { seed: null, wateringCan, fertilizerBag, sunArea },
+            needs,
+        });
+
+        this.spawnNewSeed('shared');
+    }
+
+    /**
+     * Set up competitive zones for player 1 and player 2.
+     */
+    _setupCompetitiveZones() {
+        const canvasHeight = this.canvas.height;
+        const divX = gardenState.dividerX;
+
+        // Player 1 zone (right side)
+        const p1CenterX = divX + (this.canvas.width - divX) / 2;
+        const p1Pot = new PlantPot(p1CenterX, canvasHeight - 150, this.canvas);
+        const p1Needs = new PlantNeeds();
+        const p1WateringCan = new WateringCan(this.canvas.width - 100, canvasHeight - 150, this.canvas);
+        const p1Fertilizer = new FertilizerBag(divX + 80, canvasHeight - 150, this.canvas);
+        const p1Sun = new SunArea(this.canvas.width - 100, 200);
+
+        gardenState.initZone(1, {
+            pots: [p1Pot],
+            tools: { seed: null, wateringCan: p1WateringCan, fertilizerBag: p1Fertilizer, sunArea: p1Sun },
+            needs: p1Needs,
+        });
+
+        // Player 2 zone (left side)
+        const p2CenterX = divX / 2;
+        const p2Pot = new PlantPot(p2CenterX, canvasHeight - 150, this.canvas);
+        const p2Needs = new PlantNeeds();
+        const p2WateringCan = new WateringCan(100, canvasHeight - 150, this.canvas);
+        const p2Fertilizer = new FertilizerBag(divX - 80, canvasHeight - 150, this.canvas);
+        const p2Sun = new SunArea(100, 200);
+
+        gardenState.initZone(2, {
+            pots: [p2Pot],
+            tools: { seed: null, wateringCan: p2WateringCan, fertilizerBag: p2Fertilizer, sunArea: p2Sun },
+            needs: p2Needs,
+        });
+
+        this.spawnNewSeed(1);
+        this.spawnNewSeed(2);
     }
 
     // ── Configuration ──────────────────────────────────────────
 
     /**
-     * Configure garden for multi-player
+     * Configure garden for multi-player.
+     * Called from game.js before each round starts.
      */
     configure({ playerCount, gameMode, dividerX }) {
-        this.roundGeneration++;
-        this.playerCount = playerCount || 1;
-        this.gameMode = gameMode || 'coop';
-        this.dividerX = dividerX || null;
+        gardenState.reset();                                    // increments roundGeneration, clears zones
+        gardenState.setMode(gameMode || 'coop', playerCount || 1);
+        gardenState.dividerX = dividerX || null;
 
-        // Clear existing setup
-        this.plantPots = [];
-        this.plantNeedsMap.clear();
-        this.seedsMap.clear();
-        this.wateringCansMap.clear();
-        this.fertilizerBagsMap.clear();
-        this.sunAreasMap.clear();
-        this.heldItemsMap.clear();
+        // Clear competitive-mode collections
         this.goldenWateringCans.clear();
 
-        if (this.gameMode === 'competitive' && this.dividerX) {
-            // Competitive mode - split zones
-            this.setupCompetitiveMode();
+        if (gardenState.mode === 'competitive' && gardenState.dividerX) {
+            this._setupCompetitiveZones();
         } else {
-            // Co-op or single player - shared garden
-            this.setupCoopMode();
+            this._setupCoopZone(gardenState.playerCount);
         }
 
-        // Setup magic pumpkin for co-op mode
-        if (this.gameMode === 'coop' && this.playerCount === 2) {
+        // Set up magic pumpkin for co-op mode
+        if (gardenState.mode === 'coop' && gardenState.playerCount === 2) {
             this.magicPumpkin = new MagicPumpkin(this.canvas);
             this.pumpkinSpawnTimer = 0;
         } else {
@@ -187,123 +214,9 @@ class GardenBed {
     }
 
     /**
-     * Setup co-op mode (shared garden)
-     */
-    setupCoopMode() {
-        const canvasWidth = this.canvas.width;
-        const canvasHeight = this.canvas.height;
-
-        // 2-3 plant pots spread across width, on bottom toolbar row
-        const potCount = this.playerCount === 2 ? 2 : 3;
-        const spacing = canvasWidth / (potCount + 1);
-        const potY = canvasHeight - 150;
-
-        for (let i = 0; i < potCount; i++) {
-            const pot = new PlantPot(
-                spacing * (i + 1),
-                potY,
-                this.canvas
-            );
-            this.plantPots.push(pot);
-        }
-
-        // Default to first pot for backwards compatibility
-        this.plantPot = this.plantPots[0];
-
-        // Shared plant needs
-        this.plantNeeds = new PlantNeeds();
-        this.plantNeedsMap.set('shared', this.plantNeeds);
-
-        // Shared tools
-        this.wateringCan = new WateringCan(canvasWidth - 150, canvasHeight - 150, this.canvas);
-        this.fertilizerBag = new FertilizerBag(150, canvasHeight - 150, this.canvas);
-        this.sunArea = new SunArea(canvasWidth - 150, 200); // Just below progress bar
-
-        this.wateringCansMap.set('shared', this.wateringCan);
-        this.fertilizerBagsMap.set('shared', this.fertilizerBag);
-        this.sunAreasMap.set('shared', this.sunArea);
-
-        // Spawn seed
-        this.spawnNewSeed('shared');
-
-        // Initialize interaction timers
-        this.sunInteractionTime = 0;
-        this.waterInteractionTime = 0;
-        this.foodInteractionTime = 0;
-    }
-
-    /**
-     * Setup competitive mode (split zones)
-     */
-    setupCompetitiveMode() {
-        const canvasHeight = this.canvas.height;
-
-        // Player 1 zone (right side, mirrored)
-        const p1CenterX = this.dividerX + (this.canvas.width - this.dividerX) / 2;
-        const p1Pot = new PlantPot(p1CenterX, canvasHeight - 150, this.canvas);
-        this.plantPots.push(p1Pot);
-
-        const p1Needs = new PlantNeeds();
-        this.plantNeedsMap.set(1, p1Needs);
-
-        const p1WateringCan = new WateringCan(
-            this.canvas.width - 100,
-            canvasHeight - 150,
-            this.canvas
-        );
-        const p1Fertilizer = new FertilizerBag(
-            this.dividerX + 80,
-            canvasHeight - 150,
-            this.canvas
-        );
-        const p1Sun = new SunArea(this.canvas.width - 100, 200);
-
-        this.wateringCansMap.set(1, p1WateringCan);
-        this.fertilizerBagsMap.set(1, p1Fertilizer);
-        this.sunAreasMap.set(1, p1Sun);
-
-        // Player 2 zone (left side, mirrored)
-        const p2CenterX = this.dividerX / 2;
-        const p2Pot = new PlantPot(p2CenterX, canvasHeight - 150, this.canvas);
-        this.plantPots.push(p2Pot);
-
-        const p2Needs = new PlantNeeds();
-        this.plantNeedsMap.set(2, p2Needs);
-
-        const p2WateringCan = new WateringCan(
-            100,
-            canvasHeight - 150,
-            this.canvas
-        );
-        const p2Fertilizer = new FertilizerBag(
-            this.dividerX - 80,
-            canvasHeight - 150,
-            this.canvas
-        );
-        const p2Sun = new SunArea(100, 200);
-
-        this.wateringCansMap.set(2, p2WateringCan);
-        this.fertilizerBagsMap.set(2, p2Fertilizer);
-        this.sunAreasMap.set(2, p2Sun);
-
-        // Spawn seeds for both players
-        this.spawnNewSeed(1);
-        this.spawnNewSeed(2);
-
-        // Initialize interaction timers for both players
-        this.sunInteractionTimeMap.set(1, 0);
-        this.sunInteractionTimeMap.set(2, 0);
-        this.waterInteractionTimeMap.set(1, 0);
-        this.waterInteractionTimeMap.set(2, 0);
-        this.foodInteractionTimeMap.set(1, 0);
-        this.foodInteractionTimeMap.set(2, 0);
-    }
-
-    /**
-     * Spawn a new seed packet
+     * Spawn a new seed packet into a zone.
      */
     spawnNewSeed(zoneKey = 'shared') {
-        // Use weighted random plant selection if available (challenge-aware)
         let plantType;
         if (typeof game !== 'undefined' && game.getWeightedRandomPlant) {
             plantType = game.getWeightedRandomPlant();
@@ -315,11 +228,12 @@ class GardenBed {
 
         let seedX, seedY;
 
-        if (this.gameMode === 'competitive') {
+        if (gardenState.mode === 'competitive') {
+            const divX = gardenState.dividerX;
             if (zoneKey === 1) {
-                seedX = this.dividerX + (this.canvas.width - this.dividerX) / 2;
+                seedX = divX + (this.canvas.width - divX) / 2;
             } else if (zoneKey === 2) {
-                seedX = this.dividerX / 2;
+                seedX = divX / 2;
             }
             seedY = 100;
         } else {
@@ -328,23 +242,20 @@ class GardenBed {
         }
 
         const newSeed = new DraggableSeed(seedX, seedY, plantType, this.canvas);
-
-        if (zoneKey === 'shared') {
-            this.seed = newSeed;
+        const zone = gardenState.getZone(zoneKey);
+        if (zone) {
+            zone.tools.seed = newSeed;
         }
-        this.seedsMap.set(zoneKey, newSeed);
     }
 
     /**
-     * Apply DDA (Dynamic Difficulty Adjustment)
+     * Apply DDA (Dynamic Difficulty Adjustment).
      */
     applyDDA(playerId, { seedSpeed, hitBoxMultiplier }) {
         this.ddaModifiers.set(playerId, { seedSpeed, hitBoxMultiplier });
 
-        // Map playerId to the relevant zone key
-        const zoneKey = this.gameMode === 'competitive' ? playerId : 'shared';
-        // In co-op/solo, only apply DDA from player 1 (avoid double-applying)
-        if (this.gameMode !== 'competitive' && playerId !== 1) return;
+        const zoneKey = gardenState.mode === 'competitive' ? playerId : 'shared';
+        if (gardenState.mode !== 'competitive' && playerId !== 1) return;
 
         const pot = this.getZonePot(zoneKey);
         if (pot) pot.hitRadius = 80 * hitBoxMultiplier;
@@ -370,15 +281,14 @@ class GardenBed {
     }
 
     /**
-     * Set player idle time (called from game loop with DDA data)
+     * Set player idle time (called from game loop with DDA data).
      */
     setPlayerIdleTime(playerId, idleTime) {
         this.hintPlayerIdleTime.set(playerId, idleTime);
     }
 
     /**
-     * Determine what hint to show for a given zone
-     * Returns { fromX, fromY, toX, toY, hintType } or null
+     * Determine what hint to show for a given zone.
      */
     determineHintForZone(zoneKey) {
         const pot = this.getZonePot(zoneKey);
@@ -390,7 +300,6 @@ class GardenBed {
         const sunArea = this.getZoneSunArea(zoneKey);
         const needs = this.getZoneNeeds(zoneKey);
 
-        // Phase 1: Empty pot + seed exists → arrow from seed to pot
         if (pot.growthStage === GrowthStage.EMPTY && seed && !seed.isPlanted) {
             return {
                 fromX: seed.homeX, fromY: seed.homeY,
@@ -399,7 +308,6 @@ class GardenBed {
             };
         }
 
-        // Phase 2: Harvestable → pulsing ring on pot
         if (pot.growthStage === GrowthStage.HARVESTABLE) {
             return {
                 fromX: pot.x, fromY: pot.y,
@@ -408,7 +316,6 @@ class GardenBed {
             };
         }
 
-        // Phase 3: Growing plant with needs → arrow from lowest-need tool to pot
         if (pot.growthStage !== GrowthStage.EMPTY && needs) {
             const needLevels = [
                 { type: 'water_to_pot', value: needs.water, tool: wateringCan },
@@ -416,7 +323,6 @@ class GardenBed {
                 { type: 'sun_to_pot', value: needs.sun, tool: sunArea }
             ];
 
-            // Find lowest need below 50%
             const critical = needLevels
                 .filter(n => n.value < 0.5 && n.tool)
                 .sort((a, b) => a.value - b.value)[0];
@@ -436,21 +342,19 @@ class GardenBed {
     }
 
     /**
-     * Update hint arrows based on player idle times
+     * Update hint arrows based on player idle times.
      */
     updateHints(deltaTime) {
-        const zones = this.gameMode === 'competitive' ? [1, 2] : ['shared'];
+        const zones = this.getZoneKeys();
 
         for (const zone of zones) {
             const arrow = this.hintArrows.get(zone);
             if (!arrow) continue;
 
-            // Determine idle time for this zone
             let idleTime;
-            if (this.gameMode === 'competitive') {
+            if (gardenState.mode === 'competitive') {
                 idleTime = this.hintPlayerIdleTime.get(zone) || 0;
             } else {
-                // Coop/solo: hint only if ALL tracked players are idle
                 const times = [...this.hintPlayerIdleTime.values()];
                 idleTime = times.length > 0 ? Math.min(...times) : 0;
             }
@@ -471,46 +375,49 @@ class GardenBed {
     }
 
     /**
-     * Show golden watering can for a player
+     * Show golden watering can for a player (competitive mode only).
      */
     showGoldenWateringCan(playerId) {
-        if (this.gameMode !== 'competitive') return;
+        if (gardenState.mode !== 'competitive') return;
 
         let goldenCanX, goldenCanY;
 
         if (playerId === 1) {
-            goldenCanX = this.dividerX + (this.canvas.width - this.dividerX) / 2;
+            const divX = gardenState.dividerX;
+            goldenCanX = divX + (this.canvas.width - divX) / 2;
             goldenCanY = this.canvas.height / 2;
         } else if (playerId === 2) {
-            goldenCanX = this.dividerX / 2;
+            goldenCanX = gardenState.dividerX / 2;
             goldenCanY = this.canvas.height / 2;
         }
 
         const goldenCan = new WateringCan(goldenCanX, goldenCanY, this.canvas, true);
         this.goldenWateringCans.set(playerId, goldenCan);
+
+        // Mirror into zone state
+        const zone = gardenState.getZone(playerId);
+        if (zone) zone.goldenWateringCan = goldenCan;
     }
 
     /**
-     * Spawn a random power-up in the given player's zone (competitive only)
-     * @param {number} playerId - 1 or 2
+     * Spawn a random power-up in the given player's zone (competitive only).
      */
     showPowerUp(playerId) {
-        if (this.activePowerUps.has(playerId)) return; // already one active for this player
+        if (this.activePowerUps.has(playerId)) return;
 
         const types = [InstantGrowth, DoublePoints, RainShower];
         const PowerUpClass = types[Math.floor(Math.random() * types.length)];
 
-        // Place in the correct half of the competitive layout
         const zoneX = playerId === 1
-            ? this.canvas.width * 0.75   // right zone (Player 1)
-            : this.canvas.width * 0.25;  // left zone  (Player 2)
+            ? this.canvas.width * 0.75
+            : this.canvas.width * 0.25;
         const y = this.canvas.height * 0.3 + Math.random() * this.canvas.height * 0.3;
 
         this.activePowerUps.set(playerId, new PowerUpClass(zoneX, y, this.canvas));
     }
 
     /**
-     * Spawn confetti particles
+     * Spawn confetti particles.
      */
     spawnConfetti(x, y, count = 50) {
         for (let i = 0; i < count; i++) {
@@ -519,7 +426,7 @@ class GardenBed {
     }
 
     /**
-     * Update all garden elements
+     * Update all garden elements.
      */
     update(deltaTime) {
         this.lastDeltaTime = deltaTime;
@@ -531,40 +438,40 @@ class GardenBed {
                 this.timerPaused = false;
                 this.timerPauseDuration = 0;
             }
-            // Continue other updates even when timer is paused
         }
 
         // Update needs and plant growth
-        if (this.gameMode === 'competitive') {
-            for (let i = 0; i < this.plantPots.length; i++) {
-                const pot = this.plantPots[i];
-                const playerId = i + 1;
-                const needs = this.plantNeedsMap.get(playerId);
+        if (gardenState.mode === 'competitive') {
+            for (const zk of this.getZoneKeys()) {
+                const zone = gardenState.getZone(zk);
+                if (!zone) continue;
+                const pot = zone.pots[0];
+                const needs = zone.needs;
 
                 if (pot.growthStage !== GrowthStage.EMPTY && needs) {
                     needs.update(deltaTime);
                     const satisfaction = needs.getAverageSatisfaction();
                     pot.updateGrowth(satisfaction, deltaTime);
-                    // Sync water level to pot
                     pot.waterLevelTarget = needs.water;
                 }
                 pot.update(deltaTime);
             }
         } else {
-            // Co-op/single player — update needs once, then apply to all pots
-            let needsUpdated = false;
-            for (const pot of this.plantPots) {
-                if (pot.growthStage !== GrowthStage.EMPTY) {
-                    if (!needsUpdated) {
-                        this.plantNeeds.update(deltaTime);
-                        needsUpdated = true;
+            const zone = gardenState.getZone('shared');
+            if (zone) {
+                let needsUpdated = false;
+                for (const pot of zone.pots) {
+                    if (pot.growthStage !== GrowthStage.EMPTY) {
+                        if (!needsUpdated) {
+                            zone.needs.update(deltaTime);
+                            needsUpdated = true;
+                        }
+                        const satisfaction = zone.needs.getAverageSatisfaction();
+                        pot.updateGrowth(satisfaction, deltaTime);
+                        pot.waterLevelTarget = zone.needs.water;
                     }
-                    const satisfaction = this.plantNeeds.getAverageSatisfaction();
-                    pot.updateGrowth(satisfaction, deltaTime);
-                    // Sync water level to pot
-                    pot.waterLevelTarget = this.plantNeeds.water;
+                    pot.update(deltaTime);
                 }
-                pot.update(deltaTime);
             }
         }
 
@@ -588,13 +495,12 @@ class GardenBed {
         if (this.magicPumpkin) {
             this.magicPumpkin.update(deltaTime);
 
-            // Spawn pumpkin periodically
             if (!this.magicPumpkin.visible && !this.timerPaused) {
                 this.pumpkinSpawnTimer += deltaTime;
                 if (this.pumpkinSpawnTimer >= this.pumpkinSpawnInterval) {
                     this.magicPumpkin.show();
                     this.pumpkinSpawnTimer = 0;
-                    this.pumpkinSpawnInterval = 30 + Math.random() * 15; // 30-45 seconds
+                    this.pumpkinSpawnInterval = 30 + Math.random() * 15;
                 }
             }
         }
@@ -611,26 +517,27 @@ class GardenBed {
     }
 
     /**
-     * Handle hand interactions with per-player routing
+     * Handle hand interactions with per-player routing.
      */
     checkCollisions(handPositions) {
         const harvestedPlants = [];
 
         if (!handPositions || handPositions.length === 0) {
             // Release any held items
-            if (this.gameMode === 'competitive') {
-                this.heldItemsMap.forEach((item, playerId) => {
-                    if (item) {
-                        this.releaseItem(playerId);
+            if (gardenState.mode === 'competitive') {
+                for (const zk of this.getZoneKeys()) {
+                    const zone = gardenState.getZone(zk);
+                    if (zone && zone.heldItem) {
+                        this.releaseItem(zk);
                     }
-                });
+                }
             } else {
-                if (this.heldItem) {
-                    this.releaseItem();
+                const zone = gardenState.getZone('shared');
+                if (zone && zone.heldItem) {
+                    this.releaseItem('shared');
                 }
             }
 
-            // Clear pumpkin touches
             if (this.magicPumpkin) {
                 this.magicPumpkin.playerstouching.clear();
             }
@@ -648,25 +555,25 @@ class GardenBed {
             handsByPlayer.get(playerId).push(hand);
         });
 
-        if (this.gameMode === 'competitive') {
-            // Process each player's hands in their zone
+        if (gardenState.mode === 'competitive') {
             handsByPlayer.forEach((hands, playerId) => {
                 hands.forEach(hand => {
                     const zoneOwner = this.getZoneOwner(hand.x);
-                    const effectivePlayerId = zoneOwner; // Cross-zone assist
+                    const effectivePlayerId = zoneOwner;
 
                     const result = this.processHandInteraction(hand, effectivePlayerId);
                     if (result) {
                         const isTargetPlant = typeof challengeManager !== 'undefined' &&
                             challengeManager.currentChallenge &&
                             challengeManager.getTargetPlants().includes(result);
-                        const targetPotComp = this.plantPots[effectivePlayerId - 1];
+                        const zone = gardenState.getZone(effectivePlayerId);
+                        const targetPotComp = zone ? zone.pots[0] : null;
                         harvestedPlants.push({ plantKey: result, playerId: effectivePlayerId, isTargetPlant, growTime: targetPotComp && targetPotComp.plantedAt ? (Date.now() - targetPotComp.plantedAt) / 1000 : 30 });
                     }
                 });
             });
         } else {
-            // Solo/co-op - group all collision points by hand
+            // Solo/co-op — group all collision points by hand
             const handGroups = new Map();
             handPositions.forEach(pos => {
                 const handKey = pos.isLeft ? 'left' : 'right';
@@ -676,14 +583,15 @@ class GardenBed {
                 handGroups.get(handKey).push(pos);
             });
 
+            const sharedZone = gardenState.getZone('shared');
+
             // Release held item if the holding hand disappeared
-            if (this.heldItem && this.heldItemHand && !handGroups.has(this.heldItemHand)) {
-                this.releaseItem();
+            if (sharedZone && sharedZone.heldItem && sharedZone.heldItemHand && !handGroups.has(sharedZone.heldItemHand)) {
+                this.releaseItem('shared');
             }
 
             handGroups.forEach((points, handKey) => {
-                // If another hand is holding an item, only allow free-hand interactions
-                if (this.heldItem && this.heldItemHand && this.heldItemHand !== handKey) {
+                if (sharedZone && sharedZone.heldItem && sharedZone.heldItemHand && sharedZone.heldItemHand !== handKey) {
                     points.forEach(hand => {
                         const result = this.processFreeHandInteraction(hand);
                         if (result) {
@@ -691,7 +599,9 @@ class GardenBed {
                                 challengeManager.currentChallenge &&
                                 challengeManager.getTargetPlants().includes(result);
                             let closestPotFH = null, minDistFH = Infinity;
-                            this.plantPots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistFH) { minDistFH = d; closestPotFH = p; } });
+                            if (sharedZone) {
+                                sharedZone.pots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistFH) { minDistFH = d; closestPotFH = p; } });
+                            }
                             harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant, growTime: closestPotFH && closestPotFH.plantedAt ? (Date.now() - closestPotFH.plantedAt) / 1000 : 30 });
                         }
                     });
@@ -705,14 +615,16 @@ class GardenBed {
                             challengeManager.currentChallenge &&
                             challengeManager.getTargetPlants().includes(result);
                         let closestPotSH = null, minDistSH = Infinity;
-                        this.plantPots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistSH) { minDistSH = d; closestPotSH = p; } });
+                        if (sharedZone) {
+                            sharedZone.pots.forEach(p => { const d = Math.hypot(hand.x - p.x, hand.y - p.y); if (d < minDistSH) { minDistSH = d; closestPotSH = p; } });
+                        }
                         harvestedPlants.push({ plantKey: result, playerId: hand.playerId || 1, isTargetPlant, growTime: closestPotSH && closestPotSH.plantedAt ? (Date.now() - closestPotSH.plantedAt) / 1000 : 30 });
                     }
                 });
 
                 // Track which hand grabbed the item
-                if (this.heldItem && !this.heldItemHand) {
-                    this.heldItemHand = handKey;
+                if (sharedZone && sharedZone.heldItem && !sharedZone.heldItemHand) {
+                    sharedZone.heldItemHand = handKey;
                 }
             });
 
@@ -726,12 +638,11 @@ class GardenBed {
                     }
                 });
 
-                // Activate if both players touching
                 if (this.magicPumpkin.playerstouching.size >= 2) {
                     this.magicPumpkin.activate();
                     this.pumpkinActivated = true;
                     this.timerPaused = true;
-                    this.timerPauseDuration = 3; // 3 seconds
+                    this.timerPauseDuration = 3;
                     this.spawnConfetti(this.magicPumpkin.x, this.magicPumpkin.y, 80);
                     if (typeof achievementManager !== 'undefined') achievementManager.recordMagicPumpkin();
                 }
@@ -742,39 +653,39 @@ class GardenBed {
     }
 
     /**
-     * Get zone owner based on x position (competitive mode)
+     * Get zone owner based on x position (competitive mode).
      */
     getZoneOwner(x) {
-        if (!this.dividerX) return 1;
-        return x > this.dividerX ? 1 : 2;
+        if (!gardenState.dividerX) return 1;
+        return x > gardenState.dividerX ? 1 : 2;
     }
 
     /**
-     * Process a single hand interaction
+     * Process a single hand interaction.
      */
     processHandInteraction(handPos, zoneKey) {
         let harvested = null;
 
-        // Get zone-specific items via helpers
-        const seed = this.getZoneSeed(zoneKey);
-        const wateringCan = this.getZoneWateringCan(zoneKey);
-        const fertilizerBag = this.getZoneFertilizer(zoneKey);
-        const sunArea = this.getZoneSunArea(zoneKey);
-        // Read plantNeeds fresh each time via getter to avoid stale reference after seed planting
-        const getPlantNeeds = () => this.getZoneNeeds(zoneKey);
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return harvested;
 
-        let heldItem = this.gameMode === 'competitive'
-            ? this.heldItemsMap.get(zoneKey)
-            : this.heldItem;
+        const seed = zone.tools.seed;
+        const wateringCan = zone.tools.wateringCan;
+        const fertilizerBag = zone.tools.fertilizerBag;
+        const sunArea = zone.tools.sunArea;
+        const timers = zone.interactionTimers;
+        // Read plantNeeds fresh each time to avoid stale reference after seed planting
+        const getPlantNeeds = () => zone.needs;
+
+        let heldItem = zone.heldItem;
 
         // Find relevant pot
         let targetPot = null;
-        if (this.gameMode === 'competitive') {
-            targetPot = this.plantPots[zoneKey - 1] || null;
+        if (gardenState.mode === 'competitive') {
+            targetPot = zone.pots[0] || null;
         } else {
-            // Find closest pot in co-op
             let minDist = Infinity;
-            this.plantPots.forEach(pot => {
+            zone.pots.forEach(pot => {
                 const dist = Math.sqrt(
                     Math.pow(handPos.x - pot.x, 2) +
                     Math.pow(handPos.y - pot.y, 2)
@@ -789,29 +700,27 @@ class GardenBed {
         if (!targetPot) return harvested;
 
         // Check golden watering can (competitive only)
-        if (this.gameMode === 'competitive') {
+        if (gardenState.mode === 'competitive') {
             const goldenCan = this.goldenWateringCans.get(zoneKey);
             if (goldenCan && goldenCan.isPointOver(handPos.x, handPos.y)) {
                 if (!heldItem) {
                     goldenCan.pickup();
                     heldItem = goldenCan;
-                    this.heldItemsMap.set(zoneKey, heldItem);
+                    zone.heldItem = heldItem;
                 }
             }
         }
 
         // Check for power-up collection (competitive only, uses index fingertip)
-        if (this.gameMode === 'competitive' && handPos.landmarkIndex === 8) {
+        if (gardenState.mode === 'competitive' && handPos.landmarkIndex === 8) {
             const powerUp = this.activePowerUps.get(zoneKey);
             if (powerUp && powerUp.active && !powerUp.collected) {
                 if (powerUp.isPointOver(handPos.x, handPos.y)) {
                     powerUp.applyEffect(this, zoneKey);
-                    // If instant effect already deactivated it, remove from map
                     if (!powerUp.active) {
                         this.activePowerUps.delete(zoneKey);
                     }
                     if (typeof audioManager !== 'undefined') audioManager.play('harvest');
-                    // Notify achievement manager if present
                     if (typeof game !== 'undefined' && game.achievementManager) {
                         game.achievementManager.recordPowerUp();
                     }
@@ -821,7 +730,6 @@ class GardenBed {
         }
 
         // Held items track the index fingertip only (landmark 8)
-        // Other collision points still detect pickups below
         const isIndexFinger = handPos.landmarkIndex === 8;
 
         if (heldItem && isIndexFinger) {
@@ -838,53 +746,35 @@ class GardenBed {
                         targetPot.isBeingWatered = false;
                         targetPot.waterPourProgress = 0;
                     }
-                    if (this.gameMode === 'competitive') {
-                        this.waterInteractionTimeMap.set(zoneKey, 0);
-                    } else {
-                        this.waterInteractionTime = 0;
-                    }
+                    timers.water = 0;
                 }
             }
 
             // Check for drop interactions
             if (heldItem === seed && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                // Drop seed in pot
                 if (targetPot.plantSeed(seed.plantType)) {
                     seed.plant();
-                    if (this.gameMode === 'competitive') {
-                        this.heldItemsMap.set(zoneKey, null);
-                    } else {
-                        this.heldItem = null;
-                        this.heldItemHand = null;
-                    }
+                    zone.heldItem = null;
+                    zone.heldItemHand = null;
+
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('plant');
                     }
 
                     // Reset needs for new plant
-                    if (this.gameMode === 'competitive') {
-                        this.plantNeedsMap.set(zoneKey, new PlantNeeds());
-                    } else {
-                        this.plantNeeds = new PlantNeeds();
-                        this.plantNeedsMap.set('shared', this.plantNeeds);
-                    }
+                    zone.needs = new PlantNeeds();
 
                     // Spawn new seed after delay (guarded by generation counter)
-                    const gen = this.roundGeneration;
-                    setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 1000);
+                    const gen = gardenState.roundGeneration;
+                    setTimeout(() => { if (gardenState.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 1000);
                 }
             } else if (heldItem === wateringCan && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                // Water the plant — set tilt state
                 wateringCan.isOverPot = true;
                 wateringCan.targetPotRef = targetPot;
 
-                const waterTime = this.gameMode === 'competitive'
-                    ? (this.waterInteractionTimeMap.get(zoneKey) || 0)
-                    : this.waterInteractionTime;
-
+                const waterTime = timers.water;
                 const newWaterTime = waterTime + this.lastDeltaTime;
 
-                // Update pour progress on both can and pot
                 const progress = Math.min(1, newWaterTime / 0.3);
                 wateringCan.pourProgress = progress;
                 targetPot.isBeingWatered = true;
@@ -895,63 +785,40 @@ class GardenBed {
                     wateringCan.water();
                     wateringCan.pourProgress = 0;
                     targetPot.waterPourProgress = 0;
-
-                    if (this.gameMode === 'competitive') {
-                        this.waterInteractionTimeMap.set(zoneKey, 0);
-                    } else {
-                        this.waterInteractionTime = 0;
-                    }
+                    timers.water = 0;
 
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('water');
                     }
                     if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('watering_can');
                 } else {
-                    if (this.gameMode === 'competitive') {
-                        this.waterInteractionTimeMap.set(zoneKey, newWaterTime);
-                    } else {
-                        this.waterInteractionTime = newWaterTime;
-                    }
+                    timers.water = newWaterTime;
                 }
             } else if (heldItem === fertilizerBag && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                // Feed the plant
-                const foodTime = this.gameMode === 'competitive'
-                    ? (this.foodInteractionTimeMap.get(zoneKey) || 0)
-                    : this.foodInteractionTime;
-
+                const foodTime = timers.food;
                 const newFoodTime = foodTime + this.lastDeltaTime;
 
                 if (newFoodTime > 0.5) {
                     getPlantNeeds().addFood();
-
-                    if (this.gameMode === 'competitive') {
-                        this.foodInteractionTimeMap.set(zoneKey, 0);
-                    } else {
-                        this.foodInteractionTime = 0;
-                    }
+                    timers.food = 0;
 
                     if (typeof audioManager !== 'undefined') {
                         audioManager.play('plant');
                     }
                     if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('fertilizer');
                 } else {
-                    if (this.gameMode === 'competitive') {
-                        this.foodInteractionTimeMap.set(zoneKey, newFoodTime);
-                    } else {
-                        this.foodInteractionTime = newFoodTime;
-                    }
+                    timers.food = newFoodTime;
                 }
             } else if (heldItem.isGolden && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                // Golden watering can - max all needs instantly
                 getPlantNeeds().maxAll();
                 this.goldenWateringCans.delete(zoneKey);
-                this.heldItemsMap.set(zoneKey, null);
+                zone.goldenWateringCan = null;
+                zone.heldItem = null;
 
                 if (typeof audioManager !== 'undefined') {
                     audioManager.play('water');
                 }
             } else if (heldItem.homeX != null && heldItem.homeY != null) {
-                // Return-to-home drop: move item back near its home position to put it down
                 const distToHome = Math.sqrt(
                     Math.pow(handPos.x - heldItem.homeX, 2) +
                     Math.pow(handPos.y - heldItem.homeY, 2)
@@ -970,53 +837,26 @@ class GardenBed {
             // Try to pick something up (any collision point can trigger pickup)
             if (seed && !seed.isPlanted && seed.isPointOver(handPos.x, handPos.y)) {
                 seed.pickup();
-                heldItem = seed;
-                if (this.gameMode === 'competitive') {
-                    this.heldItemsMap.set(zoneKey, heldItem);
-                } else {
-                    this.heldItem = heldItem;
-                }
+                zone.heldItem = seed;
             } else if (wateringCan && wateringCan.isPointOver(handPos.x, handPos.y)) {
                 wateringCan.pickup();
-                heldItem = wateringCan;
-                if (this.gameMode === 'competitive') {
-                    this.heldItemsMap.set(zoneKey, heldItem);
-                } else {
-                    this.heldItem = heldItem;
-                }
+                zone.heldItem = wateringCan;
             } else if (fertilizerBag && fertilizerBag.isPointOver(handPos.x, handPos.y)) {
                 fertilizerBag.pickup();
-                heldItem = fertilizerBag;
-                if (this.gameMode === 'competitive') {
-                    this.heldItemsMap.set(zoneKey, heldItem);
-                } else {
-                    this.heldItem = heldItem;
-                }
+                zone.heldItem = fertilizerBag;
             }
 
             // Sun interaction (just hover)
             if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
-                const sunTime = this.gameMode === 'competitive'
-                    ? (this.sunInteractionTimeMap.get(zoneKey) || 0)
-                    : this.sunInteractionTime;
-
+                const sunTime = timers.sun;
                 const newSunTime = sunTime + this.lastDeltaTime;
 
                 if (newSunTime > 0.2) {
                     getPlantNeeds().addSun();
-
-                    if (this.gameMode === 'competitive') {
-                        this.sunInteractionTimeMap.set(zoneKey, 0);
-                    } else {
-                        this.sunInteractionTime = 0;
-                    }
+                    timers.sun = 0;
                     if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
                 } else {
-                    if (this.gameMode === 'competitive') {
-                        this.sunInteractionTimeMap.set(zoneKey, newSunTime);
-                    } else {
-                        this.sunInteractionTime = newSunTime;
-                    }
+                    timers.sun = newSunTime;
                 }
             }
 
@@ -1030,9 +870,8 @@ class GardenBed {
                         audioManager.play('harvest');
                     }
 
-                    // Spawn new seed (guarded by generation counter)
-                    const gen = this.roundGeneration;
-                    setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 500);
+                    const gen = gardenState.roundGeneration;
+                    setTimeout(() => { if (gardenState.roundGeneration === gen) this.spawnNewSeed(zoneKey); }, 500);
                 }
             }
         }
@@ -1041,15 +880,15 @@ class GardenBed {
     }
 
     /**
-     * Release currently held item
+     * Release currently held item.
      */
     releaseItem(zoneKey = 'shared') {
-        let heldItem = this.gameMode === 'competitive'
-            ? this.heldItemsMap.get(zoneKey)
-            : this.heldItem;
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return;
+
+        const heldItem = zone.heldItem;
 
         if (heldItem) {
-            // Clear pot watering state if dropping a watering can
             if (heldItem.targetPotRef) {
                 heldItem.targetPotRef.isBeingWatered = false;
                 heldItem.targetPotRef.waterPourProgress = 0;
@@ -1058,10 +897,9 @@ class GardenBed {
 
             heldItem.drop();
 
-            // Return tools to home position
-            const wateringCan = this.getZoneWateringCan(zoneKey);
-            const fertilizerBag = this.getZoneFertilizer(zoneKey);
-            const seed = this.getZoneSeed(zoneKey);
+            const wateringCan = zone.tools.wateringCan;
+            const fertilizerBag = zone.tools.fertilizerBag;
+            const seed = zone.tools.seed;
 
             if (heldItem === wateringCan || heldItem === fertilizerBag) {
                 heldItem.returnHome();
@@ -1069,40 +907,36 @@ class GardenBed {
                 seed.returnHome();
             }
 
-            // Check if it's a golden can
             if (heldItem.isGolden) {
                 this.goldenWateringCans.delete(zoneKey);
+                zone.goldenWateringCan = null;
             }
 
-            if (this.gameMode === 'competitive') {
-                this.heldItemsMap.set(zoneKey, null);
-            } else {
-                this.heldItem = null;
-                this.heldItemHand = null;
-            }
+            zone.heldItem = null;
+            zone.heldItemHand = null;
         }
     }
 
     /**
-     * Process free-hand interactions (sun hover + harvest only, no pickup/movement)
+     * Process free-hand interactions (sun hover + harvest only, no pickup/movement).
      */
     processFreeHandInteraction(handPos) {
-        // Sun interaction
-        const sunArea = this.sunAreasMap.get('shared') || this.sunArea;
+        const zone = gardenState.getZone('shared');
+        if (!zone) return null;
+
+        const sunArea = zone.tools.sunArea;
         if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
-            this.sunInteractionTime += this.lastDeltaTime;
-            if (this.sunInteractionTime > 0.2) {
-                const plantNeeds = this.plantNeedsMap.get('shared') || this.plantNeeds;
-                if (plantNeeds) plantNeeds.addSun();
-                this.sunInteractionTime = 0;
+            zone.interactionTimers.sun += this.lastDeltaTime;
+            if (zone.interactionTimers.sun > 0.2) {
+                if (zone.needs) zone.needs.addSun();
+                zone.interactionTimers.sun = 0;
                 if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('sun');
             }
         }
 
-        // Harvest interaction
         let targetPot = null;
         let minDist = Infinity;
-        this.plantPots.forEach(pot => {
+        zone.pots.forEach(pot => {
             const dist = Math.sqrt(
                 Math.pow(handPos.x - pot.x, 2) +
                 Math.pow(handPos.y - pot.y, 2)
@@ -1120,8 +954,8 @@ class GardenBed {
                 if (typeof audioManager !== 'undefined') {
                     audioManager.play('harvest');
                 }
-                const gen = this.roundGeneration;
-                setTimeout(() => { if (this.roundGeneration === gen) this.spawnNewSeed('shared'); }, 500);
+                const gen = gardenState.roundGeneration;
+                setTimeout(() => { if (gardenState.roundGeneration === gen) this.spawnNewSeed('shared'); }, 500);
                 return harvestedPlant;
             }
         }
@@ -1130,21 +964,24 @@ class GardenBed {
     }
 
     /**
-     * Draw the entire garden scene
+     * Draw the entire garden scene.
      */
     draw(ctx) {
         // Draw divider if competitive mode
-        if (this.gameMode === 'competitive' && this.dividerX) {
+        if (gardenState.mode === 'competitive' && gardenState.dividerX) {
             this.drawDivider(ctx);
         }
 
-        // Draw sun areas, seeds, and tools (per zone)
+        // Draw sun areas (per zone)
         for (const zk of this.getZoneKeys()) {
             this.getZoneSunArea(zk).draw(ctx);
         }
 
-        // Draw plant pots
-        this.plantPots.forEach(pot => pot.draw(ctx));
+        // Draw plant pots (all zones)
+        for (const zk of this.getZoneKeys()) {
+            const zone = gardenState.getZone(zk);
+            if (zone) zone.pots.forEach(pot => pot.draw(ctx));
+        }
 
         // Draw seeds and tools (per zone)
         for (const zk of this.getZoneKeys()) {
@@ -1160,10 +997,10 @@ class GardenBed {
         // Draw active power-ups
         this.activePowerUps.forEach(pu => pu.draw(ctx));
 
-        // Draw needs panels (vertically centered, per zone)
-        const needsPanelHeight = 150; // spacing(40) * 3 + 30
+        // Draw needs panels (vertically centred, per zone)
+        const needsPanelHeight = 150;
         const needsY = Math.round(this.canvas.height / 2 - needsPanelHeight / 2 + 20);
-        const needsXPositions = this.gameMode === 'competitive'
+        const needsXPositions = gardenState.mode === 'competitive'
             ? { 1: this.canvas.width - 250, 2: 30 }
             : { shared: 30 };
 
@@ -1172,10 +1009,10 @@ class GardenBed {
             const needs = this.getZoneNeeds(zk);
             if (!pot || !needs) continue;
 
-            // For coop/solo, check if any pot is growing
-            const isGrowing = this.gameMode === 'competitive'
+            const zone = gardenState.getZone(zk);
+            const isGrowing = gardenState.mode === 'competitive'
                 ? pot.growthStage !== GrowthStage.EMPTY
-                : this.plantPots.some(p => p.growthStage !== GrowthStage.EMPTY);
+                : zone && zone.pots.some(p => p.growthStage !== GrowthStage.EMPTY);
 
             if (isGrowing) {
                 needs.draw(ctx, needsXPositions[zk], needsY);
@@ -1201,49 +1038,44 @@ class GardenBed {
     }
 
     /**
-     * Draw competitive mode divider
+     * Draw competitive mode divider.
      */
     drawDivider(ctx) {
         ctx.save();
 
-        // Dashed line
         ctx.setLineDash([15, 10]);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.lineWidth = 3;
 
-        // Soft glow
         ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
         ctx.shadowBlur = 15;
 
         ctx.beginPath();
-        ctx.moveTo(this.dividerX, 0);
-        ctx.lineTo(this.dividerX, this.canvas.height);
+        ctx.moveTo(gardenState.dividerX, 0);
+        ctx.lineTo(gardenState.dividerX, this.canvas.height);
         ctx.stroke();
 
         ctx.setLineDash([]);
         ctx.shadowBlur = 0;
 
-        // Player labels
         ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
 
-        // Player 1 (right, warm orange)
         ctx.fillStyle = '#FF8C42';
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 3;
-        const p1X = this.dividerX + (this.canvas.width - this.dividerX) / 2;
+        const p1X = gardenState.dividerX + (this.canvas.width - gardenState.dividerX) / 2;
         drawUnmirroredText(ctx, 'Player 1', p1X, 40, true);
 
-        // Player 2 (left, cool blue)
         ctx.fillStyle = '#4A90D9';
-        const p2X = this.dividerX / 2;
+        const p2X = gardenState.dividerX / 2;
         drawUnmirroredText(ctx, 'Player 2', p2X, 40, true);
 
         ctx.restore();
     }
 
     /**
-     * Draw helpful instructions
+     * Draw helpful instructions.
      */
     drawInstructions(ctx) {
         ctx.save();
@@ -1251,10 +1083,15 @@ class GardenBed {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.textAlign = 'center';
 
-        const anyPotEmpty = this.plantPots.some(pot => pot.growthStage === GrowthStage.EMPTY);
-        const anyPotHarvestable = this.plantPots.some(pot => pot.growthStage === GrowthStage.HARVESTABLE);
+        let anyPotEmpty = false;
+        let anyPotHarvestable = false;
+        for (const zk of this.getZoneKeys()) {
+            const zone = gardenState.getZone(zk);
+            if (!zone) continue;
+            if (zone.pots.some(pot => pot.growthStage === GrowthStage.EMPTY)) anyPotEmpty = true;
+            if (zone.pots.some(pot => pot.growthStage === GrowthStage.HARVESTABLE)) anyPotHarvestable = true;
+        }
 
-        // Position at bottom of screen, inline with toolbar row
         const instructionY = this.canvas.height - 60;
 
         if (anyPotEmpty) {
@@ -1269,26 +1106,22 @@ class GardenBed {
     }
 
     /**
-     * Draw pulsing return-to-home beacons when an item is held
-     * Shows the player where to move to put the item back down
+     * Draw pulsing return-to-home beacons when an item is held.
      */
     drawReturnBeacons(ctx) {
-        const zones = this.getZoneKeys();
+        for (const zk of this.getZoneKeys()) {
+            const zone = gardenState.getZone(zk);
+            if (!zone) continue;
 
-        for (const zk of zones) {
-            const heldItem = this.gameMode === 'competitive'
-                ? this.heldItemsMap.get(zk)
-                : this.heldItem;
-
+            const heldItem = zone.heldItem;
             if (!heldItem || heldItem.homeX == null || heldItem.homeY == null) continue;
 
             const hx = heldItem.homeX;
             const hy = heldItem.homeY;
-            const pulse = 0.5 + 0.5 * Math.sin(this.returnBeaconPulse); // 0-1
+            const pulse = 0.5 + 0.5 * Math.sin(this.returnBeaconPulse);
 
             ctx.save();
 
-            // Outer pulsing ring
             ctx.beginPath();
             ctx.arc(hx, hy, 40 + pulse * 10, 0, Math.PI * 2);
             ctx.strokeStyle = `rgba(255, 255, 200, ${0.2 + pulse * 0.3})`;
@@ -1297,7 +1130,6 @@ class GardenBed {
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Inner soft glow
             const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 35);
             grad.addColorStop(0, `rgba(255, 255, 200, ${0.15 + pulse * 0.1})`);
             grad.addColorStop(1, 'rgba(255, 255, 200, 0)');
@@ -1306,7 +1138,6 @@ class GardenBed {
             ctx.fillStyle = grad;
             ctx.fill();
 
-            // Down arrow icon
             ctx.font = `${20 + pulse * 4}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -1318,41 +1149,18 @@ class GardenBed {
     }
 
     /**
-     * Clear the garden (for reset)
+     * Clear the garden (for reset).
      */
     clear() {
-        this.roundGeneration++; // Invalidate any pending setTimeout callbacks
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height - 150; // Bottom toolbar row
+        gardenState.reset();   // increments roundGeneration, clears zones
 
-        this.plantPots = [];
-        this.plantPot = new PlantPot(centerX, centerY, this.canvas);
-        this.plantPots.push(this.plantPot);
-
-        this.plantNeeds = new PlantNeeds();
-        this.plantNeedsMap.clear();
-        this.plantNeedsMap.set('shared', this.plantNeeds);
-
-        this.seed = null;
-        this.heldItem = null;
-        this.heldItemHand = null;
-        this.seedsMap.clear();
-        this.heldItemsMap.clear();
-
-        this.spawnNewSeed('shared');
+        // Re-init in the current mode so the garden is ready for the next configure() call
+        this._setupCoopZone(gardenState.playerCount || 1);
 
         this.confettiParticles = [];
         this.pumpkinActivated = false;
         this.timerPaused = false;
         this.timerPauseDuration = 0;
-
-        // Clear interaction time maps to prevent stale progress carrying over
-        this.sunInteractionTime = 0;
-        this.waterInteractionTime = 0;
-        this.foodInteractionTime = 0;
-        this.sunInteractionTimeMap.clear();
-        this.waterInteractionTimeMap.clear();
-        this.foodInteractionTimeMap.clear();
 
         if (this.magicPumpkin) {
             this.magicPumpkin.hide();
@@ -1362,14 +1170,14 @@ class GardenBed {
         this.hintArrows.forEach(arrow => arrow.reset());
         this.hintPlayerIdleTime.clear();
 
-        // Clear power-ups
         this.activePowerUps.clear();
         this.powerUpCooldown = 0;
+        this.goldenWateringCans.clear();
     }
 
-    // Compatibility methods
+    // ── Compatibility methods ──────────────────────────────────────
+
     setDifficulty(level) {
-        // Adjust depletion rates based on level (per zone)
         const modifier = 1 + (level - 1) * 0.1;
 
         for (const zk of this.getZoneKeys()) {
@@ -1383,6 +1191,11 @@ class GardenBed {
     }
 
     getActiveSeedCount() {
-        return this.plantPots.filter(pot => pot.growthStage !== GrowthStage.EMPTY).length;
+        let count = 0;
+        for (const zk of this.getZoneKeys()) {
+            const zone = gardenState.getZone(zk);
+            if (zone) count += zone.pots.filter(pot => pot.growthStage !== GrowthStage.EMPTY).length;
+        }
+        return count;
     }
 }
