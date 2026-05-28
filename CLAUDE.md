@@ -38,7 +38,9 @@ This is required so changes go live on GitHub Pages immediately. Do NOT wait for
 | `index.html` | Entry point, screen overlays, script loading |
 | `css/styles.css` | All styling, screen layouts, animations |
 | `js/game.js` | Game state machine, round coordination |
-| `js/garden/` | Garden subsystem (garden-bed.js coordinator, plant-pot.js, tools.js, plant-needs.js, effects.js, constants.js) |
+| `js/garden/` | Garden subsystem split into: garden-state.js (state), garden-interaction.js (input), garden-renderer.js (drawing), sun-cycle.js (passive sunrise-to-sunset), plus coordinator, plant-pot.js, plant-needs.js, tools.js, effects.js, constants.js |
+| `js/hand-pose.js` | Per-hand open or closed classifier from MediaPipe landmarks |
+| `js/play-zone.js` | Auto-calibrated active play rectangle; maps camera coords into canvas coords |
 | `js/handTracking.js` | MediaPipe hand detection, zone-based player assignment, glove rendering |
 | `js/dda.js` | Dynamic Difficulty Adjustment per player |
 | `js/ui.js` | Screen management, hand hover system (3s dwell activation) |
@@ -54,9 +56,11 @@ This is required so changes go live on GitHub Pages immediately. Do NOT wait for
 ## Critical Gotchas
 - **Canvas is mirrored** (`scaleX(-1)`): camera left = screen right. All x-coordinate logic must account for this.
 - **MediaPipe "Left" hand = user's RIGHT hand** (mirrored). Don't confuse handedness labels.
-- **`handTracker.dividerX` is 0-1 normalized** — multiply by `canvas.width` before passing to garden.js.
+- **Sun is a passive sunrise-to-sunset cycle** driven by sunCycle. There is no sun bar or hover gesture.
+- **Tools use pose-driven grab and release**: closed hand near a tool grabs; open hand near a plant applies; open hand anywhere else flies the tool home. Touch-pickup is gone.
+- **Play zone auto-calibrates at "Wave to Start"** by sampling wrist positions. playZone.mapPoint translates raw MediaPipe coords into canvas coords.
+- **Plants droop when neglected and bounce back when needs are topped up** — they never die.
 - **No legacy aliases remain** — all balloon and pop references have been removed.
-- **Zone helpers in garden-bed.js** — use `getZoneKeys()`, `getZoneNeeds(zk)`, `getZonePot(zk)` etc. instead of `if (competitive) { map.get(key) } else { this.prop }`.
 - **UIManager DOM queries are deferred** — `_cacheElements()` runs at start of `init()`, not in constructor.
 - **Audio routes through masterGain** — all sounds connect to `this.masterGain`, not `audioContext.destination`.
 - **No build step** — all changes are live-editable. No bundler, no transpiler, no npm.
