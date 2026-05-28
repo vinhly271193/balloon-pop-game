@@ -25,6 +25,14 @@ class GardenInteraction {
     process(deltaTime, handPositions) {
         const harvestedPlants = [];
 
+        // Pose pipeline: run grab/release logic from closed/open hand pose
+        // before the collision-point loop so state is consistent this frame.
+        if (typeof handTracker !== 'undefined' && handTracker.hands && handTracker.hands.length > 0) {
+            for (const hand of handTracker.hands) {
+                this._processPose(hand, deltaTime);
+            }
+        }
+
         if (!handPositions || handPositions.length === 0) {
             // Release any held items when no hands are present.
             if (gardenState.mode === 'competitive') {
@@ -228,18 +236,6 @@ class GardenInteraction {
 
         if (!targetPot) return harvested;
 
-        // Check golden watering can (competitive only).
-        if (gardenState.mode === 'competitive') {
-            const goldenCan = zone.goldenWateringCan;
-            if (goldenCan && goldenCan.isPointOver(handPos.x, handPos.y)) {
-                if (!heldItem) {
-                    goldenCan.pickup();
-                    heldItem = goldenCan;
-                    zone.heldItem = heldItem;
-                }
-            }
-        }
-
         // Check for power-up collection (competitive only, uses index fingertip).
         if (gardenState.mode === 'competitive' && handPos.landmarkIndex === 8) {
             const puPlayerId = zoneKey === 'p1' ? 1 : 2;
@@ -305,47 +301,6 @@ class GardenInteraction {
                         }
                     }, 1000);
                 }
-            } else if (heldItem === wateringCan && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                wateringCan.isOverPot = true;
-                wateringCan.targetPotRef = targetPot;
-
-                const waterTime = timers.water;
-                const newWaterTime = waterTime + deltaTime;
-
-                const progress = Math.min(1, newWaterTime / 0.3);
-                wateringCan.pourProgress = progress;
-                targetPot.isBeingWatered = true;
-                targetPot.waterPourProgress = progress;
-
-                if (newWaterTime > 0.3) {
-                    getPlantNeeds().addWater();
-                    wateringCan.water();
-                    wateringCan.pourProgress = 0;
-                    targetPot.waterPourProgress = 0;
-                    timers.water = 0;
-
-                    if (typeof audioManager !== 'undefined') {
-                        audioManager.play('water');
-                    }
-                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('watering_can');
-                } else {
-                    timers.water = newWaterTime;
-                }
-            } else if (heldItem === fertilizerBag && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
-                const foodTime = timers.food;
-                const newFoodTime = foodTime + deltaTime;
-
-                if (newFoodTime > 0.5) {
-                    getPlantNeeds().addFood();
-                    timers.food = 0;
-
-                    if (typeof audioManager !== 'undefined') {
-                        audioManager.play('plant');
-                    }
-                    if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('fertilizer');
-                } else {
-                    timers.food = newFoodTime;
-                }
             } else if (heldItem.isGolden && targetPot && targetPot.isPointOver(handPos.x, handPos.y)) {
                 getPlantNeeds().maxAll();
                 zone.goldenWateringCan = null;
@@ -370,18 +325,6 @@ class GardenInteraction {
         }
 
         if (!heldItem) {
-            // Try to pick something up (any collision point can trigger pickup).
-            if (seed && !seed.isPlanted && seed.isPointOver(handPos.x, handPos.y)) {
-                seed.pickup();
-                zone.heldItem = seed;
-            } else if (wateringCan && wateringCan.isPointOver(handPos.x, handPos.y)) {
-                wateringCan.pickup();
-                zone.heldItem = wateringCan;
-            } else if (fertilizerBag && fertilizerBag.isPointOver(handPos.x, handPos.y)) {
-                fertilizerBag.pickup();
-                zone.heldItem = fertilizerBag;
-            }
-
             // Sun hover (accumulated dwell, no pickup required).
             if (sunArea && sunArea.isPointOver(handPos.x, handPos.y)) {
                 const sunTime = timers.sun;
@@ -475,6 +418,137 @@ class GardenInteraction {
         }
 
         return null;
+    }
+
+    // ── Pose-driven grab and release ──────────────────────────────────
+
+    /**
+     * Run pose classification and edge detection for a single hand.
+     * Calls _tryPickup on a 'grab' event and _tryRelease on a 'release' event.
+     *
+     * @param {{ handId: string, playerId: number, landmarks: Array }} hand
+     * @param {number} deltaTime
+     */
+    _processPose(hand, deltaTime) {
+        const prev = this._posePrev.get(hand.handId) || null;
+        const curr = HandPose.classify(hand.landmarks, prev);
+        const event = HandPose.getGrabEvent(prev, curr);
+        this._posePrev.set(hand.handId, curr);
+        if (!event) return;
+
+        const zoneKey = gardenState.mode === 'competitive'
+            ? (hand.playerId === 1 ? 'p1' : 'p2')
+            : 'shared';
+        const zone = gardenState.getZone(zoneKey);
+        if (!zone) return;
+
+        // Use landmark 8 (index fingertip) as the interaction point.
+        const tip = hand.landmarks[8];
+        const canvas = handTracker.canvas;
+        if (!canvas) return;
+        const point = playZone.mapPoint(tip.x, tip.y, canvas.width, canvas.height);
+
+        if (event === 'grab') {
+            this._tryPickup(zone, point);
+        } else if (event === 'release') {
+            this._tryRelease(zone, point);
+        }
+    }
+
+    /**
+     * Attempt to pick up a tool at the given canvas point.
+     * Sets zone.heldItem if a tool is found under the point.
+     *
+     * @param {ZoneState} zone
+     * @param {{ x: number, y: number }} point
+     */
+    _tryPickup(zone, point) {
+        if (zone.heldItem) return;
+        // Seed
+        const seed = zone.tools.seed;
+        if (seed && !seed.isPlanted && seed.isPointOver(point.x, point.y)) {
+            seed.pickup();
+            zone.heldItem = seed;
+            return;
+        }
+        // Watering can
+        if (zone.tools.wateringCan && zone.tools.wateringCan.isPointOver(point.x, point.y)) {
+            zone.tools.wateringCan.pickup();
+            zone.heldItem = zone.tools.wateringCan;
+            return;
+        }
+        // Fertiliser bag
+        if (zone.tools.fertilizerBag && zone.tools.fertilizerBag.isPointOver(point.x, point.y)) {
+            zone.tools.fertilizerBag.pickup();
+            zone.heldItem = zone.tools.fertilizerBag;
+            return;
+        }
+        // Golden watering can (competitive rubber-band)
+        if (zone.goldenWateringCan && zone.goldenWateringCan.isPointOver(point.x, point.y)) {
+            zone.goldenWateringCan.pickup();
+            zone.heldItem = zone.goldenWateringCan;
+        }
+    }
+
+    /**
+     * Release the currently held item. If the release point is over a plant pot,
+     * apply the tool; otherwise the tool flies home.
+     *
+     * @param {ZoneState} zone
+     * @param {{ x: number, y: number }} point
+     */
+    _tryRelease(zone, point) {
+        const held = zone.heldItem;
+        if (!held) return;
+
+        // Find a pot under the release point.
+        const targetPot = zone.pots && zone.pots.find(p => p.isPointOver(point.x, point.y));
+
+        if (targetPot) {
+            if (held instanceof DraggableSeed &&
+                typeof targetPot.isEmpty === 'function' && targetPot.isEmpty()) {
+                if (typeof targetPot.plantSeed === 'function') targetPot.plantSeed(held.plantType);
+                if (typeof held.plant === 'function') held.plant();
+                zone.heldItem = null;
+                zone.heldItemHand = null;
+                if (typeof audioManager !== 'undefined') audioManager.play('plant');
+                // Reset needs and spawn a new seed.
+                zone.needs = new PlantNeeds();
+                const gen = gardenState.roundGeneration;
+                const zoneKeys = Array.from(gardenState.zones.entries())
+                    .filter(([, z]) => z === zone)
+                    .map(([k]) => k);
+                const zk = zoneKeys[0] || 'shared';
+                setTimeout(() => {
+                    if (gardenState.roundGeneration === gen) {
+                        const gb = typeof gardenBed !== 'undefined' ? gardenBed : null;
+                        if (gb) gb.spawnNewSeed(zk);
+                    }
+                }, 1000);
+                return;
+            }
+            if (held instanceof WateringCan) {
+                if (zone.needs && typeof zone.needs.addWater === 'function') zone.needs.addWater();
+                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('watering_can');
+                if (typeof audioManager !== 'undefined') audioManager.play('water');
+            } else if (held instanceof FertilizerBag) {
+                if (zone.needs && typeof zone.needs.addFood === 'function') zone.needs.addFood();
+                if (typeof achievementManager !== 'undefined') achievementManager.recordToolUse('fertilizer');
+                if (typeof audioManager !== 'undefined') audioManager.play('plant');
+            } else if (held.isGolden) {
+                if (zone.needs && typeof zone.needs.maxAll === 'function') zone.needs.maxAll();
+                zone.goldenWateringCan = null;
+                zone.heldItem = null;
+                zone.heldItemHand = null;
+                if (typeof audioManager !== 'undefined') audioManager.play('water');
+                return;
+            }
+        }
+
+        // Release the held item regardless: tool flies home, unplanted seed returns home.
+        if (typeof held.returnHome === 'function') held.returnHome();
+        zone.heldItem = null;
+        zone.heldItemHand = null;
     }
 
     // ── Release helper ────────────────────────────────────────────────

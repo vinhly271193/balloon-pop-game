@@ -27,6 +27,10 @@ class HandTracker {
         this.leftHandDetected = false;
         this.rightHandDetected = false;
 
+        // Per-hand landmark arrays for pose-driven interaction (Task 7).
+        // Each entry: { handId: string, playerId: number, landmarks: Array }
+        this.hands = [];
+
         // Visual feedback settings
         this.showHandIndicators = true;
         this.handIndicatorSize = 40;
@@ -154,6 +158,7 @@ class HandTracker {
         // Clear stale data so drawHands() doesn't render old positions
         this.lastResults = null;
         this.handPositions = [];
+        this.hands = [];
         this.leftHandDetected = false;
         this.rightHandDetected = false;
     }
@@ -165,6 +170,7 @@ class HandTracker {
       try {
         this.lastResults = results;
         this.handPositions = [];
+        this.hands = [];
         this.leftHandDetected = false;
         this.rightHandDetected = false;
 
@@ -236,6 +242,12 @@ class HandTracker {
                         playerId // Add player ID to collision points
                     });
                 });
+
+                // Populate per-hand landmark array for pose-driven interaction.
+                const handId = this.playerCount === 2
+                    ? (i === 0 ? 'p1' : 'p2')
+                    : 'solo';
+                this.hands.push({ handId, playerId, landmarks: handData[i].landmarks });
             }
 
             // Calculate divider position for 2-player calibration
